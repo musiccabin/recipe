@@ -17,9 +17,22 @@
 </div>
 <% end %>
 
-<div class="completed-items" id="completed-items">
+<button type="button" id='completed-items-header'>Completed Items</button>
+<div id="completed-items" id="completed-items">
 <% @groceries_completed.each do |gc| %>
 <p><%=gc.name%> <%=gc.quantity%> <%=gc.unit%></p>
 </div> 
 <%end%>
+
+<script type="text/javascript"> 
+    document.getElementById("completed-items-header").onclick = function() { 
+        var x = document.getElementById("completed-items");
+        if (x.style.display === "none") {
+        x.style.display = "block";
+        } else {
+            x.style.display = "none";
+        }
+    } 
+</script>
+
 
