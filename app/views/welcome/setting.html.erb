@@ -1,5 +1,12 @@
 <%= link_to "Sign Out", session_path, method: :delete, data: {confirm: "Are you sure you want to sign out?"}%>
 
+<%if (current_user.present? && current_user.errors.any?)%>
+<p><%=current_user.errors.full_messages.join(",")%></p>
+<%end%>
+<%if @errors.present?%>
+<p><%=@errors%></p>
+<%end%>
+
 <button type="button" id='change-password'>Change Password</button>
 <div id="change-password-form">
 <%=form_with model: @user, local: true do |f|%>
@@ -20,8 +27,12 @@
 </div>
 
 <script type="text/javascript">
-    const x = document.getElementById("change-password-form");
-    x.style.display = 'none'
+    const x = document.getElementById("change-password-form");   
+    if (params[password]) {
+        x.style.display = "block";
+    } else {
+        x.style.display = 'none';
+    }
     document.getElementById("change-password").onclick = function () {
         if (x.style.display === "none") {
             x.style.display = "block";
