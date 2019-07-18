@@ -3,7 +3,9 @@ class WelcomeController < ApplicationController
     if current_user
       #grab recipes with user's preferences and display images
     else
-      #grab "ranodm" recipes and display images
+      # client = Edamam::Client.new(app_id: "1a8ba1d2", app_key: "fcd01dd3dd28e00419d01caa78d6235e")
+      client = Edamam::Client.new({app_id:"1a8ba1d2", app_key: "fcd01dd3dd28e00419d01caa78d6235e"})
+      @nutritional_data = client.food_database.nutritional_data("1 large apple")
     end
   end
 
