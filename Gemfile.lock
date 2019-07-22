@@ -60,7 +60,6 @@ GEM
     coffee-script-source (1.12.2)
     concurrent-ruby (1.1.5)
     crass (1.0.4)
-    edamam-ruby (0.2.0)
     erubi (1.8.0)
     execjs (2.7.0)
     faker (1.9.5)
@@ -182,7 +181,6 @@ DEPENDENCIES
   byebug
   cancancan
   coffee-rails (~> 4.2)
-  edamam-ruby
   faker
   jbuilder (~> 2.5)
   jquery-rails
