@@ -43,6 +43,8 @@ gem 'jquery-rails'
 gem 'pry-rails'
 gem 'faker'
 gem 'cancancan'
+gem 'delayed_job_active_record'
+gem 'delayed_job_web'
 
 group :development do
   # Access an interactive console on exception pages or by calling 'console' anywhere in the code.
