@@ -27,7 +27,7 @@ class WelcomeController < ApplicationController
           @msg = "please make sure password confirmation matches with new password."
           render :password_reset
         elsif (params[:new_password] == params[:password_confirmation] && @user.update({password: params[:new_password]}))
-          redirect_to new_session_path, notice: 'your password is updated. keep it handy this time. :)'
+          redirect_to new_session_path, notice: 'your password is updated. keep it handy. :)'
         end
       else
         return redirect_to password_reset_path, alert: 'it does not look like this email is registered. double-check if you entered it correctly.'
@@ -39,19 +39,18 @@ class WelcomeController < ApplicationController
   end
 
   def create
-    if can_update
-      reset_session
-      redirect_to new_session_path
-      flash[:notice] = 'your password is updated.'
+    if current_user.update update_user_params
+      redirect_to setting_path, notice: 'your information is updated.'
     else
-      @errors = []
-      if (params[:password] == params[:new_password])
-        @errors << "your new password has to be different from your current password."
+      if current_user.authenticate(params[:password]) == false
+        render 'welcome/setting', alert: 'please enter a correct current password.' and return
       end
-      if (params[:new_password] != params[:password_confirmation])
-        @errors << "please make sure password confirmation matches with new password."
+      if (params[:password] == params[:new_password] && params[:password] != "")
+        render 'welcome/setting', alert: 'your new password has to be different from your current password.' and return
       end
-      render :setting
+      if params[:new_password] != params[:password_confirmation]
+        render 'welcome/setting', alert: 'please make sure password confirmation matches with new password.'
+      end
     end
   end
 
@@ -62,5 +61,9 @@ class WelcomeController < ApplicationController
 
   def can_update
     (current_user == current_user.authenticate(params[:password])) && (params[:password] != params[:new_password]) && (params[:new_password] == params[:password_confirmation]) && current_user.update({password: params[:new_password]})
+  end
+
+  def update_user_params
+    params.permit(:last_name, :first_name, :email, :avatar)
   end
 end

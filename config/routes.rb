@@ -13,6 +13,7 @@ Rails.application.routes.draw do
   post '/password_reset', {to: 'welcome#password_reset'}
   get '/setting', {to: 'welcome#setting', as: 'setting'}
   post '/setting', {to: 'welcome#create', as: 'password_update'}
+  patch '/setting', {to: 'users#update', as: 'user_update'}
   get '/groceries', {to: 'groceries#index'}
   post '/groceries', {to: 'groceries#create'}
 

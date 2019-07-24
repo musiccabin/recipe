@@ -1,28 +1,43 @@
-<%if (current_user.present? && current_user.errors.any?)%>
-<p><%=current_user.errors.full_messages.join(",")%></p>
+<%if @errors%>
+<% @errors.each do |error|%>
+<p><%=error%></p>
 <%end%>
-<%if @errors.present?%>
-<p><%=@errors%></p>
 <%end%>
 
+<%= form_with model: @user, :html => { :multipart => true }, local: true do |f| %>
+<div>
+    <%= f.label :first_name %>
+    <%= f.text_field :first_name, value: current_user.first_name %>
+</div>
+<div>
+    <%= f.label :last_name %>
+    <%= f.text_field :last_name, value: current_user.last_name %>
+</div>
+<div>
+    <%= f.label :email %>
+    <%= f.email_field :email, value: current_user.email %>
+</div>
+<div>
+    <p>Change your profile picture</p>
+    <%= f.file_field :avatar %>
+</div>
+
+<%=link_to 'Change Password', password_reset_path%>
 <button type="button" id='change-password'>Change Password</button>
-<div id="change-password-form">
-<%=form_with model: @user, local: true do |f|%>
-<div>
-<%=f.label :current_password%>
-<%=f.password_field :password%>
+<div id="change-password-form" class=<%= @errors.present? ? 'show' : 'hide' %>> 
+    <div>
+        <%=f.label :current_password%>
+        <%=f.password_field :password%>
+    </div>
+    <div>
+        <%=f.label :new_password_again%>
+        <%=f.password_field :password_confirmation%>
+    </div>
 </div>
-<div>
-<%=f.label :new_password%>
-<%=f.password_field :new_password%>
 </div>
-<div>
-<%=f.label :new_password_again%>
-<%=f.password_field :password_confirmation%>
+    <%=f.submit%>
 </div>
-<%=f.submit%>
 <%end%>
-</div>
 
 <script type="text/javascript">
     document.getElementById("change-password").onclick = function () {
