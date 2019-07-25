@@ -2,6 +2,11 @@ class User < ApplicationRecord
 
     has_secure_password
     has_many :groceries, dependent: :destroy
+    has_many :dietary_restrictions, dependent: :destroy
+    has_many :likes, dependent: :nullify
+    has_many :favourites, dependent: :delete
+    has_many :completions, dependent: :nullify
+    has_many :reviews, dependent: :nullify
 
     VALID_EMAIL_REGEX = /\A([\w+\-].?)+@[a-z\d\-]+(\.[a-z]+)*\.[a-z]+\z/i
     validates :email, presence: true, uniqueness: true, format: VALID_EMAIL_REGEX
