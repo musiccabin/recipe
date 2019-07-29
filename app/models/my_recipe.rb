@@ -8,4 +8,9 @@ class MyRecipe < ApplicationRecord
     has_many :dietary_restrictions, through: :dietary_restriction_links
     has_many :taggings, dependent: :destroy
     has_many :tags, through: :taggings
+
+    validates :title, presence: true, uniqueness: true
+    validates :cooking_time_in_min, presence: true
+    validates :instructions, presence: true
+    validates :ingredients, presence: true
 end
