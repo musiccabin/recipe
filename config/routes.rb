@@ -1,14 +1,16 @@
 Rails.application.routes.draw do
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
 
-  resources :users, only: [:new, :create]
+  resources :users, only: [:new, :create] do
+    resource :mealplan, except: [:new, :index]
+  end
   resource :session, only: [:new, :create, :destroy]
-  resources :my_recipes do
-    resources :ingredients
+  resources :myrecipes do
     resources :reviews do
       resources :likes
       resources :reviews
     end
+    resources :ingredients
     resources :completions
     resources :favourites
   end
@@ -23,6 +25,7 @@ Rails.application.routes.draw do
   patch '/setting', {to: 'users#update', as: 'user_update'}
   get '/groceries', {to: 'groceries#index'}
   post '/groceries', {to: 'groceries#create'}
+  # post '/myrecipe_new', {to: 'myrecipe#add_tag', as: 'add_tag'}
 
   match(
     "/delayed_job",

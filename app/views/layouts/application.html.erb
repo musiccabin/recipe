@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>AwesomeAnswers</title>
+    <title>HappyFridge</title>
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
@@ -23,6 +23,13 @@
   <%= link_to 'Enable/Disable Store Specials', new_user_path %>
   <%= link_to 'Lunch/Dinner/Desserts', new_user_path %>
   </div>
+
+  <% if current_user.is_admin%>
+  <div class='admin-menu'>
+  <%= link_to 'New Recipe', new_myrecipe_path%>
+  <%= link_to 'View System Stats', new_user_path%>
+  </div>
+  <%end%>
 
 <div class='account-preferences'>
   <%= link_to 'Favourite Recipes', new_user_path %>

@@ -1,6 +1,6 @@
 class Favourite < ApplicationRecord
   belongs_to :user
-  belongs_to :my_recipe
+  belongs_to :myrecipe
 
-  validates :my_recipe, presence: true, uniqueness: {scope: :user}
+  validates :myrecipe, presence: true, uniqueness: {scope: :user}
 end

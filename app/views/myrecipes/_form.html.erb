@@ -1,0 +1,56 @@
+<% if @myrecipe.errors.any? %>
+<ul>
+    <% @myrecipe.errors.full_messages.each do |msg| %>
+    <li> <%= msg %></li>
+    <% end %>
+</ul>
+<% end %>
+
+<%= form_with model: @myrecipe, local: true do |f| %>
+<div>
+    <%= f.label :title %>
+    <%= f.text_field :title %>
+</div>
+<div>
+    <p>For cooking time over one hour, follow the format of '1h20m' (one hour 20 minutes). Otherwise, type in, for example, '50min' (50 minutes). Round to the nearest 5-minute. For example, either '20m' or '25m' is accepted, but not '23m'.</p>
+    <%= f.label :cooking_time %>
+    <%= f.text_field :cooking_time_in_string %>
+</div>
+<div>
+    <%= f.label :link_to_video %>
+    <%= f.text_field :videoURL %>
+</div>
+<div>
+    <%= f.label :instructions %>
+    <%= f.text_field :instructions %>
+</div>
+<div>
+    <%= f.label :dietary_restriction %>
+    <%= f.text_field :dietaryrestriction_names %>
+</div>
+<p>Tags:</p>
+<div>
+    <%=f.collection_check_boxes :tag_ids, Tag.all, :id, :name do |b|%>
+    <div class='tag-wrapper'>
+        <%=b.check_box%>
+        <%=b.text.humanize%>
+    </div>
+    <%end%>
+</div>
+
+<%#=form_with url: add_tag_path, local: true do |t|%>
+<%#=t.label :new_tags_separated_by_commas%>
+<%#=t.text_field :new_tag%>
+<%#end%>
+<p>Dietary Restrictions</p>
+<div>
+    <%=f.collection_check_boxes :dietaryrestriction_ids, Dietaryrestriction.all, :id, :name do |b|%>
+    <div class='tag-wrapper'>
+        <%=b.check_box%>
+        <%=b.text.humanize%>
+    </div>
+    <%end%>
+</div>
+
+<%= f.submit 'Create Recipe'%>
+<% end %>

@@ -43,6 +43,7 @@ gem 'jquery-rails'
 gem 'pry-rails'
 gem 'faker'
 gem 'cancancan'
+gem 'selectize-rails'
 gem 'delayed_job_active_record'
 gem 'delayed_job_web'
 gem "paperclip", git: "git://github.com/thoughtbot/paperclip.git"
