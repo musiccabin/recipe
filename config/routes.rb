@@ -26,6 +26,12 @@ Rails.application.routes.draw do
   get '/groceries', {to: 'groceries#index'}
   post '/groceries', {to: 'groceries#create'}
   # post '/myrecipe_new', {to: 'myrecipe#add_tag', as: 'add_tag'}
+  patch '/myrecipes/:id/toggle', {to: 'myrecipes#hide', as:'hide_recipe'}
+  get '/favourte_recipes', {to: 'favourites#user_favourites', as:'favourite_recipes'}
+  get '/admin/panel', {to: 'admin#panel', as:'admin_panel'}
+  get '/preferences', {to: 'users#preferences', as: 'user_preferences'}
+  post '/preferences', {to: 'users#preferences'}
+  delete '/preferences/:id', {to: 'users#delete_restriction', as: 'delete_restriction'}
 
   match(
     "/delayed_job",

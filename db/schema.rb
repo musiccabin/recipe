@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_08_01_200344) do
+ActiveRecord::Schema.define(version: 2019_08_06_200236) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -54,7 +54,7 @@ ActiveRecord::Schema.define(version: 2019_08_01_200344) do
     t.datetime "updated_at", null: false
     t.bigint "user_id"
     t.index ["name"], name: "index_dietaryrestrictions_on_name"
-    t.index ["user_id"], name: "index_dietaryrestrictions_on_user_id", unique: true
+    t.index ["user_id"], name: "index_dietaryrestrictions_on_user_id"
   end
 
   create_table "favourites", force: :cascade do |t|
@@ -109,7 +109,7 @@ ActiveRecord::Schema.define(version: 2019_08_01_200344) do
     t.bigint "my_recipe_id"
     t.bigint "ingredient_id"
     t.float "quantity"
-    t.string "unit"
+    t.string "unit", default: ""
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["ingredient_id"], name: "index_myrecipeingredientlinks_on_ingredient_id", unique: true

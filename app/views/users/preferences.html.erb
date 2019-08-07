@@ -1,0 +1,19 @@
+<h1>User preferences</h1>
+
+<% if current_user.errors.any?%>
+<%current_user.errors.full_messages.each do |m|%>
+<p><%=m%></p>
+<%end%>
+<%end%>
+
+<h3>Select dietary restrictions</h3>
+<%=form_with model: @dietaryrestriction, local: true do |f|%>
+<%= f.select :name, ['vegetarian', 'vegan', 'gluten free', 'dairy free', 'halal']%>
+<%=f.submit%>
+<%end%>
+
+<% if @restrictions %>
+<%@restrictions.each do |r|%>
+<p><%=r.name%> <%=link_to 'Delete', delete_restriction_path(r), method: :delete%></p>
+<%end%>
+<%end%>

@@ -1,5 +1,7 @@
 class UsersController < ApplicationController
 
+  before_action :find_restrictions, only: [:preferences, :delete_restriction]
+
   def new
       @user = User.new
   end
@@ -44,6 +46,29 @@ class UsersController < ApplicationController
   def setting
   end
 
+  def preferences
+    if params.has_key?("name")
+      @restriction = Dietaryrestriction.find_by(name: params[:name])
+    end
+    if @restriction == nil
+      @restriction = Dietaryrestriction.new
+    end
+    @restriction.user = current_user
+    if @restriction.save
+      redirect_to user_preferences_path
+    else
+      render :preferences
+    end
+  end
+
+  def delete_restriction
+    byebug
+    restriction = Dietaryrestriction.find(params[:id])
+    restriction.user = nil
+    current_user.dietaryrestrictions.delete(restriction)
+    redirect_to user_preferences_path
+  end
+
   def update
     if current_user.update update_user_params
       # if current_user.authenticate(params[:password]) == false
@@ -76,5 +101,9 @@ class UsersController < ApplicationController
 
   def update_user_params
     params.permit(:last_name, :first_name, :email, :avatar)
+  end
+
+  def find_restrictions
+    @restrictions = current_user.dietaryrestrictions
   end
 end

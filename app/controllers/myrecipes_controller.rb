@@ -12,9 +12,6 @@ class MyrecipesController < ApplicationController
     @myrecipe = Myrecipe.new recipe_params
     @myrecipe.user = current_user
     if @myrecipe.save
-      # @tag = Tag.new params[:new_tag]
-      # @myrecipe.tags << @tag
-      # render :new unless @tag.save
       # RecipeMailer.new_recipe(@recipe).deliver_later
       redirect_to @myrecipe
     else render :new
@@ -37,7 +34,14 @@ class MyrecipesController < ApplicationController
     hour = (@myrecipe.cooking_time_in_min / 60).floor
     min = (@myrecipe.cooking_time_in_min % 60)
     @cooking_time = "#{hour} hr #{min} min"
-    @ingredients = @myrecipe.ingredients
+    @ingredients = []
+    @myrecipe.ingredients.each do |i|
+      @ingredients << {:name => i.name, :quantity => i.quantity, :unit => i.unit}
+    end
+    @instructions = []
+    @myrecipe.instructions.split('\n').each do |step|
+      (@instructions << step) unless step == ''
+    end
     @reviews = @myrecipe.reviews.order(likes: :desc)
   end
 

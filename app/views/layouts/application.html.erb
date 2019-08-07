@@ -19,7 +19,7 @@
   <%= image_tag current_user.avatar.url(:thumb) %>
   
   <div class='recipe-preferences'>
-  <%= link_to 'Preferences', new_user_path %>
+  <%= link_to 'Preferences', user_preferences_path %>
   <%= link_to 'Enable/Disable Store Specials', new_user_path %>
   <%= link_to 'Lunch/Dinner/Desserts', new_user_path %>
   </div>

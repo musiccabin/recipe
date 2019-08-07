@@ -1,64 +1,47 @@
 <h1><%= @myrecipe.title%></h1>
 <p>Cooking Time: <%=@cooking_time%></p>
-<p><%= @product.description%></p>
 <div>
-<% if @product.tags.any? %>
-<% @product.tags.each do |tag|%>
+<% if @myrecipe.tags.any? %>
+<% @myrecipe.tags.each do |tag|%>
 <%=link_to tag.name, tag_path(tag)%>
 <%end%>
 <%end%>
 </div>
 
-<% if current_user&.favourite_products&.include? @product%>
-<%= link_to 'Remove from Favs', product_favourite_path(@product), method: :delete%>
+<% if current_user&.favourite_recipes&.include? @myrecipe%>
+<%= link_to 'Remove from Favs', myrecipe_favourite_path(@myrecipe), method: :delete%>
 <%else%>
-<%= link_to 'Add to Favs', product_favourites_path(@product), method: :post%>
+<%= link_to 'Add to Favs', myrecipe_favourites_path(@product), method: :post%>
 <%end%>
 
-<% if can?(:crud, @product) %>
+<% if can?(:crud, @myrecipe) %>
 <%= link_to 'Edit', edit_product_path(@product)%>
 <%= link_to 'Delete', product_path(@product), method: :delete, data: {confirm: "Delete?"}%>
 
-<% if @product.is_hidden%>
-<%= link_to 'Unhide', hide_product_path, method: :patch%>
+<% if @myrecipe.is_hidden%>
+<%= link_to 'Unhide', hide_recipe_path, method: :patch%>
 <% else%>
-<%= link_to 'Hide', hide_product_path, method: :patch%>
+<%= link_to 'Hide', hide_recipe_path, method: :patch%>
 <%end%>
 
 <%end%>
 
 
 <button type="button" id='ingredients'>Ingredients</button>
-<div id="ingredients-content"></div> 
+<div id="ingredients-content">
+<% @ingredients.each.do |i|%>
     <div>
-        <%=f.label :current_password%>
-        <%=f.password_field :password%>
+        <%=i.quantity%> <%=i.unit%> <%=i.name%>
     </div>
-    <div>
-        <%=f.label :new_password_again%>
-        <%=f.password_field :password_confirmation%>
-    </div>
-</div>
-</div>
-    <%=f.submit%>
-</div>
 <%end%>
+</div>
 
 <button type="button" id='instructions'>Instructions</button>
-<div id="ingredients-content"></div> 
-    <div>
-        <%=f.label :current_password%>
-        <%=f.password_field :password%>
-    </div>
-    <div>
-        <%=f.label :new_password_again%>
-        <%=f.password_field :password_confirmation%>
-    </div>
-</div>
-</div>
-    <%=f.submit%>
-</div>
+<ul id="instructions-content">
+<%@instructions.each do |step|%>
+<li><%= @instructions%></li>
 <%end%>
+</ul>
 
 <button type="button" id='reviews'>Reviews</button>
 <div id="reviews-content">

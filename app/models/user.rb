@@ -2,15 +2,15 @@ class User < ApplicationRecord
 
     has_secure_password
     has_many :groceries, dependent: :destroy
-    has_many :dietary_restrictions, dependent: :destroy
+    has_many :dietaryrestrictions, dependent: :destroy
     has_many :likes, dependent: :nullify
     has_many :favourites, dependent: :destroy
-    has_many :favourite_recipes, through: :favourites, scope: :myrecipe
+    has_many :favourite_recipes, through: :favourites, source: :myrecipe
     has_many :completions, dependent: :nullify
     has_many :completed_recipes, through: :completions, source: :myrecipe
     has_many :reviews, dependent: :nullify
     has_many :mealplans, dependent: :destroy
-    has_many :meals, through: :mealplans, scope: :myrecipe
+    has_many :meals, through: :mealplans, source: :myrecipe
 
     VALID_EMAIL_REGEX = /\A([\w+\-].?)+@[a-z\d\-]+(\.[a-z]+)*\.[a-z]+\z/i
     validates :email, presence: true, uniqueness: true, format: VALID_EMAIL_REGEX
