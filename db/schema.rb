@@ -10,17 +10,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_08_09_164308) do
+ActiveRecord::Schema.define(version: 2019_08_09_222357) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
   create_table "completions", force: :cascade do |t|
     t.bigint "user_id"
-    t.bigint "my_recipe_id"
+    t.bigint "myrecipe_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["my_recipe_id"], name: "index_completions_on_my_recipe_id"
+    t.index ["myrecipe_id"], name: "index_completions_on_myrecipe_id"
     t.index ["user_id"], name: "index_completions_on_user_id"
   end
 
@@ -40,12 +40,12 @@ ActiveRecord::Schema.define(version: 2019_08_09_164308) do
   end
 
   create_table "dietaryrestrictionlinks", force: :cascade do |t|
-    t.bigint "my_recipe_id"
-    t.bigint "dietary_restriction_id"
+    t.bigint "myrecipe_id"
+    t.bigint "dietaryrestriction_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["dietary_restriction_id"], name: "index_dietaryrestrictionlinks_on_dietary_restriction_id"
-    t.index ["my_recipe_id"], name: "index_dietaryrestrictionlinks_on_my_recipe_id"
+    t.index ["dietaryrestriction_id"], name: "index_dietaryrestrictionlinks_on_dietaryrestriction_id"
+    t.index ["myrecipe_id"], name: "index_dietaryrestrictionlinks_on_myrecipe_id"
   end
 
   create_table "dietaryrestrictions", force: :cascade do |t|
@@ -57,10 +57,10 @@ ActiveRecord::Schema.define(version: 2019_08_09_164308) do
 
   create_table "favourites", force: :cascade do |t|
     t.bigint "user_id"
-    t.bigint "my_recipe_id"
+    t.bigint "myrecipe_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["my_recipe_id"], name: "index_favourites_on_my_recipe_id"
+    t.index ["myrecipe_id"], name: "index_favourites_on_myrecipe_id"
     t.index ["user_id"], name: "index_favourites_on_user_id"
   end
 
@@ -80,8 +80,8 @@ ActiveRecord::Schema.define(version: 2019_08_09_164308) do
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "my_recipe_ingredient_link_id"
-    t.index ["my_recipe_ingredient_link_id"], name: "index_ingredients_on_my_recipe_ingredient_link_id", unique: true
+    t.bigint "myrecipeingredientlink_id"
+    t.index ["myrecipeingredientlink_id"], name: "index_ingredients_on_myrecipeingredientlink_id", unique: true
     t.index ["name"], name: "index_ingredients_on_name", unique: true
   end
 
@@ -104,14 +104,14 @@ ActiveRecord::Schema.define(version: 2019_08_09_164308) do
   end
 
   create_table "myrecipeingredientlinks", force: :cascade do |t|
-    t.bigint "my_recipe_id"
+    t.bigint "myrecipe_id"
     t.bigint "ingredient_id"
     t.float "quantity"
     t.string "unit", default: ""
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["ingredient_id"], name: "index_myrecipeingredientlinks_on_ingredient_id", unique: true
-    t.index ["my_recipe_id"], name: "index_myrecipeingredientlinks_on_my_recipe_id", unique: true
+    t.index ["myrecipe_id"], name: "index_myrecipeingredientlinks_on_myrecipe_id", unique: true
     t.index ["quantity"], name: "index_myrecipeingredientlinks_on_quantity", unique: true
     t.index ["unit"], name: "index_myrecipeingredientlinks_on_unit", unique: true
   end
@@ -123,29 +123,29 @@ ActiveRecord::Schema.define(version: 2019_08_09_164308) do
     t.text "instructions"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "my_recipe_ingredient_link_id"
+    t.bigint "myrecipeingredientlink_id"
     t.boolean "is_hidden", default: false
     t.string "cooking_time_in_string"
-    t.index ["my_recipe_ingredient_link_id"], name: "index_myrecipes_on_my_recipe_ingredient_link_id", unique: true
+    t.index ["myrecipeingredientlink_id"], name: "index_myrecipes_on_myrecipeingredientlink_id", unique: true
     t.index ["title"], name: "index_myrecipes_on_title"
   end
 
   create_table "reviews", force: :cascade do |t|
     t.text "content"
-    t.bigint "my_recipe_id"
+    t.bigint "myrecipe_id"
     t.bigint "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["my_recipe_id"], name: "index_reviews_on_my_recipe_id"
+    t.index ["myrecipe_id"], name: "index_reviews_on_myrecipe_id"
     t.index ["user_id"], name: "index_reviews_on_user_id"
   end
 
   create_table "taggings", force: :cascade do |t|
-    t.bigint "my_recipe_id"
+    t.bigint "myrecipe_id"
     t.bigint "tag_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["my_recipe_id"], name: "index_taggings_on_my_recipe_id"
+    t.index ["myrecipe_id"], name: "index_taggings_on_myrecipe_id"
     t.index ["tag_id"], name: "index_taggings_on_tag_id"
   end
 
@@ -181,24 +181,24 @@ ActiveRecord::Schema.define(version: 2019_08_09_164308) do
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
-  add_foreign_key "completions", "myrecipes", column: "my_recipe_id"
+  add_foreign_key "completions", "myrecipes"
   add_foreign_key "completions", "users"
-  add_foreign_key "dietaryrestrictionlinks", "dietaryrestrictions", column: "dietary_restriction_id"
-  add_foreign_key "dietaryrestrictionlinks", "myrecipes", column: "my_recipe_id"
-  add_foreign_key "favourites", "myrecipes", column: "my_recipe_id"
+  add_foreign_key "dietaryrestrictionlinks", "dietaryrestrictions"
+  add_foreign_key "dietaryrestrictionlinks", "myrecipes"
+  add_foreign_key "favourites", "myrecipes"
   add_foreign_key "favourites", "users"
   add_foreign_key "groceries", "users"
-  add_foreign_key "ingredients", "myrecipeingredientlinks", column: "my_recipe_ingredient_link_id"
+  add_foreign_key "ingredients", "myrecipeingredientlinks"
   add_foreign_key "likes", "reviews"
   add_foreign_key "likes", "users"
   add_foreign_key "mealplans", "myrecipes"
   add_foreign_key "mealplans", "users"
   add_foreign_key "myrecipeingredientlinks", "ingredients"
-  add_foreign_key "myrecipeingredientlinks", "myrecipes", column: "my_recipe_id"
-  add_foreign_key "myrecipes", "myrecipeingredientlinks", column: "my_recipe_ingredient_link_id"
-  add_foreign_key "reviews", "myrecipes", column: "my_recipe_id"
+  add_foreign_key "myrecipeingredientlinks", "myrecipes"
+  add_foreign_key "myrecipes", "myrecipeingredientlinks"
+  add_foreign_key "reviews", "myrecipes"
   add_foreign_key "reviews", "users"
-  add_foreign_key "taggings", "myrecipes", column: "my_recipe_id"
+  add_foreign_key "taggings", "myrecipes"
   add_foreign_key "taggings", "tags"
   add_foreign_key "userdietaryrestrictionlinks", "dietaryrestrictions"
   add_foreign_key "userdietaryrestrictionlinks", "users"

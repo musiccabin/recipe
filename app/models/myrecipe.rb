@@ -15,6 +15,8 @@ class Myrecipe < ApplicationRecord
     validates :instructions, presence: true
     validates :ingredients, presence: true
 
+    before_validation :unique_tags
+    before_validation :unique_restrictions
     before_save :convert_cooking_time
 
     def tag_names
@@ -69,5 +71,14 @@ class Myrecipe < ApplicationRecord
 
     def is_valid_URL
         self.errors.add(:videoURL,'we think the URL is not valid.') unless open(self&.videoURL).status == ["200", "OK"]
+    end
+
+    def unique_tags
+        self.tags == tags.reject(&:blanks?).uniq unless tags == nil
+    end
+
+    private
+    def unique_restrictions
+        self.dietaryrestrictions == dietaryrestrictions.reject(&:blanks?).uniq unless dietaryrestrictions == nil
     end
 end

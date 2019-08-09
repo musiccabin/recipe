@@ -17,13 +17,14 @@ class User < ApplicationRecord
     validates :email, presence: true, uniqueness: true, format: VALID_EMAIL_REGEX
     validates :first_name, presence: true
     validates :last_name, presence: true
-    validate :unique_tags
+    
+    before_validation :unique_tags
 
     has_attached_file :avatar, styles: { medium: "300x300>", thumb: "100x100>" }, default_url: "/images/:style/missing.png"
     validates_attachment_content_type :avatar, content_type: /\Aimage\/.*\z/
 
     private
     def unique_tags
-        self.tags == tags.uniq unless tags == nil
+        self.tags == tags.reject(&:blanks?).uniq unless tags == nil
     end
 end
