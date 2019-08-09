@@ -2,7 +2,8 @@ class User < ApplicationRecord
 
     has_secure_password
     has_many :groceries, dependent: :destroy
-    has_many :dietaryrestrictions, dependent: :destroy
+    has_many :userdietaryrestrictionlinks, dependent: :destroy
+    has_many :dietaryrestrictions, through: :userdietaryrestrictionlinks
     has_many :likes, dependent: :nullify
     has_many :favourites, dependent: :destroy
     has_many :favourite_recipes, through: :favourites, source: :myrecipe

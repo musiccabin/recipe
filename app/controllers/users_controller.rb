@@ -53,8 +53,8 @@ class UsersController < ApplicationController
     if @restriction == nil
       @restriction = Dietaryrestriction.new
     end
-    @restriction.user = current_user
-    if @restriction.save
+    link = Userdietaryrestrictionlink.new(user: current_user, dietaryrestriction: @restriction)
+    if link.save
       redirect_to user_preferences_path
     else
       render :preferences
@@ -62,10 +62,8 @@ class UsersController < ApplicationController
   end
 
   def delete_restriction
-    byebug
     restriction = Dietaryrestriction.find(params[:id])
-    restriction.user = nil
-    current_user.dietaryrestrictions.delete(restriction)
+    current_user.userdietaryrestrictionlinks.find_by(dietaryrestriction_id: params[:id]).destroy
     redirect_to user_preferences_path
   end
 

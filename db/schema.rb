@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_08_06_200236) do
+ActiveRecord::Schema.define(version: 2019_08_09_044317) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -52,9 +52,7 @@ ActiveRecord::Schema.define(version: 2019_08_06_200236) do
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "user_id"
     t.index ["name"], name: "index_dietaryrestrictions_on_name"
-    t.index ["user_id"], name: "index_dietaryrestrictions_on_user_id"
   end
 
   create_table "favourites", force: :cascade do |t|
@@ -158,6 +156,15 @@ ActiveRecord::Schema.define(version: 2019_08_06_200236) do
     t.index ["name"], name: "index_tags_on_name"
   end
 
+  create_table "userdietaryrestrictionlinks", force: :cascade do |t|
+    t.bigint "user_id"
+    t.bigint "dietaryrestriction_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["dietaryrestriction_id"], name: "index_userdietaryrestrictionlinks_on_dietaryrestriction_id"
+    t.index ["user_id"], name: "index_userdietaryrestrictionlinks_on_user_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "first_name"
     t.string "last_name"
@@ -177,7 +184,6 @@ ActiveRecord::Schema.define(version: 2019_08_06_200236) do
   add_foreign_key "completions", "users"
   add_foreign_key "dietaryrestrictionlinks", "dietaryrestrictions", column: "dietary_restriction_id"
   add_foreign_key "dietaryrestrictionlinks", "myrecipes", column: "my_recipe_id"
-  add_foreign_key "dietaryrestrictions", "users"
   add_foreign_key "favourites", "myrecipes", column: "my_recipe_id"
   add_foreign_key "favourites", "users"
   add_foreign_key "groceries", "users"
@@ -193,4 +199,6 @@ ActiveRecord::Schema.define(version: 2019_08_06_200236) do
   add_foreign_key "reviews", "users"
   add_foreign_key "taggings", "myrecipes", column: "my_recipe_id"
   add_foreign_key "taggings", "tags"
+  add_foreign_key "userdietaryrestrictionlinks", "dietaryrestrictions"
+  add_foreign_key "userdietaryrestrictionlinks", "users"
 end
