@@ -1,5 +1,6 @@
 class UsersController < ApplicationController
 
+  before_action :authenticate_user!, except: [:new, :create, :forgot_password, :send_email, :password_reset]
   before_action :find_restrictions, only: [:preferences, :delete_restriction]
 
   def new
@@ -49,17 +50,38 @@ class UsersController < ApplicationController
   def preferences
     if params.has_key?("name")
       @restriction = Dietaryrestriction.find_by(name: params[:name])
+      link = Userdietaryrestrictionlink.new(user: current_user, dietaryrestriction: @restriction)
+      if link.save
+        redirect_to user_preferences_path and return
+      else
+        render :preferences and return
+      end
     end
-    if @restriction == nil
-      @restriction = Dietaryrestriction.new
-    end
-    link = Userdietaryrestrictionlink.new(user: current_user, dietaryrestriction: @restriction)
-    if link.save
-      redirect_to user_preferences_path
-    else
-      render :preferences
+    if (params.has_key? 'tags')
+      tags = params[:tags].reject(&:blank?).uniq
+      if current_user.tags == nil
+        @tags = tags
+      else
+        tags.each do |tag|
+          current_user.tags << tag
+        end
+      end
+      if (current_user.save)
+        redirect_to user_preferences_path and return
+      else
+        render :preferences and return
+      end
     end
   end
+
+  # def add_tags
+  #   p 'i got here.'
+  #   if current_user.update tags_params
+  #     redirect_to 'user/preferences'
+  #   else
+  #     render :preferences
+  #   end
+  # end
 
   def delete_restriction
     restriction = Dietaryrestriction.find(params[:id])
@@ -103,5 +125,9 @@ class UsersController < ApplicationController
 
   def find_restrictions
     @restrictions = current_user.dietaryrestrictions
+  end
+
+  def tags_params
+    params.require(:user).permit(:tags)
   end
 end

@@ -1,2 +1,4 @@
 <h1>Welcome to Happy Fridge!</h1>
-<p>Find me in app/views/welcome/index.html.erb</p>
+<%@recipes.each do |r|%>
+<h3><%=r.title%></h3>
+<%end%>
