@@ -22,11 +22,7 @@
 </div>
 <div>
     <%= f.label :instructions %>
-    <%= f.text_area(:text, size: '100x20') %>
-</div>
-<div>
-    <%= f.label :dietary_restriction %>
-    <%= f.text_field :dietaryrestriction_names %>
+    <%= f.text_area(:instructions, size: '100x20') %>
 </div>
 <p>Tags:</p>
 <div>
@@ -42,6 +38,7 @@
 <%#=t.label :new_tags_separated_by_commas%>
 <%#=t.text_field :new_tag%>
 <%#end%>
+
 <p>Dietary Restrictions</p>
 <div>
     <%=f.collection_check_boxes :dietaryrestriction_ids, Dietaryrestriction.all, :id, :name do |b|%>

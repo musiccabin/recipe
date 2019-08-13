@@ -1,5 +1,7 @@
 class Myrecipe < ApplicationRecord
 
+    belongs_to :user
+
     has_many :myrecipeingredientlinks, dependent: :destroy
     has_many :ingredients, through: :myrecipeingredientlinks
     has_many :completions, dependent: :destroy
@@ -13,11 +15,10 @@ class Myrecipe < ApplicationRecord
     validate :accepted_cooking_time
     validate :is_valid_URL
     validates :instructions, presence: true
-    validates :ingredients, presence: true
 
     before_validation :unique_tags
     before_validation :unique_restrictions
-    before_save :convert_cooking_time
+    after_validation :convert_cooking_time
 
     def tag_names
         self.tags.map(&:name).join(", ")
@@ -41,7 +42,7 @@ class Myrecipe < ApplicationRecord
 
     private
     def convert_cooking_time
-        input = self.cooking_time_in_string.gsub(/\s+/, "")
+        input = cooking_time_in_string.gsub(/\s+/, "")
         output_in_min = 0
         if input.include? 'h'
             output_in_min += input[input.index('h') - 1].to_i * 60
@@ -57,7 +58,7 @@ class Myrecipe < ApplicationRecord
     
     def accepted_cooking_time
         error_text = 'please follow the format of 1h5m or 5m, rounding to the nearest 5-minute. For 27 minutes, enter 25m. Note: enter 1h instead of 60m.'
-        input = self.cooking_time_in_string.gsub(/\s+/, "")
+        input = cooking_time_in_string.gsub(/\s+/, "")
         if input.include? 'h'
             self.errors.add(:cooking_time_in_string,error_text) unless input[0..(input.index('h') - 1)].to_i
             start_index = input.index('h') + 1
@@ -70,15 +71,17 @@ class Myrecipe < ApplicationRecord
     end
 
     def is_valid_URL
-        self.errors.add(:videoURL,'we think the URL is not valid.') unless open(self&.videoURL).status == ["200", "OK"]
+        if videoURL.present?
+            self.errors.add(:videoURL,'we think the URL is not valid.') unless open(self&.videoURL).status == ["200", "OK"]
+        end
     end
 
     def unique_tags
-        self.tags == tags.reject(&:blanks?).uniq unless tags == nil
+        self.tags == tags.reject{ |e| e.to_s.empty? }.uniq unless tags == nil
     end
 
     private
     def unique_restrictions
-        self.dietaryrestrictions == dietaryrestrictions.reject(&:blanks?).uniq unless dietaryrestrictions == nil
+        self.dietaryrestrictions == dietaryrestrictions.reject(&:blank?).uniq unless dietaryrestrictions == nil
     end
 end

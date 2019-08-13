@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_08_09_222357) do
+ActiveRecord::Schema.define(version: 2019_08_13_001903) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -106,14 +106,15 @@ ActiveRecord::Schema.define(version: 2019_08_09_222357) do
   create_table "myrecipeingredientlinks", force: :cascade do |t|
     t.bigint "myrecipe_id"
     t.bigint "ingredient_id"
-    t.float "quantity"
+    t.string "quantity"
     t.string "unit", default: ""
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.date "expiry_date"
     t.index ["ingredient_id"], name: "index_myrecipeingredientlinks_on_ingredient_id", unique: true
-    t.index ["myrecipe_id"], name: "index_myrecipeingredientlinks_on_myrecipe_id", unique: true
-    t.index ["quantity"], name: "index_myrecipeingredientlinks_on_quantity", unique: true
-    t.index ["unit"], name: "index_myrecipeingredientlinks_on_unit", unique: true
+    t.index ["myrecipe_id"], name: "index_myrecipeingredientlinks_on_myrecipe_id"
+    t.index ["quantity"], name: "index_myrecipeingredientlinks_on_quantity"
+    t.index ["unit"], name: "index_myrecipeingredientlinks_on_unit"
   end
 
   create_table "myrecipes", force: :cascade do |t|
@@ -124,10 +125,12 @@ ActiveRecord::Schema.define(version: 2019_08_09_222357) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "myrecipeingredientlink_id"
-    t.boolean "is_hidden", default: false
+    t.boolean "is_hidden", default: true
     t.string "cooking_time_in_string"
+    t.bigint "user_id"
     t.index ["myrecipeingredientlink_id"], name: "index_myrecipes_on_myrecipeingredientlink_id", unique: true
     t.index ["title"], name: "index_myrecipes_on_title"
+    t.index ["user_id"], name: "index_myrecipes_on_user_id"
   end
 
   create_table "reviews", force: :cascade do |t|
@@ -196,6 +199,7 @@ ActiveRecord::Schema.define(version: 2019_08_09_222357) do
   add_foreign_key "myrecipeingredientlinks", "ingredients"
   add_foreign_key "myrecipeingredientlinks", "myrecipes"
   add_foreign_key "myrecipes", "myrecipeingredientlinks"
+  add_foreign_key "myrecipes", "users"
   add_foreign_key "reviews", "myrecipes"
   add_foreign_key "reviews", "users"
   add_foreign_key "taggings", "myrecipes"

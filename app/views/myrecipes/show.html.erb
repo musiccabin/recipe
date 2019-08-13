@@ -3,7 +3,11 @@
 <div>
 <% if @myrecipe.tags.any? %>
 <% @myrecipe.tags.each do |tag|%>
-<%=link_to tag.name, tag_path(tag)%>
+<%=link_to(
+        tag.name,
+        myrecipes_path(tag: tag.name),
+        class: "badge badge-pill badge"
+    )%>
 <%end%>
 <%end%>
 </div>
@@ -11,30 +15,34 @@
 <% if current_user&.favourite_recipes&.include? @myrecipe%>
 <%= link_to 'Remove from Favs', myrecipe_favourite_path(@myrecipe), method: :delete%>
 <%else%>
-<%= link_to 'Add to Favs', myrecipe_favourites_path(@product), method: :post%>
+<%= link_to 'Add to Favs', myrecipe_favourites_path(@myrecipe), method: :post%>
+<%end%>
+
+<% if current_user&.completed_recipes&.include? @myrecipe%>
+<%= link_to 'Remove from Completions', myrecipe_completion_path(@myrecipe), method: :delete%>
+<%else%>
+<%= link_to 'Completed!', myrecipe_completions_path(@myrecipe), method: :post%>
 <%end%>
 
 <% if can?(:crud, @myrecipe) %>
-<%= link_to 'Edit', edit_product_path(@product)%>
-<%= link_to 'Delete', product_path(@product), method: :delete, data: {confirm: "Delete?"}%>
+<%= link_to 'Edit', edit_myrecipe_path(@myrecipe)%>
+<%= link_to 'Delete', myrecipe_path(@myrecipe), method: :delete, data: {confirm: "Delete?"}%>
 
 <% if @myrecipe.is_hidden%>
-<%= link_to 'Unhide', hide_recipe_path, method: :patch%>
+<%= link_to 'Make this recipe public', hide_recipe_path, method: :patch%>
 <% else%>
-<%= link_to 'Hide', hide_recipe_path, method: :patch%>
+<%= link_to 'Hide this recipe', hide_recipe_path, method: :patch%>
 <%end%>
 
 <%end%>
 
 
 <button type="button" id='ingredients'>Ingredients</button>
-<div id="ingredients-content">
-<% @ingredients.each.do |i|%>
-    <div>
-        <%=i.quantity%> <%=i.unit%> <%=i.name%>
-    </div>
-<%end%>
-</div>
+<ul id="ingredients-content">
+    <%@links.each do |l|%>
+    <li><%=l.ingredient.name%> <%=l.quantity%> <%=l.unit%></li>
+    <%end%>
+</ul>
 
 <button type="button" id='instructions'>Instructions</button>
 <ul id="instructions-content">
@@ -46,14 +54,13 @@
 <button type="button" id='reviews'>Reviews</button>
 <div id="reviews-content">
     <% @new = []%>
-<% @reviews.each do |review_each| %>
+    <% @reviews.each do |review_each| %>
     <% r_stat = {:review => review_each, :popularity => review_each.likers}%>
     <%@new.push(r_stat)%>
     <%end%>
-<%end%>
-<% @sorted_hashes = @new.sort_by{ |k| k[:popularity]}.reverse%>
-<% @sorted_by_popularity = @sorted_hashes.map {|e| e[:review] }%>
-<% @sorted_reviews = @sorted_by_popularity.sort_by{ |k| k[:created_at] }.reverse%>
+    <% @sorted_hashes = @new.sort_by{ |k| k[:popularity]}.reverse%>
+    <% @sorted_by_popularity = @sorted_hashes.map {|e| e[:review] }%>
+    <% @sorted_reviews = @sorted_by_popularity.sort_by{ |k| k[:created_at] }.reverse%>
 
 <% @sorted_reviews.each do |r|%>
 <div>
@@ -86,8 +93,9 @@
 </script>
 
 <script type="text/javascript">
+    let x = document.getElementById("instructions-content");
+    x.style.display = 'none';
     document.getElementById("instructions").onclick = function () {
-        let x = document.getElementById("instructions-content");
         if (x.style.display === "none") {
             x.style.display = "block";
         } else {
@@ -97,8 +105,9 @@
 </script>
 
 <script type="text/javascript">
+    let x = document.getElementById("reviews-content");
+    x.style.display = 'none';
     document.getElementById("reviews").onclick = function () {
-        let x = document.getElementById("reviews-content");
         if (x.style.display === "none") {
             x.style.display = "block";
         } else {

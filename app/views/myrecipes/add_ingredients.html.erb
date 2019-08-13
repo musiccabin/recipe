@@ -1,0 +1,21 @@
+<h1>Now add ingredients...</h1>
+<%=form_with url: add_ingredients_path, local: true do |f|%>
+<%=f.label :name%>
+<%=f.text_field :name%>
+<%=f.label :quantity%>
+<%=f.text_field :quantity%>
+<%=f.label :unit_optional%>
+<%=f.text_field :unit%>
+<%=f.submit%>
+<%end%>
+
+<h3>Added ingredients:</h3>
+<%if @links%>
+<ul>
+<%@links.each do |l|%>
+<li><%=l.ingredient.name%> <%=l.quantity%> <%=l.unit%></li>
+<%end%>
+</ul>
+<%end%>
+
+<%=link_to 'View your recipe', @myrecipe%>

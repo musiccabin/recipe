@@ -32,6 +32,9 @@ Rails.application.routes.draw do
   get '/preferences', {to: 'users#preferences', as: 'user_preferences'}
   post '/preferences', {to: 'users#preferences'}
   delete '/preferences/:id', {to: 'users#delete_restriction', as: 'delete_restriction'}
+  get '/myrecripes/:id/add_ingredients', {to: 'myrecipes#add_ingredients', as: 'add_ingredients'}
+  post '/myrecripes/:id/add_ingredients', {to: 'myrecipes#add_ingredients'}
+
 
   match(
     "/delayed_job",

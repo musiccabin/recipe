@@ -34,6 +34,6 @@ class FavouritesController < ApplicationController
 
   private
   def find_recipe
-    @myrecipe = myrecipe.find(params[:myrecipe_id])
+    @myrecipe = Myrecipe.find(params[:myrecipe_id])
   end
 end
