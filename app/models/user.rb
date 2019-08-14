@@ -13,6 +13,7 @@ class User < ApplicationRecord
     has_many :reviews, dependent: :nullify
     has_many :mealplans, dependent: :destroy
     has_many :meals, through: :mealplans, source: :myrecipe
+    has_many :leftovers, dependent: :destroy
 
     VALID_EMAIL_REGEX = /\A([\w+\-].?)+@[a-z\d\-]+(\.[a-z]+)*\.[a-z]+\z/i
     validates :email, presence: true, uniqueness: true, format: VALID_EMAIL_REGEX
@@ -26,6 +27,6 @@ class User < ApplicationRecord
 
     private
     def unique_tags
-        self.tags == tags.reject(&:blanks?).uniq unless tags == nil
+        self.tags == tags.reject{ |e| e.to_s.empty? }.uniq unless tags == nil
     end
 end

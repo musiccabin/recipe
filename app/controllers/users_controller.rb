@@ -106,6 +106,65 @@ class UsersController < ApplicationController
     end
   end
 
+  def favourites
+    @favourites = current_user.favourite_recipes
+  end
+
+  def completions
+    @completions = current_user.completed_recipes
+  end
+
+  def recommend_recipes
+    
+  end
+
+  def add_leftover
+    params = leftover_params
+    if params[:ingredient]
+      leftover = Leftover.new(user: current_user)
+      ingredient = Ingredient.find_by(name: params[:ingredient])
+      if ingredient != nil
+        leftover.ingredient = ingredient
+      else
+        return @error ='sorry, this ingredient does not exist in our system yet. if you find a recipe that uses it, please let us know.'
+      end
+      if params[:quantity]
+        leftover.quantity = params[:quantity]
+      end
+      if params[:expiry_date]
+        leftover.expiry_date = params[:expiry_date]
+      end
+      if leftover.save
+        if leftover.expiry_date.present? && leftover.expiry_date != ''
+          str = "#{leftover&.quantity.to_s} #{leftover&.unit.to_s} #{leftover.ingredient.name} (expiring #{leftover.expiry_date})"
+        else
+          str = "#{leftover&.quantity.to_s} #{leftover&.unit.to_s} #{leftover.ingredient.name}"
+        end
+        redirect_to add_leftover_path, notice: "#{str} is added to your leftovers."
+      else
+        @leftover = leftover
+        render :add_leftover and return
+      end
+    end
+  end
+
+  def update_leftover
+    params = update_leftover_params
+    @leftover = Leftover.find_by(id: params[:id])
+    if @leftover.update(quantity: params[:quantity], unit: params[:unit], expiry_date: params[:expiry_date])
+      redirect_to add_leftover_path
+    else
+      byebug
+      render :add_leftover
+    end
+  end
+
+  def delete_leftover
+    @leftover = Leftover.find_by(id: params[:id])
+    @leftover.destroy
+    redirect_to add_leftover_path
+  end
+
   private
   def user_params
       params.require(:user).permit(:last_name, :first_name, :email, :password, :password_confirmation, :avatar)
@@ -129,5 +188,13 @@ class UsersController < ApplicationController
 
   def tags_params
     params.require(:user).permit(:tags)
+  end
+
+  def leftover_params
+    params.permit(:ingredient, :quantity, :unit, :expiry_date)
+  end
+
+  def update_leftover_params
+    params.permit(:id, :quantity, :unit, :expiry_date)
   end
 end

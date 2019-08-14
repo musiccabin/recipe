@@ -21,16 +21,16 @@ class FavouritesController < ApplicationController
     end
   end
 
-  def user_favourites
-    @favourite_recipes = current_user.favourite_recipes
-  end
+  # def user_favourites
+  #   @favourite_recipes = current_user.favourite_recipes
+  # end
 
-  def index
-  end
+  # def index
+  # end
 
-  def show
-    redirect_to 'myrecipes/show'
-  end
+  # def show
+  #   redirect_to 'myrecipes/show'
+  # end
 
   private
   def find_recipe

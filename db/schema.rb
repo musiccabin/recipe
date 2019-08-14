@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_08_13_001903) do
+ActiveRecord::Schema.define(version: 2019_08_13_170349) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -83,6 +83,18 @@ ActiveRecord::Schema.define(version: 2019_08_13_001903) do
     t.bigint "myrecipeingredientlink_id"
     t.index ["myrecipeingredientlink_id"], name: "index_ingredients_on_myrecipeingredientlink_id", unique: true
     t.index ["name"], name: "index_ingredients_on_name", unique: true
+  end
+
+  create_table "leftovers", force: :cascade do |t|
+    t.bigint "ingredient_id"
+    t.bigint "user_id"
+    t.string "quantity"
+    t.string "unit"
+    t.string "expiry_date"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["ingredient_id"], name: "index_leftovers_on_ingredient_id"
+    t.index ["user_id"], name: "index_leftovers_on_user_id"
   end
 
   create_table "likes", force: :cascade do |t|
@@ -192,6 +204,8 @@ ActiveRecord::Schema.define(version: 2019_08_13_001903) do
   add_foreign_key "favourites", "users"
   add_foreign_key "groceries", "users"
   add_foreign_key "ingredients", "myrecipeingredientlinks"
+  add_foreign_key "leftovers", "ingredients"
+  add_foreign_key "leftovers", "users"
   add_foreign_key "likes", "reviews"
   add_foreign_key "likes", "users"
   add_foreign_key "mealplans", "myrecipes"

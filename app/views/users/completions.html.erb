@@ -1,0 +1,11 @@
+<h1>Recipes I Completed ^v^</h1>
+<%if @completions.any?%>
+<%@completions.each do |f|%>
+<%recipe = Myrecipe.find(f.id)%>
+<div>
+    <%=link_to f.title, recipe%>
+</div>
+<%end%>
+<%else%>
+<h5>No completed recipes yet... better get cooking! =D</h5>
+<%end%>

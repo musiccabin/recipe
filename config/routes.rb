@@ -11,8 +11,8 @@ Rails.application.routes.draw do
       resources :reviews
     end
     resources :ingredients
-    resources :completions
-    resources :favourites
+    resources :completions, only: [:create, :destroy]
+    resources :favourites, only: [:create, :destroy]
   end
 
 
@@ -22,18 +22,25 @@ Rails.application.routes.draw do
   get '/password_reset', {to: 'users#password_reset', as: 'password_reset'}
   post '/password_reset', {to: 'users#password_reset'}
   get '/setting', {to: 'users#setting', as: 'setting'}
-  patch '/setting', {to: 'users#update', as: 'user_update'}
+  post '/setting', {to: 'users#update', as: 'user_update'}
+  get '/favourites', {to: 'users#favourites', as:'favourites'}
+  get '/completions', {to: 'users#completions', as:'completions'}
   get '/groceries', {to: 'groceries#index'}
   post '/groceries', {to: 'groceries#create'}
   # post '/myrecipe_new', {to: 'myrecipe#add_tag', as: 'add_tag'}
   patch '/myrecipes/:id/toggle', {to: 'myrecipes#hide', as:'hide_recipe'}
-  get '/favourte_recipes', {to: 'favourites#user_favourites', as:'favourite_recipes'}
   get '/admin/panel', {to: 'admin#panel', as:'admin_panel'}
   get '/preferences', {to: 'users#preferences', as: 'user_preferences'}
   post '/preferences', {to: 'users#preferences'}
   delete '/preferences/:id', {to: 'users#delete_restriction', as: 'delete_restriction'}
   get '/myrecripes/:id/add_ingredients', {to: 'myrecipes#add_ingredients', as: 'add_ingredients'}
   post '/myrecripes/:id/add_ingredients', {to: 'myrecipes#add_ingredients'}
+  post 'recommendations', {to: 'users#recommend_recipes', as: 'recipe_recommendation'}
+  get '/add_leftover', {to: 'users#add_leftover', as: 'add_leftover'}
+  post '/add_leftover', {to: 'users#add_leftover', as: 'save_leftover'}
+  patch '/add_leftover/:id/update', {to: 'users#update_leftover', as: 'update_leftover'}
+  delete '/add_leftover/:id', {to: 'users#delete_leftover', as: 'delete_leftover'}
+
 
 
   match(

@@ -5,6 +5,7 @@ class WelcomeController < ApplicationController
         @recipes = Myrecipe.all.order(created_at: :desc)
       else
         #grab recipes with user's preferences and display images
+        @leftovers = current_user.leftovers
       end
     else
       @recipes = Myrecipe.where(is_hidden: false).order(created_at: :desc)

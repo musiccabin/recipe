@@ -1,0 +1,74 @@
+<h1>Add a leftover ingredient</h1>
+
+<%if @leftover&.errors&.any?%>
+<%@leftover.errors.each do |e|%>
+<p><%=e%></p>
+<%end%>
+<%end%>
+
+<%if @error%>
+<p><%=@error%></p>
+<%end%>
+
+<%=form_with url: save_leftover_path, local: true do |f|%>
+<%=f.label :ingredient%>
+<%=f.text_field :ingredient%>
+<%=f.label :quantity%>
+<%=f.text_field :quantity%>
+<%=f.label :unit_optional%>
+<%=f.text_field :unit%>
+<%=f.label :expiry_date%>
+<%=f.text_field :expiry_date, placeholder: "e.g. '07-11' for July 11th"%>
+<%=f.submit%>
+<%end%>
+
+<h3>My Leftovers:</h3>
+<%if current_user.leftovers%>
+<ul>
+<%@current_user.leftovers.each do |l|%>
+
+<div class='button-wrappper'>
+<li class='leftover-info'><%=l.ingredient.name%> <%=l.quantity%> <%=l.unit%>
+<%if l.expiry_date != ''%>
+(exp. <%=l.expiry_date%>)
+<%end%></li>
+<button>Edit</button><small><%=link_to 'Delete', delete_leftover_path(l), method: :delete%></small>
+<li class='update-leftover'>
+    <%=l.ingredient.name%>
+<%=form_with url: update_leftover_path(l), method: :patch, local: true do |f|%>
+<%=f.label :quantity%>
+<%=f.text_field :quantity, value: l.quantity%>
+<%=f.label :unit%>
+<%=f.text_field :unit, value: l.unit%>
+<%=f.label :expiry_date%>
+<%=f.text_field :expiry_date, value: l.expiry_date%>
+<%=f.submit%>
+<%end%>
+</li>
+</div>
+
+<%end%>
+</ul>
+<%end%>
+
+<script type="text/javascript">
+    document.querySelectorAll(".update-leftover").forEach(function(e) {
+        e.style.display = 'none';
+    });
+    document.querySelectorAll('.leftover-info').forEach(function(e) {
+        e.style.display = 'block';
+    });
+    document.querySelectorAll("button").forEach(function(b) {
+        b.onclick = function (event) {
+        event.target.closest('div').querySelector('.leftover-info').style.display = 'none';
+        event.target.closest('div').querySelector('.update-leftover').style.display = 'block';
+        // if (x.style.display === "none") {
+        //     x.style.display = "block";
+        //     y.style.display = 'none';
+        // } else {
+        //     x.style.display = "none";
+        //     y.style.display = 'block';
+        // }
+        }
+    });
+</script>

@@ -1,4 +1,9 @@
 <h1>Welcome to Happy Fridge!</h1>
+
+<%if current_user%>
+<%=link_to 'Add a leftover ingredient!', add_leftover_path%>
+<%end%>
+
 <%@recipes.each do |r|%>
-<h3><%=r.title%></h3>
+<h3><%=link_to r.title, r%></h3>
 <%end%>

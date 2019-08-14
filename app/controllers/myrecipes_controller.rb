@@ -52,6 +52,7 @@ class MyrecipesController < ApplicationController
     @myrecipe.instructions.split('\n').each do |step|
       (@instructions << step) unless step == ''
     end
+    @review = Review.new
     @reviews = @myrecipe.reviews
   end
 

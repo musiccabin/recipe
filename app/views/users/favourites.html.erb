@@ -1,0 +1,11 @@
+<h1>My Favourite Recipes</h1>
+<%if @favourites%>
+<%@favourites.each do |f|%>
+<%recipe = Myrecipe.find(f.id)%>
+<div>
+    <%=link_to f.title, recipe%>
+</div>
+<%end%>
+<%else%>
+<h5>No favourite recipes yet...</h5>
+<%end%>

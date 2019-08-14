@@ -12,24 +12,24 @@ class CompletionsController < ApplicationController
   end
   
   def destroy
-    @competion = Completion.find_by(myrecipe_id: current_user.completed_recipes.find(@myrecipe.id))
+    @completion = Completion.find_by(myrecipe_id: current_user.completed_recipes.find(@myrecipe.id))
     if @completion.destroy
       redirect_to @myrecipe, notice: 'this recipe has been removed from your favourites.'
     else
-      redirect_to @myrecipe, alert: @favourite.errors.full_messages.join(", ")
+      redirect_to @myrecipe, alert: @completion.errors.full_messages.join(", ")
     end
   end
   
-  def user_completions
-    @completed_recipes = current_user.completed_recipes
-  end
+  # def user_completions
+  #   @completed_recipes = current_user.completed_recipes
+  # end
   
-  def index
-  end
+  # def index
+  # end
   
-  def show
-    redirect_to @myrecipe
-  end
+  # def show
+  #   redirect_to @myrecipe
+  # end
   
   private
   def find_recipe

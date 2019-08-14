@@ -4,7 +4,7 @@
 <%end%>
 <%end%>
 
-<%= form_with model: @user, :html => { :multipart => true }, local: true do |f| %>
+<%= form_with url: user_update_path, :html => { :multipart => true }, local: true do |f| %>
 <div>
     <%= f.label :first_name %>
     <%= f.text_field :first_name, value: current_user.first_name %>
@@ -21,31 +21,30 @@
     <p>Change your profile picture</p>
     <%= f.file_field :avatar %>
 </div>
+     <%=f.submit%>
 
 <%=link_to 'Change Password', password_reset_path%>
-<button type="button" id='change-password'>Change Password</button>
-<div id="change-password-form" class=<%= @errors.present? ? 'show' : 'hide' %>> 
-    <div>
-        <%=f.label :current_password%>
-        <%=f.password_field :password%>
-    </div>
-    <div>
-        <%=f.label :new_password_again%>
-        <%=f.password_field :password_confirmation%>
-    </div>
-</div>
-</div>
-    <%=f.submit%>
-</div>
-<%end%>
+<!-- <button type="button" id='change-password'>Change Password</button> -->
+<!-- # <div id="change-password-form" class=<%= @errors.present? ? 'show' : 'hide' %>> 
+#     <div>
+#         <%=f.label :current_password%>
+#         <%=f.password_field :password%>
+#     </div>
+#     <div>
+#         <%=f.label :new_password_again%>
+#         <%=f.password_field :password_confirmation%>
+#     </div>
+# </div>
+# </div>
+# <%end%>
 
-<script type="text/javascript">
-    document.getElementById("change-password").onclick = function () {
-        let x = document.getElementById("change-password-form");
-        if (x.style.display === "none") {
-            x.style.display = "block";
-        } else {
-            x.style.display = "none";
-        }
-    }
-</script>
+# <script type="text/javascript">
+#     document.getElementById("change-password").onclick = function () {
+#         let x = document.getElementById("change-password-form");
+#         if (x.style.display === "none") {
+#             x.style.display = "block";
+#         } else {
+#             x.style.display = "none";
+#         }
+#     }
+# </script> -->

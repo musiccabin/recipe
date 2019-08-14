@@ -32,7 +32,8 @@
   <%end%>
 
 <div class='account-preferences'>
-  <%= link_to 'Favourite Recipes', new_user_path %>
+  <%= link_to 'Favourite Recipes', favourites_path %>
+  <%= link_to 'Completed Recipes', completions_path %>
   <%= link_to 'Account Settings', setting_path %>
   <%= link_to 'Sign Out', session_path, method: :delete %>
   </div>  
