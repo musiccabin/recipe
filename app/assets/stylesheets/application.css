@@ -13,3 +13,170 @@
  *= require_tree .
  *= require_self
  */
+
+
+@import url(reset.css);
+
+html {
+  box-sizing: border-box;
+  /* background-image: url('groceries.jpg'); */
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
+body {
+  font-family: 'Raleway', sans-serif;
+  font-size: 1.5em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  /* min-width: 50%; */
+  padding: 1em;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+}
+
+.grocery-page {
+  background-image: url('groceries.jpg');
+  background-size: cover;
+  flex: 1;
+  min-height: 100%;
+}
+
+.sign-in {
+  background-image: url('sign-in.jpg');
+  background-size: cover;
+  flex: 1;
+  min-height: 100%;
+  color: white;
+}
+
+.sign-up {
+  background-image: url('sign-in.jpg');
+  background-size: cover;
+  flex: 1;
+  min-height: 100%;
+  color: white;
+}
+
+.welcome {
+  flex: 1;
+  min-height: 100%;
+}
+
+.welcome-bg-image {
+  background-image: url('welcome.jpg');
+  background-size: cover;
+  filter: blur(8px);
+  -webkit-filter: blur(8px);
+  -moz-filter: blur(5px);
+  -o-filter: blur(5px);
+  -ms-filter: blur(5px);
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: -1;
+}
+
+.forgot-password {
+  background-image: url('setting.jpg');
+  background-size: cover;
+  flex: 1;
+  min-height: 100%;
+}
+
+.page-title {
+  font-size: 2em;
+  padding: 1em;
+  text-align: center;
+}
+
+.input-field {
+  height: 3em;
+  width: 30em;
+  margin: 2em;
+  /* font-size: 1em; */
+  /* display: table-cell;
+  vertical-align: middle;
+  text-align: right; */
+}
+
+.signin-form-label {
+  width: 8em;
+  padding: .5em;
+  display: inline-block;
+}
+
+/* .sign-up-form {
+  display: flex; flex-direction: column;
+  align-items: center;
+}
+
+.form-element {
+  justify-content: flex-start;
+} */
+
+.button-wrapper {
+  text-align: center;
+}
+
+.button {
+  font-size: 1em;
+  padding: .5em 1em;
+  border: 1px solid white;
+  border-radius: 12px;
+  background-color: transparent;
+  color: white;
+  -webkit-transition-duration: 0.4s;
+  /* Safari */
+  transition-duration: 0.4s;
+  margin: 1em;
+}
+
+.button:hover {
+  -webkit-transition-duration: 0.4s;
+  /* Safari */
+  transition-duration: 0.4s;
+  background-color: #FF4C4C;
+  border: none;
+  cursor: grab;
+}
+
+.signup-link:hover {
+  margin: 1em;
+  text-decoration: none;
+  padding: .5em 1em;
+  border: 1px solid white;
+  border-radius: 12px;
+  background-color: transparent;
+  color: white;
+  -webkit-transition-duration: 0.4s;
+  /* Safari */
+  transition-duration: 0.4s;
+}
+
+.form-buttons {
+  padding: 1em;
+  text-align: center;
+}
+
+
+/* .bg {
+  position: fixed; 
+  top: 0; 
+  left: 0;  */
+
+/* Preserve aspet ratio */
+/* min-width: 100%;
+  min-height: 100%;
+} */

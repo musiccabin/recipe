@@ -1,34 +1,38 @@
-<h1>Sign Up</h1>
+<% content_for :body_class, 'sign-up' %>
 
-<%= form_with model: @user, :html => { :multipart => true }, local: true do |f| %>
+<h1 class='page-title'>Sign Up</h1>
+
+<%= form_with model: @user, :html => { :multipart => true }, class: 'sign-up-form', local: true do |f| %>
 
 <% if @user.errors.any? %>
 <p>
     <%= @user.errors.full_messages.join(', ') %>
 </p>
 <% end %>
-<div>
-    <%= f.label :first_name %>
-    <%= f.text_field :first_name %>
+<div class='form-element'>
+    <%= f.label :first_name, class: 'signin-form-label' %>
+    <%= f.text_field :first_name, class: 'input-field' %>
 </div>
-<div>
-    <%= f.label :last_name %>
-    <%= f.text_field :last_name %>
+<div class='form-element'>
+    <%= f.label :last_name, class: 'signin-form-label' %>
+    <%= f.text_field :last_name, class: 'input-field' %>
 </div>
-<div>
-    <%= f.label :email %>
-    <%= f.email_field :email %>
+<div class='form-element'>
+    <%= f.label :email, class: 'signin-form-label' %>
+    <%= f.email_field :email, class: 'input-field' %>
 </div>
-<div>
-    <%= f.label :password %>
-    <%= f.password_field :password %>
+<div class='form-element'>
+    <%= f.label :password, class: 'signin-form-label' %>
+    <%= f.password_field :password, class: 'input-field' %>
 </div>
-<div>
-    <%= f.label :password_confirmation %>
-    <%= f.password_field :password_confirmation %>
+<div class='form-element'>
+    <%= f.label :enter_password_again, class: 'signin-form-label' %>
+    <%= f.password_field :password_confirmation, class: 'input-field' %>
 </div>
-<div>
-    <%= f.file_field :avatar %>
+<div class='form-element'>
+    <%= f.file_field :avatar, class: 'file-upload' %>
 </div>
-<%= f.submit "Sign Up"%>
+<div class='button-wrapper'>
+<%= f.submit "Sign Up", class: 'button'%>
+</div>
 <% end %>

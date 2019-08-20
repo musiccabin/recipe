@@ -1,5 +1,7 @@
 class UsersController < ApplicationController
 
+  require 'date'
+
   before_action :authenticate_user!, except: [:new, :create, :forgot_password, :send_email, :password_reset]
   before_action :find_restrictions, only: [:preferences, :delete_restriction]
 
@@ -114,10 +116,6 @@ class UsersController < ApplicationController
     @completions = current_user.completed_recipes
   end
 
-  def recommend_recipes
-    
-  end
-
   def add_leftover
     params = leftover_params
     if params[:ingredient]
@@ -154,7 +152,6 @@ class UsersController < ApplicationController
     if @leftover.update(quantity: params[:quantity], unit: params[:unit], expiry_date: params[:expiry_date])
       redirect_to add_leftover_path
     else
-      byebug
       render :add_leftover
     end
   end

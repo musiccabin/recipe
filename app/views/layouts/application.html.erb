@@ -7,9 +7,10 @@
 
     <%= stylesheet_link_tag    'application', media: 'all' %>
     <%= javascript_include_tag 'application' %>
+    <link href="https://fonts.googleapis.com/css?family=Raleway&display=swap" rel="stylesheet">
   </head>
 
-  <body>
+  <body class="<%= content_for :body_class %>">
   <header>
   <nav>
 

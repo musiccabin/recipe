@@ -1,15 +1,21 @@
-<h1>Sign In</h1>
+<% content_for :body_class, 'sign-in' %>
+
+<h1 class='page-title'>Sign In</h1>
 
 <%= form_with url: session_path, local: true do |f| %>
 <div>
-    <%= f.label :email %>
-    <%= f.email_field :email %>
+    <%= f.label :email, class: 'signin-form-label' %>
+    <%= f.email_field :email, class: 'input-field' %>
 </div>
 <div>
-    <%= f.label :password %>
-    <%= f.password_field :password %>
+    <%= f.label :password, class: 'signin-form-label' %>
+    <%= f.password_field :password, class: 'input-field' %>
 </div>
-<%= f.submit "Sign In"%>
-<%= link_to "Sign Up", new_user_path%>
+
+<div class='form-buttons'>
+<p><%= f.submit "GO!", class: 'button'%>
+<%= link_to "Sign Up", new_user_path, class: 'signup-link'%>
 <% end %>
- <%= link_to "Oops, I lost my password! @.@", password_reset_path%>
+</p>
+<%= link_to "Oops, lost password?", password_reset_path%>
+</div>

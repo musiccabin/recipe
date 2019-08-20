@@ -49,7 +49,8 @@ class MyrecipesController < ApplicationController
       return render :add_ingredients, alert: 'a recipe must have ingredients.'
     end
     @instructions = []
-    @myrecipe.instructions.split('\n').each do |step|
+    @myrecipe.instructions.split(/[\r\n]+/).each do |step|
+      p "step is #{step}"
       (@instructions << step) unless step == ''
     end
     @review = Review.new
