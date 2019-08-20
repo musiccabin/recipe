@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_08_13_170349) do
+ActiveRecord::Schema.define(version: 2019_08_20_192053) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -123,7 +123,7 @@ ActiveRecord::Schema.define(version: 2019_08_13_170349) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.date "expiry_date"
-    t.index ["ingredient_id"], name: "index_myrecipeingredientlinks_on_ingredient_id", unique: true
+    t.index ["ingredient_id"], name: "index_myrecipeingredientlinks_on_ingredient_id"
     t.index ["myrecipe_id"], name: "index_myrecipeingredientlinks_on_myrecipe_id"
     t.index ["quantity"], name: "index_myrecipeingredientlinks_on_quantity"
     t.index ["unit"], name: "index_myrecipeingredientlinks_on_unit"
@@ -140,6 +140,10 @@ ActiveRecord::Schema.define(version: 2019_08_13_170349) do
     t.boolean "is_hidden", default: true
     t.string "cooking_time_in_string"
     t.bigint "user_id"
+    t.string "avatar_file_name"
+    t.string "avatar_content_type"
+    t.bigint "avatar_file_size"
+    t.datetime "avatar_updated_at"
     t.index ["myrecipeingredientlink_id"], name: "index_myrecipes_on_myrecipeingredientlink_id", unique: true
     t.index ["title"], name: "index_myrecipes_on_title"
     t.index ["user_id"], name: "index_myrecipes_on_user_id"

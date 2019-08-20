@@ -1,4 +1,13 @@
 <h1>Now add ingredients...</h1>
+
+<%if @error%>
+<p><%=@error%></p>
+<%end%>
+
+<%if @link&.&errors&.any?%>
+<p><%@link.errors.full_messages.join('. ')%></p>
+<%end%>
+
 <%=form_with url: add_ingredients_path, local: true do |f|%>
 <%=f.label :name%>
 <%=f.text_field :name%>
@@ -11,11 +20,49 @@
 
 <h3>Added ingredients:</h3>
 <%if @links%>
+
 <ul>
 <%@links.each do |l|%>
-<li><%=l.ingredient.name%> <%=l.quantity%> <%=l.unit%></li>
+<div class='button-wrappper'>
+<li class='ingredient-info'><%=l.ingredient.name%>: <%=l.quantity%> <%=l.unit%></li>
+    <button>Edit</button><small><%=link_to 'Delete', delete_ingredient_path(@myrecipe, l), method: :delete%></small>
+<li class='update-ingredient'>
+    <%=form_with url: update_ingredient_path(@myrecipe, l), method: :patch, local: true do |f|%>
+    <%=f.label :name%>
+    <%=f.text_field :name, value: l.ingredient.name%>
+    <%=f.label :quantity%>
+    <%=f.text_field :quantity, value: l.quantity%>
+    <%=f.label :unit%>
+    <%=f.text_field :unit, value: l.unit%>
+    <%=f.submit%>
+    <%end%>
+</li>
+</div>
 <%end%>
 </ul>
-<%end%>
 
+<%end%>    
+    
 <%=link_to 'View your recipe', @myrecipe%>
+
+<script type="text/javascript">
+    document.querySelectorAll(".update-ingredient").forEach(function(e) {
+        e.style.display = 'none';
+    });
+    document.querySelectorAll('.ingredient-info').forEach(function(e) {
+        e.style.display = 'block';
+    });
+    document.querySelectorAll("button").forEach(function(b) {
+        b.onclick = function (event) {
+        event.target.closest('div').querySelector('.ingredient-info').style.display = 'none';
+        event.target.closest('div').querySelector('.update-ingredient').style.display = 'block';
+        // if (x.style.display === "none") {
+        //     x.style.display = "block";
+        //     y.style.display = 'none';
+        // } else {
+        //     x.style.display = "none";
+        //     y.style.display = 'block';
+        // }
+        }
+    });
+</script>

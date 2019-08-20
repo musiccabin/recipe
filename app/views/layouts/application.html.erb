@@ -14,7 +14,7 @@
   <header>
   <nav>
 
-<%= link_to 'Home', new_user_path %>
+<%= link_to 'Home', root_path %>
   <% if user_signed_in? %>
   Hello <%= current_user.first_name%>
   <%= image_tag current_user.avatar.url(:thumb) %>

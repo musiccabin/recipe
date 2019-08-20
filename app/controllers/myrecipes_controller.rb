@@ -20,12 +20,42 @@ class MyrecipesController < ApplicationController
 
   def add_ingredients
     @links = @myrecipe.myrecipeingredientlinks
+    ingredient = Ingredient.find_by(name: params[:name])
+    if ingredient == nil
+      return @error = 'sorry, this ingredient does not exist in our system yet. if you find a recipe that uses it, please let us know.'
+    end
+    if params[:quantity].to_s == ''
+      return @error = "quantity must be present. You can enter 'to taste' for seasoning."
+    end
     if params[:name] && params[:quantity]
       link = Myrecipeingredientlink.new(quantity: link_params[:quantity], unit: link_params[:unit])
       link.myrecipe = @myrecipe
       link.ingredient = Ingredient.find_or_initialize_by(name: link_params[:name])
       link.save
     end
+  end
+
+  def update_ingredient
+    params = update_link_params
+    ingredient = Ingredient.find_by(name: params[:name])
+    if ingredient == nil
+      return @error = 'sorry, this ingredient does not exist in our system yet. if you find a recipe that uses it, please let us know.'
+    end
+    if params[:quantity].to_s == ''
+      return @error = "quantity must be present. You can enter 'to taste' for seasoning."
+    end
+    @link = Myrecipeingredientlink.find_by(id: params[:link_id])
+    if @link.update(ingredient: ingredient, quantity: params[:quantity], unit: params[:unit])
+      redirect_to add_ingredients_path
+    else
+      render :add_ingredients
+    end
+  end
+
+  def delete_ingredient
+    @link = Myrecipeingredientlink.find_by(id: params[:link_id])
+    @link.destroy
+    redirect_to add_ingredients_path
   end
 
   def index
@@ -50,7 +80,6 @@ class MyrecipesController < ApplicationController
     end
     @instructions = []
     @myrecipe.instructions.split(/[\r\n]+/).each do |step|
-      p "step is #{step}"
       (@instructions << step) unless step == ''
     end
     @review = Review.new
@@ -86,11 +115,15 @@ class MyrecipesController < ApplicationController
   end
 
   def recipe_params
-    params.require(:myrecipe).permit(:title, :cooking_time_in_string, :videoURL, :instructions, :dietaryrestriction_names, {dietaryrestriction_ids: []}, :tag_names, {tag_ids: []})
+    params.require(:myrecipe).permit(:title, :cooking_time_in_string, :avatar, :videoURL, :instructions, :dietaryrestriction_names, {dietaryrestriction_ids: []}, :tag_names, {tag_ids: []})
   end
 
   def link_params
     params.permit(:name, :quantity, :unit)
+  end
+
+  def update_link_params
+    params.permit(:link_id, :name, :quantity, :unit)
   end
 
   def authorize!

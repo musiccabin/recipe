@@ -6,7 +6,7 @@
 </ul>
 <% end %>
 
-<%= form_with model: @myrecipe, local: true do |f| %>
+<%= form_with model: @myrecipe, :html => { :multipart => true }, class: 'sign-up-form', local: true do |f| %>
 <div>
     <%= f.label :title %>
     <%= f.text_field :title %>
@@ -15,6 +15,9 @@
     <p>For cooking time over one hour, follow the format of '1h20m' (one hour 20 minutes). Otherwise, type in, for example, '50min' (50 minutes). Round to the nearest 5-minute. For example, either '20m' or '25m' is accepted, but not '23m'.</p>
     <%= f.label :cooking_time %>
     <%= f.text_field :cooking_time_in_string %>
+</div>
+<div>
+    <%= f.file_field :avatar%>
 </div>
 <div>
     <%= f.label :link_to_video %>

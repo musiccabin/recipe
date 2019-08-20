@@ -16,7 +16,8 @@ Rails.application.routes.draw do
   end
 
 
-  get 'welcome/index', {to: 'welcome#index', as: 'root'}
+  get '/', {to: 'welcome#index', as: 'root'}
+  get 'welcome/index', {to: 'welcome#index'}
   get '/forgot_password', {to: 'users#forgot_password', as: 'forgot_password'}
   post '/forgot_password', {to: 'users#send_email', as: 'send_email'}
   get '/password_reset', {to: 'users#password_reset', as: 'password_reset'}
@@ -35,6 +36,8 @@ Rails.application.routes.draw do
   delete '/preferences/:id', {to: 'users#delete_restriction', as: 'delete_restriction'}
   get '/myrecripes/:id/add_ingredients', {to: 'myrecipes#add_ingredients', as: 'add_ingredients'}
   post '/myrecripes/:id/add_ingredients', {to: 'myrecipes#add_ingredients'}
+  patch '/myrecripes/:id/add_ingredients/:link_id/update', {to: 'myrecipes#update_ingredient', as: 'update_ingredient'}
+  delete '/myrecripes/:id/add_ingredients/:link_id', {to: 'myrecipes#delete_ingredient', as: 'delete_ingredient'}
   post 'recommendations', {to: 'users#recommend_recipes', as: 'recipe_recommendation'}
   get '/add_leftover', {to: 'users#add_leftover', as: 'add_leftover'}
   post '/add_leftover', {to: 'users#add_leftover', as: 'save_leftover'}

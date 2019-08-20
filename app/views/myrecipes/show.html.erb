@@ -1,5 +1,6 @@
 <h1><%= @myrecipe.title%></h1>
 <p>Cooking Time: <%=@cooking_time%></p>
+<%= image_tag @myrecipe.avatar.url(:medium) %>
 <div>
 <% if @myrecipe.tags.any? %>
 <% @myrecipe.tags.each do |tag|%>
