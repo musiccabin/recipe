@@ -8,44 +8,48 @@
     <%= stylesheet_link_tag    'application', media: 'all' %>
     <%= javascript_include_tag 'application' %>
     <link href="https://fonts.googleapis.com/css?family=Raleway&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/ef152ad196.js"></script>
   </head>
 
   <body class="<%= content_for :body_class %>">
   <header>
   <nav>
 
-<%= link_to 'Home', root_path %>
+<%= link_to 'Home', root_path, class: 'menu-item'%>|
   <% if user_signed_in? %>
-  Hello <%= current_user.first_name%>
-  <%= image_tag current_user.avatar.url(:thumb) %>
-  
-  <div class='recipe-preferences'>
-  <%= link_to 'Preferences', user_preferences_path %>
-  <%= link_to 'Enable/Disable Store Specials', new_user_path %>
-  <%= link_to 'Lunch/Dinner/Desserts', new_user_path %>
-  </div>
-
+  <!-- Hello <%= current_user.first_name%> -->
   <% if current_user.is_admin%>
   <div class='admin-menu'>
-  <%= link_to 'New Recipe', new_myrecipe_path%>
-  <%= link_to 'View System Stats', new_user_path%>
+    <%= link_to 'New Recipe!', new_myrecipe_path, class: 'menu-item'%>
+    <!-- <%= link_to 'View System Stats', new_user_path%> -->
   </div>
   <%end%>
+  <a href='/add_leftover' class='drumstick'><i class="fas fa-drumstick-bite fa-3x" id='drumstick'></i></a>
+  <!-- <%= image_tag current_user.avatar.url(:thumb) %> -->
+  
+  <div id='retractable-menu' class='retractable-menu'>
+  <div class='recipe-preferences'>
+  <%= link_to 'Preferences', user_preferences_path, class: 'menu-item' %>|
+  <%= link_to 'Account', setting_path, class: 'menu-item' %>
+  <!-- <%= link_to 'Enable/Disable Store Specials', new_user_path %> -->
+  <!-- <%= link_to 'Lunch/Dinner/Desserts', new_user_path %> -->
+  </div>
+
+  
 
 <div class='account-preferences'>
-  <%= link_to 'Favourite Recipes', favourites_path %>
-  <%= link_to 'Completed Recipes', completions_path %>
-  <%= link_to 'Account Settings', setting_path %>
-  <%= link_to 'Sign Out', session_path, method: :delete %>
-  </div>  
+  <%= link_to 'Favourites', favourites_path, class: 'menu-item' %>|
+  <%= link_to 'Dishes I made!', completions_path, class: 'menu-item' %>
+</div> 
+</div> 
   <% else%>
-  <%= link_to "Sign In", new_session_path%>
+  <%= link_to "Sign In", new_session_path, class: 'menu-item'%>
   <% end %>
   </nav>
   </header>
   <main>
   <% flash.each do |type, message| %>
-  <div class="flash flash-<%= type %>">
+  <div class="flash flash-<%= type %>" style='text-align: center; margin-top: 1em'>
   <%= message%>
   </div>
   <% end %>
@@ -53,3 +57,15 @@
     </main>
   </body>
 </html>
+
+<!-- {/* <script type="text/javascript">
+  let x = document.getElementById("retractable-menu");
+  x.style.display = 'none';
+  document.getElementById("drumstick").onclick = function () {
+      if (x.style.display === "none") {
+          x.style.display = "block";
+      } else {
+          x.style.display = "none";
+      }
+  }
+</script> */} -->

@@ -1,48 +1,50 @@
-<h1>Add a leftover ingredient</h1>
+<div class='welcome-bg-image'></div>
+
+<h1 class='page-title'>Add a leftover ingredient</h1>
 
 <%if @leftover&.errors&.any?%>
-<%@leftover.errors.each do |e|%>
-<p><%=e%></p>
-<%end%>
+<p style='text-align: center'><%=@leftover.errors.full_messages.join('')%></p>
 <%end%>
 
 <%if @error%>
-<p><%=@error%></p>
+<p style='text-align: center'><%=@error%></p>
 <%end%>
 
 <%=form_with url: save_leftover_path, local: true do |f|%>
-<%=f.label :ingredient%>
-<%=f.text_field :ingredient%>
-<%=f.label :quantity%>
-<%=f.text_field :quantity%>
-<%=f.label :unit_optional%>
-<%=f.text_field :unit%>
-<%=f.label :expiry_date%>
-<%=f.text_field :expiry_date, placeholder: "e.g. '07-11' for July 11th"%>
-<%=f.submit%>
+<div class='add-leftover-form'>
+<div class='leftover-form-element'><%=f.label :ingredient%>
+<%=f.text_field :ingredient, placeholder: "'pear', not 'pears'", class: 'leftover-input'%></div>
+<div class='leftover-form-element'><%=f.label :quantity%>
+<%=f.text_field :quantity, placeholder: "'1 1/2': one and a half", class: 'leftover-input'%></div>
+<div class='leftover-form-element'><%=f.label :unit%>
+<%=f.text_field :unit, placeholder: "(optional) e.g. 'tbsp'", class: 'leftover-input'%></div>
+<div class='leftover-form-element'><%=f.label :expiry_date%>
+<%=f.text_field :expiry_date, placeholder: "e.g. '07-11' for July 11th", class: 'leftover-input'%></div>
+<div class='leftover-form-element'><%=f.submit class: 'button small'%></div>
+</div>
 <%end%>
 
-<h3>My Leftovers:</h3>
+<h3 style='text-align: center; font-weight: 700; margin: 1em'>My Leftovers:</h3>
 <%if current_user.leftovers%>
-<ul>
+<ul class='leftovers'>
 <%@current_user.leftovers.each do |l|%>
 
-<div class='button-wrappper'>
-<li class='leftover-info'><%=l.ingredient.name%> <%=l.quantity%> <%=l.unit%>
+<div class='button-wrapper'>
+<li class='leftover-info'><%=l.ingredient.name%>: <%=l.quantity%> <%=l.unit%>
 <%if l.expiry_date != ''%>
 (exp. <%=l.expiry_date%>)
 <%end%></li>
-<button>Edit</button><small><%=link_to 'Delete', delete_leftover_path(l), method: :delete%></small>
+<button class='button small'>Edit</button><small><%=link_to 'Delete', delete_leftover_path(l), method: :delete%></small>
 <li class='update-leftover'>
-    <%=l.ingredient.name%>
+    <p style='font-weight: 700; text-decoration: underline; margin-bottom: 1em'><%=l.ingredient.name%></p> 
 <%=form_with url: update_leftover_path(l), method: :patch, local: true do |f|%>
-<%=f.label :quantity%>
-<%=f.text_field :quantity, value: l.quantity%>
-<%=f.label :unit%>
-<%=f.text_field :unit, value: l.unit%>
-<%=f.label :expiry_date%>
-<%=f.text_field :expiry_date, value: l.expiry_date%>
-<%=f.submit%>
+<p><%=f.label :quantity%></p>
+<p><%=f.text_field :quantity, value: l.quantity, class: 'leftover-input'%></p>
+<p><%=f.label :unit%></p>
+<p><%=f.text_field :unit, value: l.unit, class: 'leftover-input'%></p>
+<p><%=f.label :expiry_date%></p>
+<p><%=f.text_field :expiry_date, value: l.expiry_date, class: 'leftover-input'%></p>
+<%=f.submit class: 'button small'%>
 <%end%>
 </li>
 </div>

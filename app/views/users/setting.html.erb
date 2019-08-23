@@ -1,3 +1,7 @@
+<% content_for :body_class, 'setting' %>
+
+<div class='setting-page-content'>
+<h1 class='page-title'>The Essentials :)</h1>
 <%if current_user.errors.any?%>
 <% current_user.errors.full_messages.each do |error|%>
 <p><%=error%></p>
@@ -6,24 +10,28 @@
 
 <%= form_with url: user_update_path, :html => { :multipart => true }, local: true do |f| %>
 <div>
-    <%= f.label :first_name %>
-    <%= f.text_field :first_name, value: current_user.first_name %>
+    <%= f.label :first_name, class: 'signin-form-label' %>
+    <%= f.text_field :first_name, value: current_user.first_name, class: 'input-field' %>
 </div>
 <div>
-    <%= f.label :last_name %>
-    <%= f.text_field :last_name, value: current_user.last_name %>
+    <%= f.label :last_name, class: 'signin-form-label' %>
+    <%= f.text_field :last_name, value: current_user.last_name, class: 'input-field' %>
 </div>
 <div>
-    <%= f.label :email %>
-    <%= f.email_field :email, value: current_user.email %>
+    <%= f.label :email, class: 'signin-form-label' %>
+    <%= f.email_field :email, value: current_user.email, class: 'input-field' %>
 </div>
-<div>
+<!-- <div>
     <p>Change your profile picture</p>
     <%= f.file_field :avatar %>
-</div>
-     <%=f.submit%>
+</div> -->
+<div class='form-buttons'>
+     <%=f.submit class: 'button'%>
 
-<%=link_to 'Change Password', password_reset_path%>
+<%=link_to 'Change Password', password_reset_path%> | 
+<%= link_to 'Sign Out', session_path, method: :delete %>
+</div>
+</div>
 <!-- <button type="button" id='change-password'>Change Password</button> -->
 <!-- # <div id="change-password-form" class=<%= @errors.present? ? 'show' : 'hide' %>> 
 #     <div>

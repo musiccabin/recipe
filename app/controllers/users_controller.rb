@@ -23,14 +23,17 @@ class UsersController < ApplicationController
 
   def send_email
     if User.find_by(email: params[:email]) == nil
-      redirect_to password_reset_path, alert: "it does not look like this email is registered. double-check if you entered it correctly."
+      redirect_to forgot_password_path, alert: "it does not look like this email is registered. double-check if you entered it correctly."
     else
-      PasswordResetMailer.forgot_password(User.find_by(email: params[:email])).deliver_later
+      PasswordResetMailer.password_reset(User.find_by(email: params[:email])).deliver_later
       redirect_to root_path, notice: 'An email to reset your password is making its way to your inbox.'
     end
   end
 
   def password_reset
+    if current_user
+      @user = current_user
+    end
     if params[:email].present?
       @user = User.find_by(email: params[:email])
       if @user.present?
@@ -60,12 +63,10 @@ class UsersController < ApplicationController
       end
     end
     if (params.has_key? 'tags')
-      tags = params[:tags].reject(&:blank?).uniq
-      if current_user.tags == nil
-        @tags = tags
-      else
-        tags.each do |tag|
-          current_user.tags << tag
+      tag_ids = params[:tags].reject(&:blank?).uniq
+      if current_user.tag_ids.to_s != ''
+        tag_ids.each do |id|
+          current_user.tags << Tag.find_by(id: id)
         end
       end
       if (current_user.save)
@@ -88,6 +89,12 @@ class UsersController < ApplicationController
   def delete_restriction
     restriction = Dietaryrestriction.find(params[:id])
     current_user.userdietaryrestrictionlinks.find_by(dietaryrestriction_id: params[:id]).destroy
+    redirect_to user_preferences_path
+  end
+
+  def delete_tag
+    tag = Tag.find(params[:id])
+    current_user.usertaggings.find_by(tag_id: params[:id]).destroy
     redirect_to user_preferences_path
   end
 

@@ -33,7 +33,8 @@ Rails.application.routes.draw do
   get '/admin/panel', {to: 'admin#panel', as:'admin_panel'}
   get '/preferences', {to: 'users#preferences', as: 'user_preferences'}
   post '/preferences', {to: 'users#preferences'}
-  delete '/preferences/:id', {to: 'users#delete_restriction', as: 'delete_restriction'}
+  delete '/preferences/:id/restriction', {to: 'users#delete_restriction', as: 'delete_restriction'}
+  delete '/preferences/:id/tag', {to: 'users#delete_tag', as: 'delete_tag'}
   get '/myrecripes/:id/add_ingredients', {to: 'myrecipes#add_ingredients', as: 'add_ingredients'}
   post '/myrecripes/:id/add_ingredients', {to: 'myrecipes#add_ingredients'}
   patch '/myrecripes/:id/add_ingredients/:link_id/update', {to: 'myrecipes#update_ingredient', as: 'update_ingredient'}

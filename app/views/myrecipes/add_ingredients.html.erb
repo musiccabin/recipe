@@ -1,49 +1,74 @@
-<h1>Now add ingredients...</h1>
+<% content_for :body_class, 'add-ingredients' %>
+
+<div class='add-ingredients-bg-image'></div>
+
+<div class='add-ingredients-page-content'>
+
+<div class='align-on-add-ingredients'>
+
+<h1 class='page-title'>Now add ingredients...</h1>
 
 <%if @error%>
-<p><%=@error%></p>
+<p class='error'><%=@error%></p>
 <%end%>
 
-<%if @link&.&errors&.any?%>
-<p><%@link.errors.full_messages.join('. ')%></p>
+<%if @link&.errors&.any?%>
+<p class='error'><%=@link.errors.full_messages.join('. ')%></p>
 <%end%>
 
 <%=form_with url: add_ingredients_path, local: true do |f|%>
+<div class='add-ingredient-form'>
+<div class='leftover-form-element'>
 <%=f.label :name%>
-<%=f.text_field :name%>
+<%=f.text_field :name, placeholder: "'pear', not 'pears'", class: 'leftover-input'%>
+</div>
+<div class='leftover-form-element'>
 <%=f.label :quantity%>
-<%=f.text_field :quantity%>
-<%=f.label :unit_optional%>
-<%=f.text_field :unit%>
-<%=f.submit%>
+<%=f.text_field :quantity, placeholder: "'1 1/2': one and a half", class: 'leftover-input'%>
+</div>
+<div class='leftover-form-element'>
+<%=f.label :unit%>
+<%=f.text_field :unit, placeholder: 'optional', class: 'leftover-input'%>
+</div>
+<div class='leftover-form-element'>
+<%=f.submit class: 'button small black'%>
+</div>
+</div>
 <%end%>
 
+</div>
+
+<div class='added-ingredients-and-ingredients'>
 <h3>Added ingredients:</h3>
 <%if @links%>
 
-<ul>
+<ul class='ingredients'>
 <%@links.each do |l|%>
-<div class='button-wrappper'>
+<div class='button-wrapper'>
 <li class='ingredient-info'><%=l.ingredient.name%>: <%=l.quantity%> <%=l.unit%></li>
-    <button>Edit</button><small><%=link_to 'Delete', delete_ingredient_path(@myrecipe, l), method: :delete%></small>
+    <button class='button small black'>Edit</button><small><%=link_to 'Delete', delete_ingredient_path(@myrecipe, l), method: :delete%></small>
 <li class='update-ingredient'>
     <%=form_with url: update_ingredient_path(@myrecipe, l), method: :patch, local: true do |f|%>
     <%=f.label :name%>
-    <%=f.text_field :name, value: l.ingredient.name%>
+    <%=f.text_field :name, value: l.ingredient.name, class: 'leftover-input'%>
     <%=f.label :quantity%>
-    <%=f.text_field :quantity, value: l.quantity%>
+    <%=f.text_field :quantity, value: l.quantity, class: 'leftover-input'%>
     <%=f.label :unit%>
-    <%=f.text_field :unit, value: l.unit%>
-    <%=f.submit%>
+    <%=f.text_field :unit, value: l.unit, class: 'leftover-input'%>
+    <%=f.submit class: 'button small black'%>
     <%end%>
 </li>
 </div>
 <%end%>
 </ul>
 
-<%end%>    
-    
+<div style='padding: 1em'>
 <%=link_to 'View your recipe', @myrecipe%>
+</div>
+</div>
+
+<%end%>    
+</div>
 
 <script type="text/javascript">
     document.querySelectorAll(".update-ingredient").forEach(function(e) {
@@ -65,4 +90,8 @@
         // }
         }
     });
+
+    document.querySelector('nav').querySelectorAll('a').forEach(function(e) {
+        e.style.color = 'black';
+    })
 </script>

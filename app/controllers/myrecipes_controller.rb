@@ -21,17 +21,18 @@ class MyrecipesController < ApplicationController
   def add_ingredients
     @links = @myrecipe.myrecipeingredientlinks
     ingredient = Ingredient.find_by(name: params[:name])
-    if ingredient == nil
-      return @error = 'sorry, this ingredient does not exist in our system yet. if you find a recipe that uses it, please let us know.'
-    end
     if params[:quantity].to_s == ''
-      return @error = "quantity must be present. You can enter 'to taste' for seasoning."
+      return @error = "Quantity must be present. You can enter 'to taste' for seasoning."
     end
     if params[:name] && params[:quantity]
-      link = Myrecipeingredientlink.new(quantity: link_params[:quantity], unit: link_params[:unit])
-      link.myrecipe = @myrecipe
-      link.ingredient = Ingredient.find_or_initialize_by(name: link_params[:name])
-      link.save
+      @link = Myrecipeingredientlink.new(quantity: link_params[:quantity], unit: link_params[:unit])
+      @link.myrecipe = @myrecipe
+      @link.ingredient = Ingredient.find_or_initialize_by(name: link_params[:name])
+      if @link.save
+        redirect_to add_ingredients_path
+      else
+        render :add_ingredients
+      end
     end
   end
 
@@ -39,10 +40,10 @@ class MyrecipesController < ApplicationController
     params = update_link_params
     ingredient = Ingredient.find_by(name: params[:name])
     if ingredient == nil
-      return @error = 'sorry, this ingredient does not exist in our system yet. if you find a recipe that uses it, please let us know.'
+      ingredient = Ingredient.create(name: params[:name])
     end
     if params[:quantity].to_s == ''
-      return @error = "quantity must be present. You can enter 'to taste' for seasoning."
+      return @error = "Quantity must be present. You can enter 'to taste' for seasoning."
     end
     @link = Myrecipeingredientlink.find_by(id: params[:link_id])
     if @link.update(ingredient: ingredient, quantity: params[:quantity], unit: params[:unit])
@@ -58,9 +59,9 @@ class MyrecipesController < ApplicationController
     redirect_to add_ingredients_path
   end
 
-  def index
-    @myrecipes = Myrecipe.order(title: :asc)
-  end
+  # def index
+  #   @myrecipes = Myrecipe.order(title: :asc)
+  # end
 
   def edit
   end
@@ -97,10 +98,10 @@ class MyrecipesController < ApplicationController
   def hide
     if @myrecipe.is_hidden
       @myrecipe.update(is_hidden: false)
-      redirect_to myrecipes_path, alert: 'this recipe is available to public app users now.'
+      redirect_to @myrecipe, alert: 'this recipe is available to public app users now.'
     else
       @myrecipe.update(is_hidden: true)
-      redirect_to myrecipes_path, alert: 'This recipe is hidden now.'
+      redirect_to @myrecipe, alert: 'This recipe is hidden now.'
     end
   end
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_08_20_192053) do
+ActiveRecord::Schema.define(version: 2019_08_20_215629) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -200,6 +200,15 @@ ActiveRecord::Schema.define(version: 2019_08_20_192053) do
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
+  create_table "usertaggings", force: :cascade do |t|
+    t.bigint "user_id"
+    t.bigint "tag_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["tag_id"], name: "index_usertaggings_on_tag_id"
+    t.index ["user_id"], name: "index_usertaggings_on_user_id"
+  end
+
   add_foreign_key "completions", "myrecipes"
   add_foreign_key "completions", "users"
   add_foreign_key "dietaryrestrictionlinks", "dietaryrestrictions"
@@ -224,4 +233,6 @@ ActiveRecord::Schema.define(version: 2019_08_20_192053) do
   add_foreign_key "taggings", "tags"
   add_foreign_key "userdietaryrestrictionlinks", "dietaryrestrictions"
   add_foreign_key "userdietaryrestrictionlinks", "users"
+  add_foreign_key "usertaggings", "tags"
+  add_foreign_key "usertaggings", "users"
 end

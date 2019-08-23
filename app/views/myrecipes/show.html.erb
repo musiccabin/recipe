@@ -1,29 +1,37 @@
-<h1><%= @myrecipe.title%></h1>
+<% content_for :body_class, 'myrecipe' %>
+
+<div class='welcome-bg-image'></div>
+
+<div class='recipe-header'>
+
+<div class='page-title-and-heart'>
+<h1 class='page-title'><%= @myrecipe.title%></h1>
+<% if current_user&.favourite_recipes&.include? @myrecipe%>
+<i class="fas fa-heart" style='padding: .5em'></i>
+<%= link_to "Forget it!", myrecipe_favourite_path(@myrecipe), method: :delete%>
+<%else%>
+<i class="far fa-heart" style='padding: .5em'></i>
+<%= link_to 'Love it!', myrecipe_favourites_path(@myrecipe), method: :post%>
+<%end%>
+</div>
 <p>Cooking Time: <%=@cooking_time%></p>
-<%= image_tag @myrecipe.avatar.url(:medium) %>
+</div>
+
+<div class='recipe-body'>
+
+<div class='image-and-reviews'>
+<%= image_tag @myrecipe.avatar.url(:medium), class: 'image-on-myrecipe' %>
 <div>
 <% if @myrecipe.tags.any? %>
 <% @myrecipe.tags.each do |tag|%>
 <%=link_to(
         tag.name,
-        myrecipes_path(tag: tag.name),
+        root_path(tag: tag.name),
         class: "badge badge-pill badge"
     )%>
 <%end%>
 <%end%>
 </div>
-
-<% if current_user&.favourite_recipes&.include? @myrecipe%>
-<%= link_to 'Remove from Favs', myrecipe_favourite_path(@myrecipe), method: :delete%>
-<%else%>
-<%= link_to 'Add to Favs', myrecipe_favourites_path(@myrecipe), method: :post%>
-<%end%>
-
-<% if current_user&.completed_recipes&.include? @myrecipe%>
-<%= link_to 'Remove from Completions', myrecipe_completion_path(@myrecipe), method: :delete%>
-<%else%>
-<%= link_to 'Completed!', myrecipe_completions_path(@myrecipe), method: :post%>
-<%end%>
 
 <%#if current_user%>
 <%#=link_to 'Add to Meal Plan', mealplan_path, method: :post%>
@@ -41,22 +49,7 @@
 
 <%end%>
 
-
-<button type="button" id='ingredients'>Ingredients</button>
-<ul id="ingredients-content">
-    <%@links.each do |l|%>
-    <li><%=l.ingredient.name%> <%=l.quantity%> <%=l.unit%></li>
-    <%end%>
-</ul>
-
-<button type="button" id='instructions'>Instructions</button>
-<ul id="instructions-content">
-<%@instructions.each do |step|%>
-<li><%=step%></li>
-<%end%>
-</ul>
-
-<button type="button" id='reviews'>Reviews</button>
+<button type="button" id='reviews' class='button'>Reviews</button>
 <div id="reviews-content">
     <% @new = []%>
     <% @reviews.each do |review_each| %>
@@ -85,6 +78,59 @@
 </div>
 <% end %>
 </div> 
+
+<%= form_with(model: [@myrecipe, @review], local: true) do |f| %>
+
+<% if @myrecipe.errors.any? %>
+<ul>
+    <% @myrecipe.errors.full_messages.each do |msg| %>
+    <li> <%= msg %></li>
+    <% end %>
+</ul>
+<% end %>
+<div class='form-group'>
+    <%= f.text_area(:body, cols: 50, rows: 5, placeholder: "Share your experience of making this recipe...", class: "form-control") %>
+</div>
+<%= f.submit class: 'button'%>
+
+<ul class='review-list'>
+    <% @reviews.each do |r| %>
+    <li>
+        <p><%= r.body %></p>
+        <small><%= link_to "Edit", myrecipe_review_path(@myrecipe)%></small>       
+        <small><%= link_to "Delete", myrecipe_review_path(@myrecipe, r), method: :delete, data: {confirm: "Delete Review?"}%></small>
+        <small>Reviewed by <%=r.user%> <%= time_ago_in_words(r.created_at)%></small>
+    </li>
+    <% end %>
+</ul>
+
+<% end %>
+</div>
+
+<div class='ingredients-and-instructions'>
+    <button type="button" id='ingredients' class='button'>Ingredients</button>
+    <ul id="ingredients-content">
+        <%@links.each do |l|%>
+        <li><%=l.ingredient.name%>: <%=l.quantity%> <%=l.unit%></li>
+        <%end%>
+    </ul>
+    
+    <button type="button" id='instructions' class='button'>Instructions</button>
+    <div class='instructions-content' id="instructions-content">
+    <ul>
+    <%@instructions.each do |step|%>
+    <li><%=step%></li>
+    <%end%>
+    </ul>
+    <% if current_user&.completed_recipes&.include? @myrecipe%>
+    <%= link_to 'Remove from Completions', myrecipe_completion_path(@myrecipe), method: :delete%>
+    <%else%>
+    <%= link_to 'Completed!', myrecipe_completions_path(@myrecipe), method: :post%>
+    <%end%>
+    </div>
+</div>
+
+</div>
 
 <script type="text/javascript">
     document.getElementById("ingredients").onclick = function () {
@@ -120,30 +166,3 @@
         }
     }
 </script>
-
-<%= form_with(model: [@myrecipe, @review], local: true) do |f| %>
-
-<% if @myrecipe.errors.any? %>
-<ul>
-    <% @myrecipe.errors.full_messages.each do |msg| %>
-    <li> <%= msg %></li>
-    <% end %>
-</ul>
-<% end %>
-<div class='form-group'>
-    <%= f.text_area(:body, cols: 50, rows: 5, placeholder: "Share your experience of making this recipe...", class: "form-control") %>
-</div>
-<%= f.submit %>
-
-<ul class='review-list'>
-    <% @reviews.each do |r| %>
-    <li>
-        <p><%= r.body %></p>
-        <small><%= link_to "Edit", myrecipe_review_path(@myrecipe)%></small>       
-        <small><%= link_to "Delete", myrecipe_answer_path(@question, a), method: :delete, data: {confirm: "Delete Answer?"}%></small>
-        <small>Reviewed <%= time_ago_in_words(a.created_at)%></small>
-    </li>
-    <% end %>
-</ul>
-
-<% end %>

@@ -1,11 +1,25 @@
-<h1>My Favourite Recipes</h1>
+<% content_for :body_class, 'welcome' %>
+
+<div class='welcome-bg-image'></div>
+
+<h1 class='page-title'>My Favourite Recipes</h1>
 <%if @favourites%>
+<div class='recipes-on-index'>
 <%@favourites.each do |f|%>
-<%recipe = Myrecipe.find(f.id)%>
-<div>
-    <%=link_to f.title, recipe%>
-</div>
+    <div class='individual-recipe'>
+    <%recipe = Myrecipe.find(f.id)%>
+    <a href='/myrecipes/<%=recipe.id%>' class='recipe-image-on-index'><%= image_tag recipe.avatar.url(:medium)%></a>
+    <h3 class='recipe-title-on-index'><%=recipe.title%></h3>
+    <%hour = (recipe.cooking_time_in_min / 60).floor%>
+    <%min = (recipe.cooking_time_in_min % 60)%>
+    <%if hour == 0%>
+    <small>ready in <%=min%> min</small>
+    <%else%>
+    <small>ready in <%=hour%> hr <%=min%> min</small>
+    <%end%>
+    </div>
 <%end%>
+</div>
 <%else%>
 <h5>No favourite recipes yet...</h5>
 <%end%>

@@ -1,6 +1,6 @@
 <% content_for :body_class, 'sign-in' %>
 
-<h1 class='page-title'>Sign In</h1>
+<h1 class='page-title'>Hey, you...</h1>
 
 <%= form_with url: session_path, local: true do |f| %>
 <div>
@@ -17,5 +17,5 @@
 <%= link_to "Sign Up", new_user_path, class: 'signup-link'%>
 <% end %>
 </p>
-<%= link_to "Oops, lost password?", password_reset_path%>
+<%= link_to "Oops, lost password?", forgot_password_path%>
 </div>

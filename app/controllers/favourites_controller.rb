@@ -15,7 +15,7 @@ class FavouritesController < ApplicationController
   def destroy
     @favourite = Favourite.find_by(myrecipe_id: current_user.favourite_recipes.find(@myrecipe.id))
     if @favourite.destroy
-      redirect_to @myrecipe, notice: 'this product has been removed from your favourites.'
+      redirect_to @myrecipe, notice: 'this recipe has been removed from your favourites.'
     else
       redirect_to @myrecipe, alert: @favourite.errors.full_messages.join(", ")
     end

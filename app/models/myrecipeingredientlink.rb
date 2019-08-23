@@ -3,6 +3,10 @@ class Myrecipeingredientlink < ApplicationRecord
   belongs_to :ingredient
 
   validates :quantity, presence: true
-  validates :myrecipe, uniqueness: true
-  validates :ingredient, uniqueness: true
+  validate :quantity_is_number
+
+  private
+  def quantity_is_number
+    self.errors.add(:quantity, 'should be numbers or fractions only.') unless self.quantity.include? '/^[A-Za-z]+$/'
+  end
 end

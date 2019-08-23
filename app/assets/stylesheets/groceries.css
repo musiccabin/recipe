@@ -2,26 +2,3 @@
 They will automatically be included in application.css.
 You can use Sass (SCSS) here: http://sass-lang.com/ */
 
-a:link {
-    color: #cc0000;
-    text-decoration: none;
-    cursor: grab;
-}
-
-a:visited {
-    color: white;
-    text-decoration: none;
-    cursor: grab;
-}
-
-a:hover {
-    color: red;
-    text-decoration: underline;
-    cursor: grab;
-}
-
-a:active {
-    color: red;
-    text-decoration: underline;
-    cursor: grabbing;
-}

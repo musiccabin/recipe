@@ -2,12 +2,24 @@
 
 <div class='welcome-bg-image'></div>
 
-<h1>Welcome to Happy Fridge!</h1>
+<h1 class='page-title'>Welcome to Happy Fridge!</h1>
 
 <%if current_user%>
 <%=link_to 'Add a leftover ingredient!', add_leftover_path%>
 <%end%>
 
+<div class='recipes-on-index'>
 <%@recipes.each do |r|%>
-<h3><%=link_to r.title, r%></h3>
+<div class='individual-recipe'>
+<h3 class='recipe-title-on-index'><%=r.title%></h3>
+<%hour = (r.cooking_time_in_min / 60).floor%>
+<%min = (r.cooking_time_in_min % 60)%>
+<%if hour == 0%>
+<small>ready in <%=min%> min</small>
+<%else%>
+<small>ready in <%=hour%> hr <%=min%> min</small>
 <%end%>
+<a href='/myrecipes/<%=r.id%>' class='recipe-image-on-index'><%= image_tag r.avatar.url(:medium)%></a>
+</div>
+<%end%>
+</div>

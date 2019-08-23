@@ -1,25 +1,31 @@
-<h1>User preferences</h1>
+<% content_for :body_class, 'setting' %>
+
+<h1 class='page-title'>My Preferences</h1>
 
 <% if current_user.errors.any?%>
-<%current_user.errors.full_messages.each do |m|%>
-<p><%=m%></p>
-<%end%>
+<p style='text-align: center'><%=current_user.errors.full_messages.join('')%></p>
 <%end%>
 
-<h3>Select dietary restrictions</h3>
+<div class='section-on-preferences'>
+<!-- <h3 class='section-title-on-preferences'>Select dietary restrictions</h3> -->
 <%=form_with model: @dietaryrestriction, local: true do |f|%>
 <%= f.select :name, ['vegetarian', 'vegan', 'gluten free', 'dairy free', 'halal']%>
-<%=f.submit%>
+<%=f.submit class: 'button small'%>
 <%end%>
 
+<div class='restrictions-on-preferences'>
 <% if @restrictions %>
 <%@restrictions.each do |r|%>
-<p><%=r.name%> <%=link_to 'Delete', delete_restriction_path(r), method: :delete%></p>
+<small class='restriction-on-preferences'><%=r.name%> <%=link_to 'x', delete_restriction_path(r), method: :delete%></small>
 <%end%>
 <%end%>
+</div>
+</div>
 
+<div class='section-on-preferences'>
+<!-- <h3 class='section-title-on-preferences'>Select categories</h3> -->
 <%=form_with model: @user, local: true do |f|%>
-<div>
+<div class='tags-on-preferences'>
     <%=f.collection_check_boxes :tags, Tag.all, :id, :name do |b|%>
     <div class='tag-wrapper'>
         <%=b.check_box%>
@@ -27,11 +33,16 @@
     </div>
     <%end%>
 </div>
-<%=f.submit 'Save Preferences'%>
-<%end%>
-
+<div class='restrictions-on-preferences'>
 <%if current_user.tags%>
 <%current_user.tags.each do |t|%>
-<p><%=Tag.find(t).name%></p>
+<small class='restriction-on-preferences'><%=t.name%> <%=link_to 'x', delete_tag_path(t), method: :delete%></small>
 <%end%>
+<%end%>
+</div>
+</div>
+
+<div>
+<%=f.submit 'Save Preferences', class: 'button'%>
+</div>
 <%end%>
