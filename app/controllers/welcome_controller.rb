@@ -26,14 +26,13 @@ class WelcomeController < ApplicationController
     result_rstrn_tags = []
     #either filter by tag name in params
     if params[:tag]
-      # byebug
       tag = Tag.find_by(name: params[:tag])
       result_rstrn_tags += result_rstrn.select {|recipe| recipe.tags.include? tag}
     #or filter by user's tag selections
     elsif current_user.tags.any?
       current_user.tags.each do |tag|
         result_rstrn_tags += result_rstrn.select{|recipe| recipe.tags.include?(tag)}
-    end
+      end
     else
       result_rstrn_tags = result_rstrn
     end
@@ -77,10 +76,12 @@ class WelcomeController < ApplicationController
     sorted_results = []
     result_rstrn_tags_exp_all.each do |r|
       exp_leftovers.each do |leftover|
-        ingredient = leftover[:lo].ingredient
-        quantity_leftover = leftover[:lo].quantity
+        l = leftover[:lo]
+        ingredient = l.ingredient
         next if r.myrecipeingredientlinks.find_by(ingredient: ingredient) == nil
-        quantity_recipe = r.myrecipeingredientlinks.find_by(ingredient: ingredient).quantity
+        #compare quantities
+        quantity_leftover = l.quantity
+        quantity_recipe = proper_recipe_quantity(ingredient, r, l)
         if above_50_percent(quantity_recipe, quantity_leftover)
           # byebug
           stats[r] += 1
@@ -121,24 +122,26 @@ class WelcomeController < ApplicationController
     stats_50.default = 0
     result_rstrn_tags_non_exp.each do |r|
       non_exp_leftovers.each do |leftover|
-        # byebug
         ingredient = leftover.ingredient
-        quantity_leftover = leftover.quantity
         next if r.myrecipeingredientlinks.find_by(ingredient: ingredient) == nil
-        quantity_recipe = r.myrecipeingredientlinks.find_by(ingredient: ingredient).quantity
-        # if above_50_percent(quantity_recipe, quantity_leftover)
-        #   stats_50[r] += 1
-        #   break if stats_50[r] >= 3
-        #   # if stats_50[r] >= 3
-        #   #   sorted_results << r
-        #   #   break
-        #   # end
-        # else
-        #   stats_reg[r] += 1
-        #   break if stats_reg[r] >= 5
-        # end
+        #compare quantities
+        quantity_leftover = leftover.quantity
+        quantity_recipe = proper_recipe_quantity(ingredient, r, leftover)
+        # byebug
+        if above_50_percent(quantity_recipe, quantity_leftover)
+          stats_50[r] += 1
+          break if stats_50[r] >= 3
+          # if stats_50[r] >= 3
+          #   sorted_results << r
+          #   break
+          # end
+        else
+          stats_reg[r] += 1
+          break if stats_reg[r] >= 5
+        end
       end
     end
+    stats_reg = stats_reg.delete_if {|recipe| stats_50.include? recipe}
     sorted_results = push_recipe(stats_50, 3, sorted_results)
     sorted_results = push_recipe(stats_reg, 5, sorted_results)
     sorted_results = push_recipe(stats_50, 2, sorted_results)
@@ -177,6 +180,30 @@ class WelcomeController < ApplicationController
     #   sorted_results += selected.keys
     # end
     # sorted_results
+  end
+
+  def proper_recipe_quantity(ingredient, recipe, leftover)
+    link = recipe.myrecipeingredientlinks.find_by(ingredient: ingredient)
+    unit_recipe = link.unit
+    unit_leftover = leftover.unit
+    if unit_recipe == unit_leftover
+      return link.quantity
+    else
+      return convert_quantity(ingredient, link, recipe, leftover)
+    end
+  end
+
+  def convert_quantity(ingredient, link, recipe, leftover)
+    output = ''
+    case ingredient.name
+    when 'cucumber'
+      if link.unit == 'cup'
+        output = link.quantity / 2
+      end
+    else
+      output = ''
+    end
+    output
   end
 
   def push_recipe(stats,val,sorted_results)

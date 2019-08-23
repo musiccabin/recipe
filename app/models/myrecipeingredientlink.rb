@@ -7,6 +7,6 @@ class Myrecipeingredientlink < ApplicationRecord
 
   private
   def quantity_is_number
-    self.errors.add(:quantity, 'should be numbers or fractions only.') unless self.quantity.include? '/^[A-Za-z]+$/'
+    self.errors.add(:quantity, 'should be numbers or fractions only.') if self.quantity.include? '/^[A-Za-z]+$/'
   end
 end
