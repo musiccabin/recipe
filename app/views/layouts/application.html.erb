@@ -9,15 +9,17 @@
     <%= javascript_include_tag 'application' %>
     <link href="https://fonts.googleapis.com/css?family=Raleway&display=swap" rel="stylesheet">
     <script src="https://kit.fontawesome.com/ef152ad196.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
   </head>
 
   <body class="<%= content_for :body_class %>">
   <header>
   <nav>
 
-<%= link_to 'Home', root_path, class: 'menu-item'%>|
+<%= link_to 'Home', root_path, class: 'menu-item'%>| 
   <% if user_signed_in? %>
   <!-- Hello <%= current_user.first_name%> -->
+  <%=link_to 'Meal Plan', user_mealplan_path(current_user, current_user.mealplan), class: 'menu-item'%> |
   <% if current_user.is_admin%>
   <div class='admin-menu'>
     <%= link_to 'New Recipe!', new_myrecipe_path, class: 'menu-item'%>
@@ -35,9 +37,8 @@
   <!-- <%= link_to 'Lunch/Dinner/Desserts', new_user_path %> -->
   </div>
 
-  
-
 <div class='account-preferences'>
+  <%= link_to 'Groceries', groceries_path, class: 'menu-item' %>|
   <%= link_to 'Favourites', favourites_path, class: 'menu-item' %>|
   <%= link_to 'Dishes I made!', completions_path, class: 'menu-item' %>
 </div> 

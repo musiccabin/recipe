@@ -1,2 +1,68 @@
-<h1>Mealplans#show</h1>
-<p>Find me in app/views/mealplans/show.html.erb</p>
+<% content_for :body_class, 'grocery-page' %>
+
+<div class='mealplan-page-content'>
+<h1 class='page-title'>My Meals</h1>
+
+<p class='error'>You can make a meal plan by adding a few recipes.</p>
+
+<%if @links%>
+<%@links.each do |link|%>
+<div class='individual-recipe'>
+    <div class='recipe-title-and-utensils'>
+    <h3 class='recipe-title-on-index'><%=link.myrecipe.title%></h3>
+    <div class='utensils-and-form'>
+        <i class="fas fa-utensils"></i>
+        <%if current_user.mealplan.myrecipemealplanlinks.find_by(myrecipe: link.myrecipe)%>
+        <%=form_with url: remove_from_mealplan_path, local: true do |f|%>
+            <%= f.hidden_field :myrecipe_id, value: link.myrecipe.id %>
+            <%= f.submit 'forget it!', class: 'button small'%>
+        <%end%>
+        <%else%>
+        <%=form_with url: add_to_mealplan_path, local: true do |f|%>
+            <%= f.hidden_field :myrecipe_id, value: link.myrecipe.id %>
+            <%= f.submit 'cook it!', class: 'button small'%>
+        <%end%>
+        <%end%>
+    </div>
+    </div>
+    <%hour = (link.myrecipe.cooking_time_in_min / 60).floor%>
+    <%min = (link.myrecipe.cooking_time_in_min % 60)%>
+    <%if hour == 0%>
+    <small>ready in <%=min%> min</small>
+    <%else%>
+    <small>ready in <%=hour%> hr <%=min%> min</small>
+    <%end%>
+    <a href='/myrecipes/<%=link.myrecipe.id%>' class='recipe-image-on-index'><%= image_tag link.myrecipe.avatar.url(:medium)%></a>
+</div>
+<%end%>
+<%else%>
+<h3>No recipes here. Make a plan!</h3>
+<%end%>
+</div>
+
+<script type="text/javascript">
+document.querySelector('nav').querySelectorAll('a').forEach(function(e) {
+        e.style.color = 'black';
+        })
+        
+        $(document).ready(function() {
+            $('form').css("display", "none");
+            $(".fa-utensils").hover(function() {
+                $('form').css("display", "block");
+            });
+            $("form").mouseleave(function() {
+                $('form').css("display", "none");
+            });
+
+            $('.button').css("color", "black");
+            $('.button').css("border", "1px solid black");
+            $(".button").hover(function() {
+                $(".button").css("color", "white");
+                $(".button").css("border", "1px solid white");
+            });
+            $(".button").mouseleave(function() {
+                $(".button").css("color", "black");
+                $(".button").css("border", "1px solid black");
+            });
+        })
+</script>

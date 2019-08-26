@@ -68,7 +68,7 @@ class MyrecipesController < ApplicationController
 
   def destroy
     @myrecipe.destroy
-    redirect_to myrecipes_path, notice: 'this recipe is deleted.'
+    redirect_to root_path, notice: 'this recipe is deleted.'
   end
 
   def show
@@ -76,9 +76,6 @@ class MyrecipesController < ApplicationController
     min = (@myrecipe.cooking_time_in_min % 60)
     @cooking_time = "#{hour} hr #{min} min"
     @links = @myrecipe.myrecipeingredientlinks
-    if @links == nil
-      return render :add_ingredients, alert: 'a recipe must have ingredients.'
-    end
     @instructions = []
     @myrecipe.instructions.split(/[\r\n]+/).each do |step|
       (@instructions << step) unless step == ''
@@ -116,7 +113,7 @@ class MyrecipesController < ApplicationController
   end
 
   def recipe_params
-    params.require(:myrecipe).permit(:title, :cooking_time_in_string, :avatar, :videoURL, :instructions, :dietaryrestriction_names, {dietaryrestriction_ids: []}, :tag_names, {tag_ids: []})
+    params.require(:myrecipe).permit(:title, :cooking_time, :avatar, :videoURL, :instructions, :dietaryrestriction_names, {dietaryrestriction_ids: []}, :tag_names, {tag_ids: []})
   end
 
   def link_params

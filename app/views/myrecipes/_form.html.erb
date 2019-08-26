@@ -1,11 +1,7 @@
 <div>
 
 <% if @myrecipe.errors.any? %>
-<ul>
-    <% @myrecipe.errors.full_messages.each do |msg| %>
-    <li> <%= msg %></li>
-    <% end %>
-</ul>
+    <p class='error'><%= @myrecipe.errors.full_messages.join('. ')%></p>
 <% end %>
 
 <%= form_with model: @myrecipe, :html => { :multipart => true }, class: 'recipe-form', local: true do |f| %>
@@ -15,8 +11,8 @@
 </div>
 <div class='form-element'>
     <p class='recipe-form-label'><%= f.label :cooking_time %></p>
-    <small style='margin-bottom: 1em; text-align: center'>'1h20m' (one hour 20 minutes). '50m' (50 minutes). Round to the nearest 5 minutes.</small>
-    <p><%= f.text_field :cooking_time_in_string, class: 'recipe-form-input' %></p>
+    <small style='margin: 1em; text-align: center'>'1h20m' (one hour 20 minutes). '50m' (50 minutes). Round to the nearest 5 minutes.</small>
+    <p><%= f.text_field :cooking_time, class: 'recipe-form-input' %></p>
 </div>
 <div class='form-element'>
     <p class='recipe-form-label'>Upload an image</p>

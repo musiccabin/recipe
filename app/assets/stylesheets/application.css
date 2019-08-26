@@ -50,6 +50,9 @@ main {
   background-size: cover;
   flex: 1;
   min-height: 100%;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center;
 }
 
 .sign-in {
@@ -340,6 +343,23 @@ main {
   text-align: center;
 }
 
+.recipe-title-and-utensils {
+  display: flex; flex-direction: row;
+  align-items: center;
+}
+
+.fa-utensils {
+  padding: 1em;
+  -webkit-transition-duration: 0.4s;
+  /* Safari */
+  transition-duration: 0.4s;
+}
+
+.utensils-and-form {
+  display: flex; flex-direction: row;
+  align-items: center;
+}
+
 .recipe-image-on-index {
   /* min-height: 50vh; */
   padding: 1em;
@@ -388,6 +408,36 @@ ul {
   border-radius: 75px;
   background: #141414;
   box-shadow: 0 0 15px 10px #141414;
+}
+
+.tags-on-myrecipe {
+  padding: 1em;
+  display: flex; flex-direction: row;
+  justify-content: center;
+}
+
+.tag-on-myrecipe {
+  padding: .5em;
+}
+
+.admin-actions-on-myrecipe {
+  padding: 1em;
+  display: flex; flex-direction: row;
+  justify-content: center;
+}
+
+.admin-action-on-myrecipe {
+  padding: .5em;
+}
+
+.review-form-text-area {
+  width: 40em;
+  height: 20em;
+  font-size: 0.7em;
+  padding: 1em;
+  /* text-align: center; */
+  /* border: none;
+  background: rbga(255,255,255,0.5); */
 }
 
 .page-title-and-heart {
@@ -448,7 +498,57 @@ ul {
 
 .tag-wrapper {
   padding: .25em;
+  display: flex; flex-direction: row;
+  align-items: center;
 }
+
+.input-helper {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 5px;
+}
+
+.input-helper::before {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 5px;
+  content: '';
+  display: block;
+  position: absolute;
+}
+
+.input-helper--checkbox {
+  padding-left: 40px;
+}
+
+.input-helper--checkbox::before {
+  padding-left: 40px;
+  top: 2px;
+  left: 0;
+  width: 20px;
+  height: 30px;
+  border: 1px solid white;
+}
+
+input[type="checkbox"] {
+  display: none;
+}
+
+input[type="checkbox"]::checked {
+  background: white;
+}
+
+label::before {
+  background: white;
+}
+
+/* .checkbox-on-preferences {
+  font-size: 1em;
+}
+
+.checkbox-on-preferences.checked {
+  background: red;
+} */
 
 .restrictions-on-preferences {
   display: flex; flex-direction: row;
@@ -516,6 +616,24 @@ ul {
 .align-on-add-ingredients {
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
+}
+
+.mealplan-page-content {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+}
+
+.grocery-item {
+  padding: 1em;
+  font-size: 1em;
+  background: transparent;
+  cursor: grab;
+}
+
+.completed-grocery {
+  padding: 1em;
+  text-decoration: line-through;
+  cursor: grab;
 }
 
 a.drumstick:link {
@@ -600,13 +718,36 @@ nav {
     animation-delay: 2s;
 }
 
-
 .menu-item {
+  padding: .5em;
+}
+
+.recipe-preferences {
+  padding: .5em;
+}
+
+.account-preferences {
   padding: .5em;
 }
 
 small {
   font-size: .7em;
+}
+
+.drumstick {
+  padding: .5em;
+}
+
+select {
+  font-size: 1em;
+}
+
+option {
+  background: transparent;
+}
+
+option:hover {
+  background:#FF0000;
 }
 
 

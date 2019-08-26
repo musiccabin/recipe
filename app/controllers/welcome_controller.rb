@@ -1,4 +1,7 @@
 class WelcomeController < ApplicationController
+
+  before_action :authenticate_user!, only: [:add_to_mealplan, :remove_from_mealplan]
+
   def index
     if current_user
       # if current_user.is_admin
@@ -10,6 +13,19 @@ class WelcomeController < ApplicationController
       @recipes = Myrecipe.where(is_hidden: false).order(created_at: :desc)
       #grab "ranodm" recipes and display images
     end
+  end
+
+  def add_to_mealplan
+    link = Myrecipemealplanlink.create(myrecipe: Myrecipe.find_by(id: params[:myrecipe_id]), mealplan: current_user.mealplan)
+    add_groceries_from_mealplan
+    redirect_to root_path, notice: "Recipe is added to your mealplan! Add any dishes you want to cook for the next few days to stay organized."
+  end
+
+  def remove_from_mealplan
+    link = current_user.mealplan.myrecipemealplanlinks.find_by(myrecipe: Myrecipe.find_by(id: params[:myrecipe_id]))
+    link.destroy
+    add_groceries_from_mealplan
+    redirect_to root_path, notice: "Alright, removed!"
   end
 
   private
@@ -90,12 +106,15 @@ class WelcomeController < ApplicationController
           #   sorted_results << r
           #   break
           # end
+        else
+          stats[r] = 0
         end
       end
     end
     sorted_results = push_recipe(stats, 3, sorted_results)
     sorted_results = push_recipe(stats, 2, sorted_results)
     sorted_results = push_recipe(stats, 1, sorted_results)
+    sorted_results = push_recipe(stats, 0, sorted_results)
     # if stats.has_value?(2)
     #   selected = stats.select {|k,v| v == 2}
     #   sorted_results += selected.keys
@@ -187,7 +206,7 @@ class WelcomeController < ApplicationController
     unit_recipe = link.unit
     unit_leftover = leftover.unit
     if unit_recipe == unit_leftover
-      return link.quantity
+      return floatify(link.quantity)
     else
       return convert_quantity(ingredient, link, recipe, leftover)
     end
@@ -198,7 +217,13 @@ class WelcomeController < ApplicationController
     case ingredient.name
     when 'cucumber'
       if link.unit == 'cup'
-        output = link.quantity / 2
+        # quantity = link.quantity
+        output = floatify(link.quantity) / 2
+      end
+    when 'strawberry'
+      if link.unit == 'cup'
+        # quantity = link.quantity
+        output = floatify(link.quantity) * 8
       end
     else
       output = ''
@@ -232,26 +257,182 @@ class WelcomeController < ApplicationController
   def above_50_percent(quantity_recipe, quantity_leftover)
     if quantity_leftover.to_s == ''
       return true
-    elsif floatify(quantity_recipe) >= 0.5 * floatify(quantity_leftover)
+    # byebug
+    elsif quantity_recipe >= 0.5 * floatify(quantity_leftover)
       return true
     else
       return false
     end
   end
 
-  def floatify(quantity)
-    output = 0
-    quantity = quantity.lstrip.reverse.lstrip.reverse
-    if quantity.include? ' '
-      output += quantity.split(" ")[0].to_i
-      to_process = quantity.split(" ")[1]
-    else
-      to_process = quantity
+  def add_groceries_from_mealplan
+    links = []
+    added_up = []
+    current_user.mealplan.myrecipemealplanlinks.each do |link|
+      links += link.myrecipe.myrecipeingredientlinks.to_a
     end
-    if to_process.include? '/'
-      output += (to_process.split("/")[0].to_i / to_process.split("/")[1].to_i)
+    links.each do |link|
+      next if link.ingredient.name == 'water'
+      if added_up == []
+        stats = {}
+        stats[:name] = link.ingredient.name
+        stats[:unit] = appropriate_unit(link.ingredient, link.unit)
+        stats[:quantity] = calculated_quantity(link)
+        added_up << stats
+      else
+        ingredient_exists = false
+        added_up.each do |stats|
+          if stats[:name] == link.ingredient.name
+            stats[:quantity] += calculated_quantity(link) unless is_seasoning?(link.ingredient.name)
+            ingredient_exists = true
+            break
+          end
+        end
+        if ingredient_exists == false
+          stats = {}
+          stats[:name] = link.ingredient.name
+          stats[:unit] = appropriate_unit(link.ingredient, link.unit)
+          stats[:quantity] = calculated_quantity(link)
+          added_up << stats
+        end
+      end
+    end
+
+    # subtract_leftovers = []
+    # added_up.each do |stats|
+    #     if current_user&.leftovers&.find_by(ingredient: Ingredient.find_by(name: stats[:name]))
+    #         stats[]
+    #     else
+    #         output_quantity = quantity
+    #     end
+    # end
+
+    # byebug
+    added_up.each do |stats|
+      if stats[:quantity] != nil
+        if stats[:unit] == 'cup' && stats[:quantity] < 0.2
+          stats[:unit] = 'tbsp'
+          stats[:quantity] /= 0.0625
+          if stats[:quantity] < 1
+            stats[:unit] = 'tsp'
+            stats[:quantity] /= 0.333
+          end
+        end
+      end
+
+      stats[:quantity] = stringify_quantity(stats[:quantity])
+        
+      current_user.groceries.destroy_all
+      # byebug
+      Grocery.create(name: stats[:name], quantity: stats[:quantity], unit: stats[:unit], user: current_user, is_completed: false)
+    end
+  end
+
+  def calculated_quantity(link)
+    output = nil
+    if link.unit == appropriate_unit(link.ingredient, link.unit)
+        output = floatify(link.quantity)
+    elsif link.unit == 'cup'
+      case link.ingredient.name
+      when 'green bell pepper'
+        output = floatify(link.quantity) / 1.25
+      when 'red bell pepper'
+        output = floatify(link.quantity) / 1.25
+      when 'yellow bell pepper'
+        output = floatify(link.quantity) / 1.25
+      when 'green onions'
+        output = floatify(link.quantity) * 9
+      when 'strawberry'
+        output = floatify(link.quantity) * 8
+      when 'cucumber'
+        output = floatify(link.quantity) / 2
+      when 'avocado'
+        output = floatify(link.quantity) / 2
+      when 'red onion'
+        output = floatify(link.quantity) * 3
+      else
+        output = floatify(link.quantity)
+      end
+    elsif link.unit == 'tbsp'
+      output = floatify(link.quantity) * 0.0625
+    elsif link.unit == 'tsp'
+      output = floatify(link.quantity) * 0.0625 * 0.333
+    end
+    output = nil if output == 0
+    output
+  end
+
+  def appropriate_unit(ingredient, unit)
+    output = nil
+    
+    case ingredient.name
+    when 'corn'
+        output = 'ear'
+    when 'bacon'
+        output = 'strip'
+    when 'chicken bouillon'
+        output = 'cube'
+    when 'linguine'
+        output = 'pkg'
+    when 'garlic'
+        output = 'clove'
     else
-      output += to_process.to_f
+        output = nil
+    end
+
+    if is_produce?(ingredient.name) || is_seasoning?(ingredient.name)
+        output ||= ''
+    else
+        output ||= 'cup'
+    end
+
+    output
+end
+
+def stringify_quantity(float)
+    output = ''
+    # byebug
+    if float != nil
+      if float.floor == float
+        output += float.floor.to_s
+      else
+        num = float - float.floor
+        if float.floor == 0
+          case true
+          when num >= (0.875)
+            output += float.ceil.to_s
+          when num >= (0.7)
+            output += "3/4"
+          when num >= (0.6)
+            output += "2/3"
+          when num >= (0.4)
+            output += "1/2"
+          when num >= (0.29)
+            output += "1/3"
+          when num >= (0.2)
+            output += "1/4"
+          else
+            output += 'what the heck?!'
+          end
+        else
+          case true
+          when num >= (0.875)
+            output += float.ceil.to_s
+          when num >= (0.7)
+            output += "#{float.floor.to_s} 3/4"
+          when num >= (0.6)
+            output += "#{float.floor.to_s} 2/3"
+          when num >= (0.4)
+            output += "#{float.floor.to_s} 1/2"
+          when num >= (0.29)
+            output += "#{float.floor.to_s} 1/3"
+          when num >= (0.125)
+            output += "#{float.floor.to_s} 1/4"
+          else
+            output += 'what the heck?!'
+          end
+        end
+      end
     end
     output
   end

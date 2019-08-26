@@ -23,13 +23,15 @@
 <%= image_tag @myrecipe.avatar.url(:medium), class: 'image-on-myrecipe' %>
 <div>
 <% if @myrecipe.tags.any? %>
+<div class='tags-on-myrecipe'>
 <% @myrecipe.tags.each do |tag|%>
 <%=link_to(
         tag.name,
         root_path(tag: tag.name),
-        class: "badge badge-pill badge"
+        class: "tag-on-myrecipe"
     )%>
 <%end%>
+</div>
 <%end%>
 </div>
 
@@ -37,17 +39,19 @@
 <%#=link_to 'Add to Meal Plan', mealplan_path, method: :post%>
 <%#end%>
 
+<div class='admin-actions-on-myrecipe'>
 <% if can?(:crud, @myrecipe) %>
-<%= link_to 'Edit', edit_myrecipe_path(@myrecipe)%>
-<%= link_to 'Delete', myrecipe_path(@myrecipe), method: :delete, data: {confirm: "Delete?"}%>
+<%= link_to 'Edit', edit_myrecipe_path(@myrecipe), class: 'admin-action-on-myrecipe'%>
+<%= link_to 'Delete', myrecipe_path(@myrecipe), method: :delete, data: {confirm: "Delete?"}, class: 'admin-action-on-myrecipe'%>
 
 <% if @myrecipe.is_hidden%>
-<%= link_to 'Make this recipe public', hide_recipe_path, method: :patch%>
+<%= link_to 'Make this recipe public', hide_recipe_path, method: :patch, class: 'admin-action-on-myrecipe'%>
 <% else%>
-<%= link_to 'Hide this recipe', hide_recipe_path, method: :patch%>
+<%= link_to 'Hide this recipe', hide_recipe_path, method: :patch, class: 'admin-action-on-myrecipe'%>
 <%end%>
 
 <%end%>
+</div>
 
 <button type="button" id='reviews' class='button'>Reviews</button>
 <div id="reviews-content">
@@ -89,7 +93,7 @@
 </ul>
 <% end %>
 <div class='form-group'>
-    <%= f.text_area(:body, cols: 50, rows: 5, placeholder: "Share your experience of making this recipe...", class: "form-control") %>
+    <%= f.text_area(:body, cols: 50, rows: 5, placeholder: "Share your experience of making this recipe...", class: "review-form-text-area") %>
 </div>
 <%= f.submit class: 'button'%>
 

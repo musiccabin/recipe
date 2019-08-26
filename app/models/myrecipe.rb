@@ -10,11 +10,14 @@ class Myrecipe < ApplicationRecord
     has_many :dietaryrestrictions, through: :dietaryrestrictionlinks
     has_many :taggings, dependent: :destroy
     has_many :tags, through: :taggings
+    has_many :myrecipemealplanlinks, dependent: :destroy
+    has_many :mealplans, through: :myrecipemealplanlinks
 
     has_attached_file :avatar, styles: {custom: "500x500#", medium: "700x700#", thumb: "500x500#" }, default_url: "/images/:style/missing.png"
     validates_attachment_content_type :avatar, content_type: /\Aimage\/.*\z/
 
     validates :title, presence: true, uniqueness: true
+    validates :cooking_time, presence: true
     validate :accepted_cooking_time
     validate :is_valid_URL
     validates :instructions, presence: true
@@ -45,7 +48,7 @@ class Myrecipe < ApplicationRecord
 
     private
     def convert_cooking_time
-        input = cooking_time_in_string.gsub(/\s+/, "")
+        input = cooking_time.gsub(/\s+/, "")
         output_in_min = 0
         if input.include? 'h'
             output_in_min += input[input.index('h') - 1].to_i * 60
@@ -60,16 +63,17 @@ class Myrecipe < ApplicationRecord
     end
     
     def accepted_cooking_time
+        return if self.cooking_time = ''
         error_text = 'please follow the format of 1h5m or 5m, rounding to the nearest 5-minute. For 27 minutes, enter 25m. Note: enter 1h instead of 60m.'
-        input = cooking_time_in_string.gsub(/\s+/, "")
+        input = cooking_time.gsub(/\s+/, "")
         if input.include? 'h'
-            self.errors.add(:cooking_time_in_string,error_text) unless input[0..(input.index('h') - 1)].to_i
+            self.errors.add(:cooking_time,error_text) unless input[0..(input.index('h') - 1)].to_i
             start_index = input.index('h') + 1
             end_index = input.length - 1
             input = input[start_index..end_index]
         end
         if input.include? 'm'
-            self.errors.add(:cooking_time_in_string,error_text) unless ((input.index('m') == 2 || input.index('m') == 1) && input[0..(input.index('m') - 1)].to_i && input[0..(input.index('m') - 1)].to_i <= 55)
+            self.errors.add(:cooking_time,error_text) unless ((input.index('m') == 2 || input.index('m') == 1) && input[0..(input.index('m') - 1)].to_i && input[0..(input.index('m') - 1)].to_i <= 55)
         end
     end
 

@@ -8,7 +8,6 @@
 <%@favourites.each do |f|%>
     <div class='individual-recipe'>
     <%recipe = Myrecipe.find(f.id)%>
-    <a href='/myrecipes/<%=recipe.id%>' class='recipe-image-on-index'><%= image_tag recipe.avatar.url(:medium)%></a>
     <h3 class='recipe-title-on-index'><%=recipe.title%></h3>
     <%hour = (recipe.cooking_time_in_min / 60).floor%>
     <%min = (recipe.cooking_time_in_min % 60)%>
@@ -17,6 +16,7 @@
     <%else%>
     <small>ready in <%=hour%> hr <%=min%> min</small>
     <%end%>
+    <a href='/myrecipes/<%=recipe.id%>' class='recipe-image-on-index'><%= image_tag recipe.avatar.url(:medium)%></a>
     </div>
 <%end%>
 </div>

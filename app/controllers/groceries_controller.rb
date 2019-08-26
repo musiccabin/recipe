@@ -15,6 +15,16 @@ class GroceriesController < ApplicationController
         redirect_to groceries_path
     end
 
+    def complete_grocery
+        grocery = Grocery.find_by(id: params[:id])
+        if grocery.is_completed
+          grocery.update(is_completed: false)
+        else
+          grocery.update(is_completed: true)
+        end
+        redirect_to groceries_path
+    end
+
     private
     def grocery_params
         params.require(:grocery).permit(:name, :quantity, :unit)

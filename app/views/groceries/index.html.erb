@@ -1,28 +1,55 @@
 <% content_for :body_class, 'grocery-page' %>
 <div>
-<h1>Grocery List</h1>
+<h1 class='page-title'>Grocery List</h1>
 
 <%=form_with model: @grocery, local: true do |f|%>
+<div class='add-leftover-form'>
+<div class='leftover-form-element'>
 <%=f.label :name%>
-<%=f.text_field :name%>
+<%=f.text_field :name, class: 'leftover-input'%>
+</div>
+<div class='leftover-form-element'>
 <%=f.label :quantity%>
-<%=f.text_field :quantity%>
+<%=f.text_field :quantity, class: 'leftover-input'%>
+</div>
+<div class='leftover-form-element'>
 <%=f.label :unit%>
-<%=f.text_field :unit%>
-<%=f.submit 'Add'%>
+<%=f.text_field :unit, class: 'leftover-input'%>
+</div>
+<div class='leftover-form-element'>
+<%=f.submit 'Add', class: 'button small'%>
+</div>
+</div>
 <%end%>
 
 <% @groceries.each do |g| %>
 <div>
-<input type="checkbox" name='item' value="<%=g.name%>" <%= g.is_completed ? "checked" : "" %>
-<label for="item"><%=g.name%> <%=g.quantity%> <%=g.unit%></label>
+    <%=form_with url: complete_grocery_path(g), local: true do |f|%>
+    <!-- <%= f.hidden_field :grocery_id %> -->
+    <% g_info = "#{g.name}"%>
+    <%if g.quantity != ''%>
+        <% g_info += "#{[': ', g.quantity, g.unit].compact.join(' ')}"%>
+        <%end%>
+    <%=f.submit g_info, class: 'grocery-item'%>
+    <%end%>
+<!-- <input type="checkbox" name='item' class='checkbox-on-preferences' value="<%=g.name%>" <%= g.is_completed ? "checked" : "" %> -->
+<!-- <label for="item"><%=g.name%> <%=g.quantity%> <%=g.unit%></label> -->
 </div>
 <% end %>
 
-<button type="button" id='completed-items-header'>Completed Items</button>
+<button type="button" id='completed-items-header' class='button'>Completed Items</button>
 <div id="completed-items" id="completed-items">
 <% @groceries_completed.each do |gc| %>
-<p><%=gc.name%> <%=gc.quantity%> <%=gc.unit%></p>
+    <div>
+        <%=form_with url: complete_grocery_path(gc), local: true do |f|%>
+        <% gc_info = "#{gc.name}"%>
+        <%if gc.quantity != ''%>
+        <% gc_info += "#{[': ', gc.quantity, gc.unit].compact.join(' ')}"%>
+        <%end%>
+        <%=f.submit gc_info, class: 'grocery-item'%>
+        <%end%>
+    </div>
+<!-- <p class='completed-grocery'><%=gc.name%> <%=gc.quantity%> <%=gc.unit%></p> -->
 <%end%>
 </div> 
 
@@ -39,6 +66,37 @@
         x.style.display = "none";
         }
     } 
+
+    document.querySelector('nav').querySelectorAll('a').forEach(function(e) {
+            e.style.color = 'black';
+    })
+
+    $(document).ready(function() {
+        $('.button').css("color", "black");
+        $('.button').css("border", "1px solid black");
+        $(".button").hover(function() {
+            $(event.target).css("color", "white");
+            $(event.target).css("border", "1px solid white");
+        });
+        $(".button").mouseleave(function(event) {
+            $(event.target).css("color", "black");
+            $(event.target).css("border", "1px solid black");
+        });
+
+        $(".grocery-item").hover(function(event) {
+            $(event.target).css("text-decoration", "line-through");
+        })
+        $(".grocery-item").mouseleave(function(event) {
+            $(event.target).css("text-decoration", "none");
+        })
+
+        $(".completed-grocery").hover(function(event) {
+            $(event.target).css("text-decoration", "none");
+        })
+        $(".completed-grocery").mouseleave(function(event) {
+            $(event.target).css("text-decoration", "line-through");
+        })
+    })
 </script>
 
 

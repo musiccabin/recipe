@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_08_20_215629) do
+ActiveRecord::Schema.define(version: 2019_08_26_210850) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -66,7 +66,7 @@ ActiveRecord::Schema.define(version: 2019_08_20_215629) do
 
   create_table "groceries", force: :cascade do |t|
     t.string "name"
-    t.float "quantity"
+    t.string "quantity"
     t.string "unit"
     t.boolean "is_completed", default: false
     t.bigint "user_id"
@@ -107,11 +107,9 @@ ActiveRecord::Schema.define(version: 2019_08_20_215629) do
   end
 
   create_table "mealplans", force: :cascade do |t|
-    t.bigint "myrecipe_id"
     t.bigint "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["myrecipe_id"], name: "index_mealplans_on_myrecipe_id", unique: true
     t.index ["user_id"], name: "index_mealplans_on_user_id", unique: true
   end
 
@@ -129,6 +127,15 @@ ActiveRecord::Schema.define(version: 2019_08_20_215629) do
     t.index ["unit"], name: "index_myrecipeingredientlinks_on_unit"
   end
 
+  create_table "myrecipemealplanlinks", force: :cascade do |t|
+    t.bigint "mealplan_id"
+    t.bigint "myrecipe_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["mealplan_id"], name: "index_myrecipemealplanlinks_on_mealplan_id"
+    t.index ["myrecipe_id"], name: "index_myrecipemealplanlinks_on_myrecipe_id"
+  end
+
   create_table "myrecipes", force: :cascade do |t|
     t.string "title"
     t.integer "cooking_time_in_min"
@@ -138,7 +145,7 @@ ActiveRecord::Schema.define(version: 2019_08_20_215629) do
     t.datetime "updated_at", null: false
     t.bigint "myrecipeingredientlink_id"
     t.boolean "is_hidden", default: true
-    t.string "cooking_time_in_string"
+    t.string "cooking_time"
     t.bigint "user_id"
     t.string "avatar_file_name"
     t.string "avatar_content_type"
@@ -221,10 +228,11 @@ ActiveRecord::Schema.define(version: 2019_08_20_215629) do
   add_foreign_key "leftovers", "users"
   add_foreign_key "likes", "reviews"
   add_foreign_key "likes", "users"
-  add_foreign_key "mealplans", "myrecipes"
   add_foreign_key "mealplans", "users"
   add_foreign_key "myrecipeingredientlinks", "ingredients"
   add_foreign_key "myrecipeingredientlinks", "myrecipes"
+  add_foreign_key "myrecipemealplanlinks", "mealplans"
+  add_foreign_key "myrecipemealplanlinks", "myrecipes"
   add_foreign_key "myrecipes", "myrecipeingredientlinks"
   add_foreign_key "myrecipes", "users"
   add_foreign_key "reviews", "myrecipes"

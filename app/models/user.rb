@@ -13,8 +13,7 @@ class User < ApplicationRecord
     has_many :completions, dependent: :nullify
     has_many :completed_recipes, through: :completions, source: :myrecipe
     has_many :reviews, dependent: :nullify
-    has_many :mealplans, dependent: :destroy
-    has_many :meals, through: :mealplans, source: :myrecipe
+    has_one :mealplan, dependent: :destroy
     has_many :leftovers, dependent: :destroy
 
     VALID_EMAIL_REGEX = /\A([\w+\-].?)+@[a-z\d\-]+(\.[a-z]+)*\.[a-z]+\z/i
