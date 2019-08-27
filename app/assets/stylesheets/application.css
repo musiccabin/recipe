@@ -210,16 +210,20 @@ main {
   width: 8em;
   padding: .5em;
   display: inline-block;
+  text-align: center;
 }
 
-/* .sign-up-form {
+.signin-form-label-password-confirmation {
+  width: 12em;
+  padding: .5em;
+  display: inline-block;
+  text-align: center;
+}
+
+.sign-up-form {
   display: flex; flex-direction: column;
   align-items: center;
 }
-
-.form-element {
-  justify-content: flex-start;
-} */
 
 .button {
   font-size: 1em;
@@ -358,6 +362,10 @@ main {
 .utensils-and-form {
   display: flex; flex-direction: row;
   align-items: center;
+}
+
+.hide-form {
+  display: none;
 }
 
 .recipe-image-on-index {
@@ -501,7 +509,7 @@ ul {
   display: flex; flex-direction: row;
   align-items: center;
 }
-
+/* 
 .input-helper {
   position: relative;
   display: inline-block;
@@ -530,17 +538,9 @@ ul {
   border: 1px solid white;
 }
 
-input[type="checkbox"] {
-  display: none;
-}
-
-input[type="checkbox"]::checked {
-  background: white;
-}
-
 label::before {
   background: white;
-}
+} */
 
 /* .checkbox-on-preferences {
   font-size: 1em;
@@ -557,7 +557,16 @@ label::before {
 
 .restriction-on-preferences {
   padding: 1em;
+  font-weight: 900;
 }
+
+input[type="checkbox"] {
+  margin: 1em;
+}
+
+/* input[type="checkbox"]::checked {
+  background: white;
+} */
 
 /* .section-on-preferences {
   padding: 1em;
@@ -636,6 +645,23 @@ label::before {
   cursor: grab;
 }
 
+.show {
+  display: block;
+}
+
+.hide {
+  display: none;
+  /* -webkit-transition-duration: 0.4s;
+  transition-duration: 0.4s; */
+}
+
+.visually-hidden {
+  opacity: 0;
+  -webkit-transition-duration: 0.4s;
+  /* Safari */
+  transition-duration: 0.4s;
+}
+
 a.drumstick:link {
   color: black;
 }
@@ -701,7 +727,7 @@ a:active {
   margin-bottom: 1em;
 }
 
-nav {
+.nav-menu {
   width: 100%;
   display: flex; flex-direction: row;
   justify-content: space-between;
@@ -716,7 +742,17 @@ nav {
     height: 100px; */
     -webkit-animation-delay: 2s;
     animation-delay: 2s;
+    display: flex; flex-direction: row;
+    justify-content: center; align-items: center;
+    float: right;
 }
+
+/* .retractable-menu-items {
+    -webkit-animation-delay: 2s;
+    animation-delay: 2s;
+    display: flex; flex-direction: row;
+    justify-content: flex-end;
+} */
 
 .menu-item {
   padding: .5em;
@@ -742,13 +778,13 @@ select {
   font-size: 1em;
 }
 
-option {
+/* option {
   background: transparent;
 }
 
 option:hover {
   background:#FF0000;
-}
+} */
 
 
 

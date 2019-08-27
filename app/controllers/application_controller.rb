@@ -47,7 +47,7 @@ class ApplicationController < ActionController::Base
 
    def authenticate_user!
     unless user_signed_in?
-        flash[:danger] = 'you must be signed in to access this page.'
+        flash[:danger] = 'get access to all that juicy stuff!'
         redirect_to new_session_path
     end
    end

@@ -63,7 +63,7 @@ class Myrecipe < ApplicationRecord
     end
     
     def accepted_cooking_time
-        return if self.cooking_time = ''
+        # return if self.cooking_time = ''
         error_text = 'please follow the format of 1h5m or 5m, rounding to the nearest 5-minute. For 27 minutes, enter 25m. Note: enter 1h instead of 60m.'
         input = cooking_time.gsub(/\s+/, "")
         if input.include? 'h'

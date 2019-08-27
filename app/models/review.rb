@@ -7,7 +7,7 @@ class Review < ApplicationRecord
   has_many :likers, through: :likes, source: :user
   # has_many :child_events, :class_name => "Review", :foreign_key => "child_review_id"
 
-  validates :content, presence: true, length: {minimum: 50}
+  validates :content, presence: true, uniqueness: true
   validates :myrecipe, presence: true, uniqueness: true
   # validates :parent, uniqueness: true
 end

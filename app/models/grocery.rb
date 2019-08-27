@@ -3,6 +3,6 @@ class Grocery < ApplicationRecord
 
     belongs_to :user
 
-    validates :name, presence: true, uniqueness: {source: :user}
+    validates :name, presence: true, uniqueness: {scope: :user}
     # validates :quantity, presence: true
 end

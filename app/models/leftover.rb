@@ -3,7 +3,7 @@ class Leftover < ApplicationRecord
   belongs_to :user
 
   validate :accepted_expiry_date
-  validates :ingredient, uniqueness: true
+  validates :ingredient, uniqueness: {scope: :user}
   
   private
   def accepted_expiry_date

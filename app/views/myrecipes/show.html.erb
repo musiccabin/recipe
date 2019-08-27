@@ -54,7 +54,7 @@
 </div>
 
 <button type="button" id='reviews' class='button'>Reviews</button>
-<div id="reviews-content">
+<!-- <div id="reviews-content">
     <% @new = []%>
     <% @reviews.each do |review_each| %>
     <% r_stat = {:review => review_each, :popularity => review_each.likers}%>
@@ -66,7 +66,7 @@
 
 <% @sorted_reviews.each do |r|%>
 <div>
-    <p><%=r.body%></p>
+    <p><%=r.content%></p>
     <p>Answered by: <%=r.user.first_name%></p>
     
     <%if can?(:crud, r)%>
@@ -81,7 +81,7 @@
     <%end%>
 </div>
 <% end %>
-</div> 
+</div>  -->
 
 <%= form_with(model: [@myrecipe, @review], local: true) do |f| %>
 
@@ -93,17 +93,21 @@
 </ul>
 <% end %>
 <div class='form-group'>
-    <%= f.text_area(:body, cols: 50, rows: 5, placeholder: "Share your experience of making this recipe...", class: "review-form-text-area") %>
+    <%= f.text_area(:content, cols: 50, rows: 5, placeholder: "Share your experience of making this recipe...", class: "review-form-text-area") %>
 </div>
 <%= f.submit class: 'button'%>
 
 <ul class='review-list'>
     <% @reviews.each do |r| %>
     <li>
-        <p><%= r.body %></p>
+        <p style='margin-bottom: 1em'><%= r.content %></p>
+        <%if r.user == current_user%>
+        <small>Reviewed by Me <%= time_ago_in_words(r.created_at)%> ago</small>
         <small><%= link_to "Edit", myrecipe_review_path(@myrecipe)%></small>       
         <small><%= link_to "Delete", myrecipe_review_path(@myrecipe, r), method: :delete, data: {confirm: "Delete Review?"}%></small>
-        <small>Reviewed by <%=r.user%> <%= time_ago_in_words(r.created_at)%></small>
+        <%else%>
+        <small>Reviewed by <%=r.user.first_name%> <%= time_ago_in_words(r.created_at)%> ago</small>
+        <%end%>
     </li>
     <% end %>
 </ul>
@@ -126,10 +130,14 @@
     <li><%=step%></li>
     <%end%>
     </ul>
+    <div style='text-align: center'>
+    <%if current_user.present?%>
     <% if current_user&.completed_recipes&.include? @myrecipe%>
-    <%= link_to 'Remove from Completions', myrecipe_completion_path(@myrecipe), method: :delete%>
+    <%= link_to 'Completed!', myrecipe_completion_path(@myrecipe), method: :delete%>
     <%else%>
-    <%= link_to 'Completed!', myrecipe_completions_path(@myrecipe), method: :post%>
+    <%= link_to 'Done?', myrecipe_completions_path(@myrecipe), method: :post%>
+    <%end%>
+    </div>
     <%end%>
     </div>
 </div>

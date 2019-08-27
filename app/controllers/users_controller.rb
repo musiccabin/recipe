@@ -12,8 +12,8 @@ class UsersController < ApplicationController
   def create
     @user = User.new user_params
     if @user.save
-      Mealplan.create(user: current_user)
       session[:user_id] = @user.id
+      Mealplan.create(user: current_user)
       redirect_to root_path
     else render :new
     end
@@ -141,12 +141,20 @@ class UsersController < ApplicationController
         leftover.expiry_date = params[:expiry_date]
       end
       if leftover.save
-        if leftover.expiry_date.present? && leftover.expiry_date != ''
-          str = "#{leftover&.quantity.to_s} #{leftover&.unit.to_s} of #{leftover.ingredient.name} (expiring #{leftover.expiry_date})"
+        if leftover.quantity != ''
+          if leftover.expiry_date.present? && leftover.expiry_date != ''
+            str = "#{leftover&.quantity.to_s} #{leftover&.unit.to_s} of #{leftover.ingredient.name} (expiring #{leftover.expiry_date})"
+          else
+            str = "#{leftover&.quantity.to_s} #{leftover&.unit.to_s} of #{leftover.ingredient.name}"
+          end
         else
-          str = "#{leftover&.quantity.to_s} #{leftover&.unit.to_s} of #{leftover.ingredient.name}"
-        end
+          if leftover.expiry_date.present? && leftover.expiry_date != ''
+            str = "#{leftover.ingredient.name} (expiring #{leftover.expiry_date})"
+          else
+            str = "#{leftover.ingredient.name}"
+          end
         redirect_to add_leftover_path, notice: "#{str} is added to your leftovers."
+        end
       else
         @leftover = leftover
         render :add_leftover and return

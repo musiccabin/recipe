@@ -16,36 +16,44 @@
   <header>
   <nav>
 
-<%= link_to 'Home', root_path, class: 'menu-item'%>| 
+  <div class='nav-menu'>
   <% if user_signed_in? %>
   <!-- Hello <%= current_user.first_name%> -->
-  <%=link_to 'Meal Plan', user_mealplan_path(current_user, current_user.mealplan), class: 'menu-item'%> |
   <% if current_user.is_admin%>
   <div class='admin-menu'>
     <%= link_to 'New Recipe!', new_myrecipe_path, class: 'menu-item'%>
     <!-- <%= link_to 'View System Stats', new_user_path%> -->
   </div>
   <%end%>
-  <a href='/add_leftover' class='drumstick'><i class="fas fa-drumstick-bite fa-3x" id='drumstick'></i></a>
-  <!-- <%= image_tag current_user.avatar.url(:thumb) %> -->
-  
-  <div id='retractable-menu' class='retractable-menu'>
-  <div class='recipe-preferences'>
-  <%= link_to 'Preferences', user_preferences_path, class: 'menu-item' %>|
-  <%= link_to 'Account', setting_path, class: 'menu-item' %>
-  <!-- <%= link_to 'Enable/Disable Store Specials', new_user_path %> -->
-  <!-- <%= link_to 'Lunch/Dinner/Desserts', new_user_path %> -->
-  </div>
 
-<div class='account-preferences'>
-  <%= link_to 'Groceries', groceries_path, class: 'menu-item' %>|
-  <%= link_to 'Favourites', favourites_path, class: 'menu-item' %>|
-  <%= link_to 'Dishes I made!', completions_path, class: 'menu-item' %>
-</div> 
-</div> 
-  <% else%>
-  <%= link_to "Sign In", new_session_path, class: 'menu-item'%>
-  <% end %>
+<a href='/'><i class="fas fa-concierge-bell fa-2x menu-item"></i></a>
+<div class='retractable-menu'>
+    <i class="far fa-calendar-alt fa-2x menu-item"></i>
+    <div class='hide visually-hidden retractable-menu-items' id='mealplan-menu' >
+      <%=link_to 'Meal Plan', user_mealplan_path(current_user, current_user.mealplan), class: 'menu-item'%> |
+      <%= link_to 'Groceries', groceries_path, class: 'menu-item' %>|
+    </div>
+</div>
+
+<div class='retractable-menu'>
+  <i class="fas fa-user-circle fa-2x menu-item"></i>
+  <div class='hide visually-hidden retractable-menu-items' id='preferences-menu' >
+    <%= link_to 'Preferences', user_preferences_path, class: 'menu-item' %>|
+    <%= link_to 'Account', setting_path, class: 'menu-item' %>|
+    <%= link_to 'Favourites', favourites_path, class: 'menu-item' %>|
+    <%= link_to 'Dishes I made!', completions_path, class: 'menu-item' %>
+  </div>
+    <!-- <%= link_to 'Enable/Disable Store Specials', new_user_path %> -->
+    <!-- <%= link_to 'Lunch/Dinner/Desserts', new_user_path %> -->
+</div>
+<a href='/add_leftover' class='drumstick'><i class="fas fa-drumstick-bite fa-2x" id='drumstick'></i></a>
+</div>
+
+<%else%>
+<a href='/'><i class="fas fa-concierge-bell fa-2x menu-item"></i></a>
+<%= link_to "Sign In", new_session_path, class: 'menu-item'%>
+<%end%>
+
   </nav>
   </header>
   <main>
@@ -70,3 +78,59 @@
       }
   }
 </script> */} -->
+
+<script type="text/javascript">
+  $(document).ready(function() {
+    const menuPreferences = $("#preferences-menu");
+    const iconPreferences = $(".fa-user-circle");
+
+    iconPreferences.hover(function(event) {
+      iconPreferences.css("color", "red");
+      menuPreferences.removeClass("hide");
+      setTimeout(function() {
+        menuPreferences.removeClass('visually-hidden');
+      }, 300);
+    });
+
+    menuPreferences.mouseleave(function(event) {
+      menuPreferences.addClass('visually-hidden');
+      menuPreferences.one('transitionend', function(e) {
+          menuPreferences.addClass('hide');
+          iconPreferences.css("color", "black");
+        });
+    });
+
+    const menuMealplan = $("#mealplan-menu");
+    const iconMealplan = $(".fa-calendar-alt")
+
+    iconMealplan.hover(function(event) {
+      iconMealplan.css("color", "red");
+      menuMealplan.removeClass("hide");
+      setTimeout(function() {
+        menuMealplan.removeClass('visually-hidden');
+      }, 300);
+    });
+
+    menuMealplan.mouseleave(function(event) {
+      menuMealplan.addClass('visually-hidden');
+      menuMealplan.one('transitionend', function(e) {
+          menuMealplan.addClass('hide');
+          iconMealplan.css("color", "black");
+        });
+    });
+
+    // $(".fa-user-circle").hover(function() {
+    //   if (menu.hasClass('hide')) {
+    //     menu.removeClass('hide');
+    //     setTimeout(function() {
+    //       menu.removeClass('visually-hidden');
+    //     }, 300);
+    //   } else {
+    //     menu.addClass('visually-hidden');
+    //     menu.one('transitionend', function(e) {
+    //       menu.addClass('hide');
+    //     });
+    //   }
+    // }) 
+  })
+  </script>

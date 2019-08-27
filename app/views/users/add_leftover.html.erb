@@ -30,7 +30,10 @@
 <%@current_user.leftovers.each do |l|%>
 
 <div class='button-wrapper'>
-<li class='leftover-info'><%=l.ingredient.name%>: <%=l.quantity%> <%=l.unit%>
+<li class='leftover-info'><%=l.ingredient.name%>
+    <%if l.quantity.to_s != ''%>
+    : <%=l.quantity%> <%=l.unit%>
+    <%end%>
 <%if l.expiry_date != ''%>
 (exp. <%=l.expiry_date%>)
 <%end%></li>

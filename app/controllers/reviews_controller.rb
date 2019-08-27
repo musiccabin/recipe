@@ -9,20 +9,19 @@ class ReviewsController < ApplicationController
     @review.myrecipe = Myrecipe.find(params[:myrecipe_id])
     @myrecipe = @review.myrecipe
     if @review.save
-      # ProductMailer.new_review(@review).deliver_later
       redirect_to @myrecipe
     else
       @reviews = @myrecipe.reviews.order(created_at: :desc)
-      render 'myrecipe/show'
+      redirect_to @myrecipe
     end
   end
 
   def edit
   end
 
-  def update
-    if @review.update
-  end
+  # def update
+  #   if @review.update
+  # end
 
   def destroy
     @review.destroy
@@ -31,7 +30,7 @@ class ReviewsController < ApplicationController
 
   private
   def review_params
-    params.require(:review).permit(:rating, :body)
+    params.require(:review).permit(:content)
   end
 
   def find_review

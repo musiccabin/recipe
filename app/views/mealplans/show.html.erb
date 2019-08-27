@@ -13,12 +13,12 @@
     <div class='utensils-and-form'>
         <i class="fas fa-utensils"></i>
         <%if current_user.mealplan.myrecipemealplanlinks.find_by(myrecipe: link.myrecipe)%>
-        <%=form_with url: remove_from_mealplan_path, local: true do |f|%>
+        <%=form_with url: remove_from_mealplan_path, class: 'hide', local: true do |f|%>
             <%= f.hidden_field :myrecipe_id, value: link.myrecipe.id %>
             <%= f.submit 'forget it!', class: 'button small'%>
         <%end%>
         <%else%>
-        <%=form_with url: add_to_mealplan_path, local: true do |f|%>
+        <%=form_with url: add_to_mealplan_path, class: 'hide', local: true do |f|%>
             <%= f.hidden_field :myrecipe_id, value: link.myrecipe.id %>
             <%= f.submit 'cook it!', class: 'button small'%>
         <%end%>
@@ -46,12 +46,11 @@ document.querySelector('nav').querySelectorAll('a').forEach(function(e) {
         })
         
         $(document).ready(function() {
-            $('form').css("display", "none");
-            $(".fa-utensils").hover(function() {
-                $('form').css("display", "block");
+            $(".fa-utensils").hover(function(event) {
+                $(event.currentTarget).closest('div').find('form').removeClass("hide");
             });
-            $("form").mouseleave(function() {
-                $('form').css("display", "none");
+            $("form").mouseleave(function(event) {
+                $(event.currentTarget).addClass("hide");
             });
 
             $('.button').css("color", "black");

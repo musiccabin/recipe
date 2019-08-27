@@ -9,6 +9,9 @@ class WelcomeController < ApplicationController
       # else
         #grab recipes with user's preferences and display images
         @recipes = recommend_recipes
+    elsif params[:tag]
+      tag = Tag.find_by(name: params[:tag])
+      @recipes = Myrecipe.all.to_a.select {|recipe| recipe.tags.include? tag}
     else
       @recipes = Myrecipe.where(is_hidden: false).order(created_at: :desc)
       #grab "ranodm" recipes and display images
@@ -61,16 +64,19 @@ class WelcomeController < ApplicationController
       end
       #select the rest of the leftovers
       non_exp_leftovers = current_user.leftovers.to_a.delete_if {|r| exp_leftovers.include? r}
+      #delete recipes existed in sorted_results(the ones using expiring leftovers)
       result_rstrn_tags_non_exp = result_rstrn_tags.to_a.delete_if {|r| sorted_results.include? r}
+      #sort and push recipes that use non-expiring leftovers
       sorted_results += use_up_leftovers(non_exp_leftovers, result_rstrn_tags_non_exp)
-      ###
+      #push all the rest (non-sorted) recipes from recipe bank
       result_rstrn_tags.each do |result|
         sorted_results << result unless sorted_results.include?(result)
       end
+    #if user doesn't have leftovers
     else
       sorted_results = result_rstrn_tags
     end
-    #sort recipes by seasonal ingredients
+    #return sorted results (future: sort recipes by seasonal ingredients)
     sorted_results
   end
 
@@ -204,7 +210,7 @@ class WelcomeController < ApplicationController
   def proper_recipe_quantity(ingredient, recipe, leftover)
     link = recipe.myrecipeingredientlinks.find_by(ingredient: ingredient)
     unit_recipe = link.unit
-    unit_leftover = leftover.unit
+    unit_leftover = leftover.unit.to_s
     if unit_recipe == unit_leftover
       return floatify(link.quantity)
     else
@@ -255,7 +261,9 @@ class WelcomeController < ApplicationController
   end
 
   def above_50_percent(quantity_recipe, quantity_leftover)
-    if quantity_leftover.to_s == ''
+    if quantity_recipe == ''
+      return false
+    elsif quantity_leftover.to_s == ''
       return true
     # byebug
     elsif quantity_recipe >= 0.5 * floatify(quantity_leftover)
@@ -330,6 +338,7 @@ class WelcomeController < ApplicationController
 
   def calculated_quantity(link)
     output = nil
+    return output if is_seasoning?(link.ingredient.name)
     if link.unit == appropriate_unit(link.ingredient, link.unit)
         output = floatify(link.quantity)
     elsif link.unit == 'cup'
@@ -412,7 +421,7 @@ def stringify_quantity(float)
           when num >= (0.2)
             output += "1/4"
           else
-            output += 'what the heck?!'
+            output += ''
           end
         else
           case true
@@ -429,7 +438,7 @@ def stringify_quantity(float)
           when num >= (0.125)
             output += "#{float.floor.to_s} 1/4"
           else
-            output += 'what the heck?!'
+            output += ''
           end
         end
       end

@@ -125,6 +125,6 @@ class MyrecipesController < ApplicationController
   end
 
   def authorize!
-    redirect_to @myrecipe, alert: "permission declined." unless current_user.is_admin === true
+    redirect_to @myrecipe, alert: "permission declined." unless current_user.is_admin == true
   end
 end

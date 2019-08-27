@@ -16,7 +16,7 @@
 <div class='restrictions-on-preferences'>
 <% if @restrictions %>
 <%@restrictions.each do |r|%>
-<small class='restriction-on-preferences'><%=r.name%> <%=link_to 'x', delete_restriction_path(r), method: :delete%></small>
+<p class='restriction-on-preferences'><%=r.name%> <%=link_to 'x', delete_restriction_path(r), method: :delete%></p>
 <%end%>
 <%end%>
 </div>
@@ -28,7 +28,6 @@
 <div class='tags-on-preferences'>
     <%=f.collection_check_boxes :tags, Tag.all, :id, :name do |b|%>
     <div class='tag-wrapper'>
-        <label for="checkbox-input" class="input-helper input-helper--checkbox"></label>
         <%=b.check_box %>
         <%=b.text.humanize%>
     </div>
@@ -37,7 +36,7 @@
 <div class='restrictions-on-preferences'>
 <%if current_user.tags%>
 <%current_user.tags.each do |t|%>
-<small class='restriction-on-preferences'><%=t.name%> <%=link_to 'x', delete_tag_path(t), method: :delete%></small>
+<p class='restriction-on-preferences'><%=t.name%> <%=link_to 'x', delete_tag_path(t), method: :delete%></p>
 <%end%>
 <%end%>
 </div>

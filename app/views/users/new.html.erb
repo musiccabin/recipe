@@ -1,6 +1,6 @@
 <% content_for :body_class, 'sign-up' %>
 
-<h1 class='page-title'>Sign Up</h1>
+<h1 class='page-title'>Let's Get Started...</h1>
 
 <%= form_with model: @user, :html => { :multipart => true }, class: 'sign-up-form', local: true do |f| %>
 
@@ -26,7 +26,7 @@
     <%= f.password_field :password, class: 'input-field' %>
 </div>
 <div class='form-element'>
-    <%= f.label :enter_password_again, class: 'signin-form-label' %>
+    <%= f.label :enter_password_again, class: 'signin-form-label-password-confirmation' %>
     <%= f.password_field :password_confirmation, class: 'input-field' %>
 </div>
 <!-- <div class='form-element'>
