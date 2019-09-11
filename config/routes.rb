@@ -26,9 +26,13 @@ Rails.application.routes.draw do
   post '/setting', {to: 'users#update', as: 'user_update'}
   get '/favourites', {to: 'users#favourites', as:'favourites'}
   get '/completions', {to: 'users#completions', as:'completions'}
+
   get '/groceries', {to: 'groceries#index', as: 'groceries'}
   post '/groceries', {to: 'groceries#create'}
   post '/groceries/:id/toggle', {to: 'groceries#complete_grocery', as: 'complete_grocery'}
+  patch '/groceries/:id/update', {to: 'groceries#update', as: 'update_grocery'}
+  delete '/groceries/:id/delete', {to: 'groceries#destroy', as: 'delete_grocery'}
+
   # post '/myrecipe_new', {to: 'myrecipe#add_tag', as: 'add_tag'}
   patch '/myrecipes/:id/toggle', {to: 'myrecipes#hide', as:'hide_recipe'}
   get '/admin/panel', {to: 'admin#panel', as:'admin_panel'}

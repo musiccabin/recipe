@@ -2,6 +2,8 @@
 <div>
 <h1 class='page-title'>Grocery List</h1>
 
+<p style="padding: 1em">We can only save edits to imported groceries after meal plan has been finalized. :)</p>
+
 <%=form_with model: @grocery, local: true do |f|%>
 <div class='add-leftover-form'>
 <div class='leftover-form-element'>
@@ -22,20 +24,74 @@
 </div>
 <%end%>
 
-<% @groceries.each do |g| %>
-<div>
-    <%=form_with url: complete_grocery_path(g), local: true do |f|%>
-    <!-- <%= f.hidden_field :grocery_id %> -->
-    <% g_info = "#{g.name}"%>
-    <%if g.quantity != ''%>
-        <% g_info += "#{[': ', g.quantity, g.unit].compact.join(' ')}"%>
+<%if @groceries%>
+<ul class='users-groceries'>
+<%@groceries.each do |g|%>
+
+<div class='button-wrapper'>
+<li class='grocery-info'>
+        <%=form_with url: complete_grocery_path(g), class: 'grocery-item-form', local: true do |f|%>
+        <!-- <%= f.hidden_field :grocery_id %> -->
+        <% g_info = "#{g.name}"%>
+        <%if g.quantity != ''%>
+            <% g_info += "#{[': ', g.quantity, g.unit].compact.join(' ')}"%>
+            <%end%>
+        <%=f.submit g_info, class: 'grocery-item'%>
         <%end%>
-    <%=f.submit g_info, class: 'grocery-item'%>
-    <%end%>
-<!-- <input type="checkbox" name='item' class='checkbox-on-preferences' value="<%=g.name%>" <%= g.is_completed ? "checked" : "" %> -->
-<!-- <label for="item"><%=g.name%> <%=g.quantity%> <%=g.unit%></label> -->
+<i class="fas fa-pen"></i><%=link_to 'X', delete_grocery_path(g), style: 'font-weight: 900; padding: .5em', method: :delete%>
+</li>
+<li class='update-leftover'>
+    <p style='font-weight: 700; text-decoration: underline; margin-bottom: 1em'><%=g.name%></p> 
+<%=form_with url: update_grocery_path(g), method: :patch, local: true do |f|%>
+<!-- <p><%=f.label :quantity%></p> -->
+<p><%=f.text_field :quantity, value: g.quantity, placeholder: "quantity", class: 'leftover-input'%></p>
+<!-- <p><%=f.label :unit%></p> -->
+<p><%=f.text_field :unit, value: g.unit, placeholder: "unit (optional)", class: 'leftover-input'%></p>
+<%=f.submit class: 'button small'%>
+<%end%>
+</li>
 </div>
-<% end %>
+
+<%end%>
+</ul>
+<%end%>
+
+<%if @groceries_by_user%>
+<h3 style='text-align: center; font-weight: 700; margin-top: 2em'>Other Stuff I Need:</h3>
+<ul class='users-groceries'>
+<%@groceries_by_user.each do |gbu|%>
+
+<div class='button-wrapper'>
+<li class='grocery-info'>
+        <%=form_with url: complete_grocery_path(gbu), class: 'grocery-item-form', local: true do |f|%>
+        <!-- <%= f.hidden_field :grocery_id %> -->
+        <% gbu_info = "#{gbu.name}"%>
+        <%if gbu.quantity != ''%>
+            <% gbu_info += "#{[': ', gbu.quantity, gbu.unit].compact.join(' ')}"%>
+            <%end%>
+        <%=f.submit gbu_info, class: 'grocery-item'%>
+        <%end%>
+    <!-- <%=gbu.name%>
+    <%if gbu.quantity.to_s != ''%>
+    : <%=gbu.quantity%> <%=gbu.unit%>
+    <%end%> -->
+<i class="fas fa-pen"></i><%=link_to 'X', delete_grocery_path(gbu), style: 'font-weight: 900; padding: .5em', method: :delete%>
+</li>
+<li class='update-leftover'>
+    <p style='font-weight: 700; text-decoration: underline; margin-bottom: 1em'><%=gbu.name%></p> 
+<%=form_with url: update_grocery_path(gbu), method: :patch, local: true do |f|%>
+<!-- <p><%=f.label :quantity%></p> -->
+<p><%=f.text_field :quantity, value: gbu.quantity, placeholder: "quantity", class: 'leftover-input'%></p>
+<!-- <p><%=f.label :unit%></p> -->
+<p><%=f.text_field :unit, value: gbu.unit, placeholder: "unit (optional)", class: 'leftover-input'%></p>
+<%=f.submit class: 'button small'%>
+<%end%>
+</li>
+</div>
+
+<%end%>
+</ul>
+<%end%>
 
 <button type="button" id='completed-items-header' class='button'>Completed Items</button>
 <div id="completed-items" id="completed-items">
@@ -67,7 +123,7 @@
         }
     } 
 
-    document.querySelector('nav').querySelectorAll('a').forEach(function(e) {
+    document.querySelectorAll('a').forEach(function(e) {
             e.style.color = 'black';
     })
 
@@ -96,7 +152,43 @@
         $(".completed-grocery").mouseleave(function(event) {
             $(event.target).css("text-decoration", "line-through");
         })
+
+        $('.button-wrapper').css("margin", "0");
+        $('.button-wrapper').find('a').hover(function(event) {
+            $(event.target).css("text-decoration", "none");
+            $(event.target).css("color", "red");
+        })
+        $('.button-wrapper').find('a').mouseleave(function(event) {
+            $(event.target).css("color", "black");
+        })
+
+        $('.fa-pen').hover(function(event) {
+            $(event.target).css("color", "red");
+        })
+        $('.fa-pen').mouseleave(function(event) {
+            $(event.target).css("color", "black");
+        })
     })
+
+    document.querySelectorAll(".update-leftover").forEach(function(e) {
+        e.style.display = 'none';
+    });
+    document.querySelectorAll('.grocery-info').forEach(function(e) {
+        e.style.display = 'flex';
+    });
+    document.querySelectorAll(".fa-pen").forEach(function(b) {
+        b.onclick = function (event) {
+        event.target.closest('div').querySelector('.grocery-info').style.display = 'none';
+        event.target.closest('div').querySelector('.update-leftover').style.display = 'block';
+        // if (x.style.display === "none") {
+        //     x.style.display = "block";
+        //     y.style.display = 'none';
+        // } else {
+        //     x.style.display = "none";
+        //     y.style.display = 'block';
+        // }
+        }
+    });
 </script>
 
 

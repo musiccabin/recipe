@@ -645,6 +645,27 @@ input[type="checkbox"] {
   cursor: grab;
 }
 
+.fa-pen {
+  cursor: grab;
+  padding: .5em;
+}
+
+.grocery-item-form {
+  display: flex; flex-direction: row;
+  align-items: center; justify-content: center;
+}
+
+.grocery-info {
+  width: 15vw;
+  display: flex; flex-direction: row;
+  align-items: center; justify-content: center;
+}
+
+.users-groceries {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+}
+
 .show {
   display: block;
 }
@@ -722,6 +743,19 @@ a:active {
   }
 }
 
+.fa-concierge-bell {
+  color: black;
+}
+
+.fa-concierge-bell:hover {
+  color: red;
+  cursor: grab;
+  animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
 .error {
   text-align: center;
   margin-bottom: 1em;
@@ -770,12 +804,13 @@ small {
   font-size: .7em;
 }
 
-.drumstick {
-  padding: .5em;
-}
-
 select {
   font-size: 1em;
+}
+
+input[type="submit"] {
+  font-family: 'Raleway', sans-serif;
+  border: none;
 }
 
 /* option {

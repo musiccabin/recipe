@@ -152,7 +152,6 @@ class WelcomeController < ApplicationController
         #compare quantities
         quantity_leftover = leftover.quantity
         quantity_recipe = proper_recipe_quantity(ingredient, r, leftover)
-        # byebug
         if above_50_percent(quantity_recipe, quantity_leftover)
           stats_50[r] += 1
           break if stats_50[r] >= 3
@@ -219,7 +218,7 @@ class WelcomeController < ApplicationController
   end
 
   def convert_quantity(ingredient, link, recipe, leftover)
-    output = ''
+    output = link.quantity
     case ingredient.name
     when 'cucumber'
       if link.unit == 'cup'
@@ -232,7 +231,7 @@ class WelcomeController < ApplicationController
         output = floatify(link.quantity) * 8
       end
     else
-      output = ''
+      output = link.quantity
     end
     output
   end
@@ -316,6 +315,8 @@ class WelcomeController < ApplicationController
     # end
 
     # byebug
+    current_user.groceries.where(:user_added => false).destroy_all
+
     added_up.each do |stats|
       if stats[:quantity] != nil
         if stats[:unit] == 'cup' && stats[:quantity] < 0.2
@@ -329,8 +330,8 @@ class WelcomeController < ApplicationController
       end
 
       stats[:quantity] = stringify_quantity(stats[:quantity])
-        
-      current_user.groceries.destroy_all
+      
+      # current_user.groceries.destroy_all
       # byebug
       Grocery.create(name: stats[:name], quantity: stats[:quantity], unit: stats[:unit], user: current_user, is_completed: false)
     end

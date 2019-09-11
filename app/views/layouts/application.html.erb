@@ -46,7 +46,7 @@
     <!-- <%= link_to 'Enable/Disable Store Specials', new_user_path %> -->
     <!-- <%= link_to 'Lunch/Dinner/Desserts', new_user_path %> -->
 </div>
-<a href='/add_leftover' class='drumstick'><i class="fas fa-drumstick-bite fa-2x" id='drumstick'></i></a>
+<a href='/add_leftover' class='drumstick'><i class="fas fa-drumstick-bite fa-2x menu-item" id='drumstick'></i></a>
 </div>
 
 <%else%>
@@ -81,43 +81,105 @@
 
 <script type="text/javascript">
   $(document).ready(function() {
-    const menuPreferences = $("#preferences-menu");
-    const iconPreferences = $(".fa-user-circle");
+    const pages = ['setting', 'sign-in', 'sign-up', 'forgot-password', 'new-recipe'];
+    if (!pages.includes($('body').attr('class'))) {
+      const menuPreferences = $("#preferences-menu");
+      const iconPreferences = $(".fa-user-circle");
 
-    iconPreferences.hover(function(event) {
-      iconPreferences.css("color", "red");
-      menuPreferences.removeClass("hide");
-      setTimeout(function() {
-        menuPreferences.removeClass('visually-hidden');
-      }, 300);
-    });
+      iconPreferences.hover(function(event) {
+        iconPreferences.css("color", "red");
+        $('.retractable-menu-items').each(function(k,v) {
+          $(this).addClass('hide');
+        })
+        $('.fa-calendar-alt').css("color", "black");
+        menuPreferences.removeClass("hide");
+        setTimeout(function() {
+          menuPreferences.removeClass('visually-hidden');
+        }, 300);
+      });
 
-    menuPreferences.mouseleave(function(event) {
-      menuPreferences.addClass('visually-hidden');
-      menuPreferences.one('transitionend', function(e) {
+      menuPreferences.mouseleave(function(event) {
+        menuPreferences.addClass('visually-hidden');
+        menuPreferences.one('transitionend', function(e) {
           menuPreferences.addClass('hide');
           iconPreferences.css("color", "black");
         });
-    });
+      });
 
-    const menuMealplan = $("#mealplan-menu");
-    const iconMealplan = $(".fa-calendar-alt")
+      const menuMealplan = $("#mealplan-menu");
+      const iconMealplan = $(".fa-calendar-alt")
 
-    iconMealplan.hover(function(event) {
-      iconMealplan.css("color", "red");
-      menuMealplan.removeClass("hide");
-      setTimeout(function() {
-        menuMealplan.removeClass('visually-hidden');
-      }, 300);
-    });
+      iconMealplan.hover(function(event) {
+        iconMealplan.css("color", "red");
+        $('.retractable-menu-items').each(function(k,v) {
+          $(this).addClass('hide');
+        })
+        $('.fa-user-circle').css("color", "black");
+        menuMealplan.removeClass("hide");
+        setTimeout(function() {
+          menuMealplan.removeClass('visually-hidden');
+        }, 300);
+      });
 
-    menuMealplan.mouseleave(function(event) {
-      menuMealplan.addClass('visually-hidden');
-      menuMealplan.one('transitionend', function(e) {
+      menuMealplan.mouseleave(function(event) {
+        menuMealplan.addClass('visually-hidden');
+        menuMealplan.one('transitionend', function(e) {
           menuMealplan.addClass('hide');
           iconMealplan.css("color", "black");
         });
-    });
+      });
+    } else {
+      $(document).css("color", "white");
+      $(".drumstick").css("color", "white");
+      $('.fa-concierge-bell').css("color", "white");
+
+      const menuPreferences = $("#preferences-menu");
+      const iconPreferences = $(".fa-user-circle");
+
+      iconPreferences.hover(function(event) {
+        iconPreferences.css("color", "red");
+        $('.retractable-menu-items').each(function(k,v) {
+          $(this).addClass('hide');
+        })
+        $('.fa-calendar-alt').css("color", "white");
+        menuPreferences.removeClass("hide");
+        setTimeout(function() {
+          menuPreferences.removeClass('visually-hidden');
+        }, 300);
+      });
+
+      menuPreferences.mouseleave(function(event) {
+        menuPreferences.addClass('visually-hidden');
+        menuPreferences.one('transitionend', function(e) {
+          menuPreferences.addClass('hide');
+          iconPreferences.css("color", "white");
+        });
+      });
+
+      const menuMealplan = $("#mealplan-menu");
+      const iconMealplan = $(".fa-calendar-alt")
+
+      iconMealplan.hover(function(event) {
+        iconMealplan.css("color", "red");
+        $('.retractable-menu-items').each(function(k,v) {
+          $(this).addClass('hide');
+        })
+        $('.fa-user-circle').css("color", "white");
+        menuMealplan.removeClass("hide");
+        setTimeout(function() {
+          menuMealplan.removeClass('visually-hidden');
+        }, 300);
+      });
+
+      menuMealplan.mouseleave(function(event) {
+        menuMealplan.addClass('visually-hidden');
+        menuMealplan.one('transitionend', function(e) {
+          menuMealplan.addClass('hide');
+          iconMealplan.css("color", "white");
+        });
+      });
+    }
+    
 
     // $(".fa-user-circle").hover(function() {
     //   if (menu.hasClass('hide')) {
