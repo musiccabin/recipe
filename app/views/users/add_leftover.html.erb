@@ -30,14 +30,22 @@
 <%@current_user.leftovers.each do |l|%>
 
 <div class='button-wrapper'>
-<li class='leftover-info'><%=l.ingredient.name%>
+<li class='each-leftover'>
+    <div class='leftover-info'>
+    <%=l.ingredient.name%>
     <%if l.quantity.to_s != ''%>
     : <%=l.quantity%> <%=l.unit%>
     <%end%>
 <%if l.expiry_date != ''%>
 (exp. <%=l.expiry_date%>)
-<%end%></li>
-<button class='button small'>Edit</button><small><%=link_to 'Delete', delete_leftover_path(l), method: :delete%></small>
+<%end%>
+</div>
+<i class="fas fa-pen"></i>
+<%=link_to delete_leftover_path(l), method: :delete do%>
+<i class="fas fa-trash"></i>
+<%end%>
+<!-- <button class='button small'>Edit</button><small><%=link_to 'Delete', delete_leftover_path(l), method: :delete%></small> -->
+</li>
 <li class='update-leftover'>
     <p style='font-weight: 700; text-decoration: underline; margin-bottom: 1em'><%=l.ingredient.name%></p> 
 <%=form_with url: update_leftover_path(l), method: :patch, local: true do |f|%>
@@ -60,12 +68,12 @@
     document.querySelectorAll(".update-leftover").forEach(function(e) {
         e.style.display = 'none';
     });
-    document.querySelectorAll('.leftover-info').forEach(function(e) {
-        e.style.display = 'block';
-    });
-    document.querySelectorAll("button").forEach(function(b) {
-        b.onclick = function (event) {
-        event.target.closest('div').querySelector('.leftover-info').style.display = 'none';
+    // document.querySelectorAll('.leftover-info').forEach(function(e) {
+    //     e.style.display = 'block';
+    // });
+    document.querySelectorAll(".fa-pen").forEach(function(i) {
+        i.onclick = function (event) {
+        event.target.closest('div').querySelector('.each-leftover').style.display = 'none';
         event.target.closest('div').querySelector('.update-leftover').style.display = 'block';
         // if (x.style.display === "none") {
         //     x.style.display = "block";

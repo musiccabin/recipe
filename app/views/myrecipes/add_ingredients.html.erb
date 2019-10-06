@@ -45,8 +45,11 @@
 <ul class='ingredients'>
 <%@links.each do |l|%>
 <div class='button-wrapper'>
-<li class='ingredient-info'><%=l.ingredient.name%>: <%=l.quantity%> <%=l.unit%></li>
-    <button class='button small black'>Edit</button><small><%=link_to 'Delete', delete_ingredient_path(@myrecipe, l), method: :delete%></small>
+<li class='each-ingredient'>
+    <div class='ingredient-info'><%=l.ingredient.name%>: <%=l.quantity%> <%=l.unit%></div>
+    <i class="fas fa-pen"></i><%=link_to 'X', delete_ingredient_path(@myrecipe, l), style: 'font-weight: 900; padding: .5em', method: :delete%>
+</li>
+    <!-- <button class='button small black'>Edit</button><small><%=link_to 'Delete', delete_ingredient_path(@myrecipe, l), method: :delete%></small> -->
 <li class='update-ingredient'>
     <%=form_with url: update_ingredient_path(@myrecipe, l), method: :patch, local: true do |f|%>
     <%=f.label :name%>
@@ -74,12 +77,12 @@
     document.querySelectorAll(".update-ingredient").forEach(function(e) {
         e.style.display = 'none';
     });
-    document.querySelectorAll('.ingredient-info').forEach(function(e) {
-        e.style.display = 'block';
-    });
-    document.querySelectorAll("button").forEach(function(b) {
-        b.onclick = function (event) {
-        event.target.closest('div').querySelector('.ingredient-info').style.display = 'none';
+    // document.querySelectorAll('.ingredient-info').forEach(function(e) {
+    //     e.style.display = 'block';
+    // });
+    document.querySelectorAll(".fa-pen").forEach(function(i) {
+        i.onclick = function (event) {
+        event.target.closest('div').querySelector('.each-ingredient').style.display = 'none';
         event.target.closest('div').querySelector('.update-ingredient').style.display = 'block';
         // if (x.style.display === "none") {
         //     x.style.display = "block";

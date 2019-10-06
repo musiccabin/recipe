@@ -14,7 +14,7 @@
 <div class='recipe-title-and-utensils'>
 <h3 class='recipe-title-on-index'><%=r.title%></h3>
 <div class='utensils-and-form'>
-<i class="fas fa-utensils"></i>
+<i class="fas fa-utensils fa-2x"></i>
 <%if current_user&.mealplan&.myrecipemealplanlinks&.find_by(myrecipe: r)%>
 <%=form_with url: remove_from_mealplan_path, class: 'hide', local: true do |f|%>
     <%= f.hidden_field :myrecipe_id, value: r.id %>
@@ -42,7 +42,10 @@
 
 <script type="text/javascript">
 $(document).ready(function() {
-    $(".fa-utensils").hover(function(event) {
+//     $(".fa-utensils").hover(function(event) {
+//         $(event.currentTarget).closest('div').find('form').removeClass("hide");
+//   });
+  $(".fa-utensils").click(function(event) {
         $(event.currentTarget).closest('div').find('form').removeClass("hide");
   });
   $("form").mouseleave(function(event) {

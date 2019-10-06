@@ -4,8 +4,9 @@
 
 <div class='recipe-header'>
 
-<div class='page-title-and-heart'>
+<div class='page-title-and-icons'>
 <h1 class='page-title'><%= @myrecipe.title%></h1>
+<div class='icons-on-myrecipe'>
 <% if current_user&.favourite_recipes&.include? @myrecipe%>
 <i class="fas fa-heart" style='padding: .5em'></i>
 <%= link_to "Forget it!", myrecipe_favourite_path(@myrecipe), method: :delete%>
@@ -13,6 +14,21 @@
 <i class="far fa-heart" style='padding: .5em'></i>
 <%= link_to 'Love it!', myrecipe_favourites_path(@myrecipe), method: :post%>
 <%end%>
+<div class='utensils-and-form'>
+        <i class="fas fa-utensils"></i>
+        <%if current_user&.mealplan&.myrecipemealplanlinks&.find_by(myrecipe: @myrecipe)%>
+        <%=form_with url: remove_from_mealplan_path, class: 'hide', local: true do |f|%>
+            <%= f.hidden_field :myrecipe_id, value: @myrecipe.id %>
+            <%= f.submit 'forget it!', class: 'button small'%>
+        <%end%>
+        <%else%>
+        <%=form_with url: add_to_mealplan_path, class: 'hide', local: true do |f|%>
+            <%= f.hidden_field :myrecipe_id, value: @myrecipe.id %>
+            <%= f.submit 'cook it!', class: 'button small'%>
+        <%end%>
+        <%end%>
+        </div>
+</div>
 </div>
 <p>Cooking Time: <%=@cooking_time%></p>
 </div>
@@ -45,9 +61,9 @@
 <%= link_to 'Delete', myrecipe_path(@myrecipe), method: :delete, data: {confirm: "Delete?"}, class: 'admin-action-on-myrecipe'%>
 
 <% if @myrecipe.is_hidden%>
-<%= link_to 'Make this recipe public', hide_recipe_path, method: :patch, class: 'admin-action-on-myrecipe'%>
+<%= link_to 'Publish', hide_recipe_path, method: :patch, class: 'admin-action-on-myrecipe'%>
 <% else%>
-<%= link_to 'Hide this recipe', hide_recipe_path, method: :patch, class: 'admin-action-on-myrecipe'%>
+<%= link_to 'Hide', hide_recipe_path, method: :patch, class: 'admin-action-on-myrecipe'%>
 <%end%>
 
 <%end%>
@@ -178,3 +194,11 @@
         }
     }
 </script>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+      $(".fa-utensils").click(function(event) {
+            $(event.currentTarget).closest('div').find('form').removeClass("hide");
+      });
+    })
+    </script>
