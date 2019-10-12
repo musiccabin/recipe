@@ -74,7 +74,13 @@ class MyrecipesController < ApplicationController
   def show
     hour = (@myrecipe.cooking_time_in_min / 60).floor
     min = (@myrecipe.cooking_time_in_min % 60)
-    @cooking_time = "#{hour} hr #{min} min"
+    if hour == 0
+      @cooking_time = "#{min} min"
+    elsif min == 0
+      @cooking_time = "#{hour} hr"
+    else
+      @cooking_time = "#{hour} hr #{min} min"
+    end
     @links = @myrecipe.myrecipeingredientlinks
     @instructions = []
     @myrecipe.instructions.split(/[\r\n]+/).each do |step|

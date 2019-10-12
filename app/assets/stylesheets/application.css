@@ -816,7 +816,7 @@ a:active {
     height: 100px; */
     -webkit-animation-delay: 2s;
     animation-delay: 2s;
-    display: flex; flex-direction: row;
+    display: flex; flex-direction: column;
     justify-content: center; align-items: center;
     float: right;
 }
@@ -824,20 +824,22 @@ a:active {
 /* .retractable-menu-items {
     -webkit-animation-delay: 2s;
     animation-delay: 2s;
-    display: flex; flex-direction: row;
-    justify-content: flex-end;
+    display: flex; flex-direction: column;
+    align-items: center;
+    justify-content: center;
 } */
 
 .menu-item {
   padding: .5em;
+  font-size: 1.5em;
 }
 
 .recipe-preferences {
-  padding: .5em;
+  padding: 1em;
 }
 
 .account-preferences {
-  padding: .5em;
+  padding: 1em;
 }
 
 small {

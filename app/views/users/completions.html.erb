@@ -14,6 +14,8 @@
     <%min = (recipe.cooking_time_in_min % 60)%>
     <%if hour == 0%>
     <small>ready in <%=min%> min</small>
+    <%elsif min == 0%>
+    <small>ready in <%=hour%> hr</small>
     <%else%>
     <small>ready in <%=hour%> hr <%=min%> min</small>
     <%end%>

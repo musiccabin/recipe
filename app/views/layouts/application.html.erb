@@ -30,17 +30,17 @@
 <div class='retractable-menu'>
     <i class="far fa-calendar-alt fa-2x menu-item"></i>
     <div class='hide visually-hidden retractable-menu-items' id='mealplan-menu' >
-      <%=link_to 'Meal Plan', user_mealplan_path(current_user, current_user.mealplan), class: 'menu-item'%> |
-      <%= link_to 'Groceries', groceries_path, class: 'menu-item' %>|
+      <%=link_to 'Meal Plan', user_mealplan_path(current_user, current_user.mealplan), class: 'menu-item'%> 
+      <%= link_to 'Groceries', groceries_path, class: 'menu-item' %>
     </div>
 </div>
 
 <div class='retractable-menu'>
   <i class="fas fa-user-circle fa-2x menu-item"></i>
   <div class='hide visually-hidden retractable-menu-items' id='preferences-menu' >
-    <%= link_to 'Preferences', user_preferences_path, class: 'menu-item' %>|
-    <%= link_to 'Account', setting_path, class: 'menu-item' %>|
-    <%= link_to 'Favourites', favourites_path, class: 'menu-item' %>|
+    <%= link_to 'Preferences', user_preferences_path, class: 'menu-item' %>
+    <%= link_to 'Account', setting_path, class: 'menu-item' %>
+    <%= link_to 'Favourites', favourites_path, class: 'menu-item' %>
     <%= link_to 'Dishes I made!', completions_path, class: 'menu-item' %>
   </div>
     <!-- <%= link_to 'Enable/Disable Store Specials', new_user_path %> -->
@@ -86,7 +86,7 @@
       const menuPreferences = $("#preferences-menu");
       const iconPreferences = $(".fa-user-circle");
 
-      iconPreferences.hover(function(event) {
+      iconPreferences.click(function(event) {
         iconPreferences.css("color", "red");
         $('.retractable-menu-items').each(function(k,v) {
           $(this).addClass('hide');
@@ -98,18 +98,18 @@
         }, 300);
       });
 
-      menuPreferences.mouseleave(function(event) {
-        menuPreferences.addClass('visually-hidden');
-        menuPreferences.one('transitionend', function(e) {
-          menuPreferences.addClass('hide');
-          iconPreferences.css("color", "black");
-        });
-      });
+      // menuPreferences.mouseleave(function(event) {
+      //   menuPreferences.addClass('visually-hidden');
+      //   menuPreferences.one('transitionend', function(e) {
+      //     menuPreferences.addClass('hide');
+      //     iconPreferences.css("color", "black");
+      //   });
+      // });
 
       const menuMealplan = $("#mealplan-menu");
       const iconMealplan = $(".fa-calendar-alt")
 
-      iconMealplan.hover(function(event) {
+      iconMealplan.click(function(event) {
         iconMealplan.css("color", "red");
         $('.retractable-menu-items').each(function(k,v) {
           $(this).addClass('hide');
@@ -121,13 +121,13 @@
         }, 300);
       });
 
-      menuMealplan.mouseleave(function(event) {
-        menuMealplan.addClass('visually-hidden');
-        menuMealplan.one('transitionend', function(e) {
-          menuMealplan.addClass('hide');
-          iconMealplan.css("color", "black");
-        });
-      });
+      // menuMealplan.mouseleave(function(event) {
+      //   menuMealplan.addClass('visually-hidden');
+      //   menuMealplan.one('transitionend', function(e) {
+      //     menuMealplan.addClass('hide');
+      //     iconMealplan.css("color", "black");
+      //   });
+      // });
     } else {
       $(document).css("color", "white");
       $(".drumstick").css("color", "white");
@@ -136,7 +136,7 @@
       const menuPreferences = $("#preferences-menu");
       const iconPreferences = $(".fa-user-circle");
 
-      iconPreferences.hover(function(event) {
+      iconPreferences.click(function(event) {
         iconPreferences.css("color", "red");
         $('.retractable-menu-items').each(function(k,v) {
           $(this).addClass('hide');
@@ -148,18 +148,18 @@
         }, 300);
       });
 
-      menuPreferences.mouseleave(function(event) {
-        menuPreferences.addClass('visually-hidden');
-        menuPreferences.one('transitionend', function(e) {
-          menuPreferences.addClass('hide');
-          iconPreferences.css("color", "white");
-        });
-      });
+      // menuPreferences.mouseleave(function(event) {
+      //   menuPreferences.addClass('visually-hidden');
+      //   menuPreferences.one('transitionend', function(e) {
+      //     menuPreferences.addClass('hide');
+      //     iconPreferences.css("color", "white");
+      //   });
+      // });
 
       const menuMealplan = $("#mealplan-menu");
       const iconMealplan = $(".fa-calendar-alt")
 
-      iconMealplan.hover(function(event) {
+      iconMealplan.click(function(event) {
         iconMealplan.css("color", "red");
         $('.retractable-menu-items').each(function(k,v) {
           $(this).addClass('hide');
@@ -171,13 +171,13 @@
         }, 300);
       });
 
-      menuMealplan.mouseleave(function(event) {
-        menuMealplan.addClass('visually-hidden');
-        menuMealplan.one('transitionend', function(e) {
-          menuMealplan.addClass('hide');
-          iconMealplan.css("color", "white");
-        });
-      });
+      // menuMealplan.mouseleave(function(event) {
+      //   menuMealplan.addClass('visually-hidden');
+      //   menuMealplan.one('transitionend', function(e) {
+      //     menuMealplan.addClass('hide');
+      //     iconMealplan.css("color", "white");
+      //   });
+      // });
     }
     
 
