@@ -9,6 +9,20 @@
     <div class='individual-recipe'>
     <%recipe = Myrecipe.find(f.id)%>
     <h3 class='recipe-title-on-index'><%=recipe.title%></h3>
+    <div class='utensils-and-form'>
+        <i class="fas fa-utensils fa-2x"></i>
+        <%if current_user.mealplan.myrecipemealplanlinks.find_by(myrecipe: recipe)%>
+        <%=form_with url: remove_from_mealplan_path, local: true do |f|%>
+            <%= f.hidden_field :myrecipe_id, value: recipe.id %>
+            <%= f.submit 'forget it!', class: 'button small'%>
+        <%end%>
+        <%else%>
+        <%=form_with url: add_to_mealplan_path, local: true do |f|%>
+            <%= f.hidden_field :myrecipe_id, value: recipe.id %>
+            <%= f.submit 'cook it!', class: 'button small'%>
+        <%end%>
+        <%end%>
+    </div>
     <%hour = (recipe.cooking_time_in_min / 60).floor%>
     <%min = (recipe.cooking_time_in_min % 60)%>
     <%if hour == 0%>

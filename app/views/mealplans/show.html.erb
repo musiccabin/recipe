@@ -11,14 +11,14 @@
     <div class='recipe-title-and-utensils'>
     <h3 class='recipe-title-on-index'><%=link.myrecipe.title%></h3>
     <div class='utensils-and-form'>
-        <i class="fas fa-utensils"></i>
+        <i class="fas fa-utensils fa-2x"></i>
         <%if current_user.mealplan.myrecipemealplanlinks.find_by(myrecipe: link.myrecipe)%>
-        <%=form_with url: remove_from_mealplan_path, class: 'hide', local: true do |f|%>
+        <%=form_with url: remove_from_mealplan_path, local: true do |f|%>
             <%= f.hidden_field :myrecipe_id, value: link.myrecipe.id %>
             <%= f.submit 'forget it!', class: 'button small'%>
         <%end%>
         <%else%>
-        <%=form_with url: add_to_mealplan_path, class: 'hide', local: true do |f|%>
+        <%=form_with url: add_to_mealplan_path, local: true do |f|%>
             <%= f.hidden_field :myrecipe_id, value: link.myrecipe.id %>
             <%= f.submit 'cook it!', class: 'button small'%>
         <%end%>
@@ -48,22 +48,22 @@ document.querySelector('nav').querySelectorAll('a').forEach(function(e) {
         })
         
         $(document).ready(function() {
-            $(".fa-utensils").hover(function(event) {
-                $(event.currentTarget).closest('div').find('form').removeClass("hide");
-            });
-            $("form").mouseleave(function(event) {
-                $(event.currentTarget).addClass("hide");
-            });
+            // $(".fa-utensils").hover(function(event) {
+            //     $(event.currentTarget).closest('div').find('form').removeClass("hide");
+            // });
+            // $("form").mouseleave(function(event) {
+            //     $(event.currentTarget).addClass("hide");
+            // });
 
             $('.button').css("color", "black");
             $('.button').css("border", "1px solid black");
-            $(".button").hover(function() {
+            $(".button").click(function() {
                 $(".button").css("color", "white");
                 $(".button").css("border", "1px solid white");
             });
-            $(".button").mouseleave(function() {
-                $(".button").css("color", "black");
-                $(".button").css("border", "1px solid black");
-            });
+            // $(".button").mouseleave(function() {
+            //     $(".button").css("color", "black");
+            //     $(".button").css("border", "1px solid black");
+            // });
         })
 </script>
