@@ -195,6 +195,7 @@ main {
 .page-title {
   font-size: 2em;
   padding: 1em;
+  margin-top: 1em;
   text-align: center;
   /* word-wrap: normal; */
 }
@@ -814,6 +815,7 @@ a:active {
   top: 0;
   left: 0;
   right: 0;
+  background: rgba(255,255,255,0.5);
 }
 
 .nav-menu-bottom {
@@ -827,6 +829,7 @@ a:active {
   bottom: 0;
   left: 0;
   right: 0;
+  background: rgba(255,255,255,0.5);
 }
 
 .retractable-menu {
