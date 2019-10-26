@@ -9,49 +9,49 @@
 <%end%>
 
 <div class='recipes-on-index'>
-<%@recipes.each do |r|%>
-<div class='individual-recipe'>
-<div class='recipe-title-and-utensils'>
-<h3 class='recipe-title-on-index'><%=r.title%></h3>
-<div class='utensils-and-form'>
-<i class="fas fa-utensils fa-2x"></i>
-<%if current_user&.mealplan&.myrecipemealplanlinks&.find_by(myrecipe: r)%>
-<%=form_with url: remove_from_mealplan_path, local: true do |f|%>
-    <%= f.hidden_field :myrecipe_id, value: r.id %>
-    <%= f.submit 'forget it!', class: 'button small'%>
-<%end%>
-<%else%>
-<%=form_with url: add_to_mealplan_path, local: true do |f|%>
-    <%= f.hidden_field :myrecipe_id, value: r.id %>
-    <%= f.submit 'cook it!', class: 'button small'%>
-<%end%>
-<%end%>
-</div>
-</div>
-<%hour = (r.cooking_time_in_min / 60).floor%>
-<%min = (r.cooking_time_in_min % 60)%>
-<%if hour == 0%>
-<small>ready in <%=min%> min</small>
-<%elsif min == 0%>
-<small>ready in <%=hour%> hr</small>
-<%else%>
-<small>ready in <%=hour%> hr <%=min%> min</small>
-<%end%>
-<a href='/myrecipes/<%=r.id%>' class='recipe-image-on-index'><%= image_tag r.avatar.url(:medium)%></a>
-</div>
-<%end%>
+    <%@recipes.each do |r|%>
+    <div class='individual-recipe'>
+        <div class='recipe-title-and-utensils'>
+            <h3 class='recipe-title-on-index'><%=r.title%></h3>
+            <div class='utensils-and-form'>
+                <i class="fas fa-utensils fa-2x"></i>
+                <%if current_user&.mealplan&.myrecipemealplanlinks&.find_by(myrecipe: r)%>
+                <%=form_with url: remove_from_mealplan_path, local: true do |f|%>
+                <%= f.hidden_field :myrecipe_id, value: r.id %>
+                <%= f.submit 'forget it!', class: 'button small'%>
+                <%end%>
+                <%else%>
+                <%=form_with url: add_to_mealplan_path, local: true do |f|%>
+                <%= f.hidden_field :myrecipe_id, value: r.id %>
+                <%= f.submit 'cook it!', class: 'button small'%>
+                <%end%>
+                <%end%>
+            </div>
+        </div>
+        <%hour = (r.cooking_time_in_min / 60).floor%>
+        <%min = (r.cooking_time_in_min % 60)%>
+        <%if hour == 0%>
+        <small>ready in <%=min%> min</small>
+        <%elsif min == 0%>
+        <small>ready in <%=hour%> hr</small>
+        <%else%>
+        <small>ready in <%=hour%> hr <%=min%> min</small>
+        <%end%>
+        <a href='/myrecipes/<%=r.id%>' class='recipe-image-on-index'><%= image_tag r.avatar.url(:medium)%></a>
+    </div>
+    <%end%>
 </div>
 
 <script type="text/javascript">
-// $(document).ready(function() {
-//     $(".fa-utensils").hover(function(event) {
-//         $(event.currentTarget).closest('div').find('form').removeClass("hide");
-//   });
-//   $(".fa-utensils").click(function(event) {
-//         $(event.currentTarget).closest('div').find('form').removeClass("hide");
-//   });
-//   $("form").mouseleave(function(event) {
-//         $(event.currentTarget).addClass("hide");
-//   });
-// })
+    // $(document).ready(function() {
+    //     $(".fa-utensils").hover(function(event) {
+    //         $(event.currentTarget).closest('div').find('form').removeClass("hide");
+    //   });
+    //   $(".fa-utensils").click(function(event) {
+    //         $(event.currentTarget).closest('div').find('form').removeClass("hide");
+    //   });
+    //   $("form").mouseleave(function(event) {
+    //         $(event.currentTarget).addClass("hide");
+    //   });
+    // })
 </script>

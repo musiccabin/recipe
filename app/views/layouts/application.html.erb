@@ -21,21 +21,27 @@
   <!-- Hello <%= current_user.first_name%> -->
   <% if current_user.is_admin%>
   <div class='admin-menu'>
-    <%= link_to 'New Recipe!', new_myrecipe_path, class: 'menu-item'%>
+    <%= link_to 'Add!', new_myrecipe_path, class: 'menu-item'%>
     <!-- <%= link_to 'View System Stats', new_user_path%> -->
   </div>
   <%end%>
 
 <a href='/'><i class="fas fa-concierge-bell fa-2x menu-item"></i></a>
-<div class='retractable-menu'>
+<%=link_to user_mealplan_path(current_user, current_user.mealplan) do%>
+<%= fa_icon "calendar-alt 2x", class: 'menu-item' %>
+<%end%>
+<!-- <div class='retractable-menu'>
     <i class="far fa-calendar-alt fa-2x menu-item"></i>
     <div class='hide visually-hidden retractable-menu-items' id='mealplan-menu' >
       <%=link_to 'Meal Plan', user_mealplan_path(current_user, current_user.mealplan), class: 'menu-item'%> 
       <%= link_to 'Groceries', groceries_path, class: 'menu-item' %>
     </div>
-</div>
+</div> -->
 
-<div class='retractable-menu'>
+<%=link_to user_preferences_path do%>
+<%= fa_icon "user-circle 2x", class: 'menu-item' %>
+<%end%>
+<!-- <div class='retractable-menu'>
   <i class="fas fa-user-circle fa-2x menu-item"></i>
   <div class='hide visually-hidden retractable-menu-items' id='preferences-menu' >
     <%= link_to 'Preferences', user_preferences_path, class: 'menu-item' %>
@@ -43,16 +49,21 @@
     <%= link_to 'Favourites', favourites_path, class: 'menu-item' %>
     <%= link_to 'Dishes I made!', completions_path, class: 'menu-item' %>
   </div>
-    <!-- <%= link_to 'Enable/Disable Store Specials', new_user_path %> -->
-    <!-- <%= link_to 'Lunch/Dinner/Desserts', new_user_path %> -->
-</div>
+    <%= link_to 'Enable/Disable Store Specials', new_user_path %>
+</div> -->
 <a href='/add_leftover' class='drumstick'><i class="fas fa-drumstick-bite fa-2x menu-item" id='drumstick'></i></a>
+
+<div class='nav-menu-bottom'>
+<%=link_to groceries_path do%>
+<%= fa_icon "carrot 2x", class: 'menu-item' %>
+<%end%>
 </div>
 
 <%else%>
 <a href='/'><i class="fas fa-concierge-bell fa-2x menu-item"></i></a>
 <%= link_to "Sign In", new_session_path, class: 'menu-item'%>
 <%end%>
+</div>
 
   </nav>
   </header>

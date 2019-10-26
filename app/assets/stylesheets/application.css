@@ -12,6 +12,8 @@
  *
  *= require_tree .
  *= require_self
+ /*
+ *= require font-awesome
  */
 
 
@@ -803,10 +805,28 @@ a:active {
 
 .nav-menu {
   width: 100%;
+  position: fixed;
   display: flex; flex-direction: row;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  margin-bottom: 1em;
+  text-align: center;
+  /* margin-bottom: 1em; */
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+.nav-menu-bottom {
+  width: 100%;
+  position: fixed;
+  display: flex; flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  /* margin-bottom: 1em; */
+  bottom: 0;
+  left: 0;
+  right: 0;
 }
 
 .retractable-menu {

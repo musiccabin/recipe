@@ -47,6 +47,7 @@ gem 'selectize-rails'
 gem 'delayed_job_active_record'
 gem 'delayed_job_web'
 gem "paperclip", git: "git://github.com/thoughtbot/paperclip.git"
+gem "font-awesome-rails"
 
 group :development do
   # Access an interactive console on exception pages or by calling 'console' anywhere in the code.
