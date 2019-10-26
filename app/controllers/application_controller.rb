@@ -21,6 +21,33 @@ class ApplicationController < ActionController::Base
   end
   helper_method(:is_seasoning?)
 
+  #info from: https://bcfarmersmarket.org/why-bc-farmers-markets/whats-in-season/
+  def seasonal_ingredients
+    output = []
+    now = Time.now.strftime("%m/%d/%Y")
+    cur_mo = now[0..1]
+    case cur_mo
+    when '10'
+      output = ['apple', 'artichoke', 'beet', 'broccoli', 'brussels sprouts', 'green cabbage', 'red cabbage', 'savoy cabbage', 'carrot', 'cauliflower', 'celery', 'corn', 'cranberry', 'cucumber', 'fennel bulb', 'garlic', 'kale', 'kiwi', 'leek', 'lettuce', 'mustard greens', 'red onion', 'yellow onion', 'parsnip', 'pear', 'pepper', 'potato', 'pumpkin', 'quince', 'radish', 'rutabaga', 'spinach', 'squash', 'swiss chard', 'tomato', 'turnip', 'zucchini', 'bean', 'shallot']
+    else
+      output = []
+    end
+  end
+
+  def is_in_season?(item)
+    if item.include? 'potato'
+      item = 'potato'
+    elsif item.include?('pepper') && !item.include?('black')
+      item = 'pepper'
+    elsif item.include? 'squash'
+      item = 'squash'
+    elsif item == 'onion' && (seasonal_ingredients.include?('red onion') || seasonal_ingredients.include?('yellow onion') || seasonal_ingredients.include?('white onion'))
+      return true
+    end
+    seasonal_ingredients.include? item
+  end
+  helper_method(:is_in_season?)
+
   def floatify(quantity)
     output = 0
     quantity = quantity.lstrip.reverse.lstrip.reverse

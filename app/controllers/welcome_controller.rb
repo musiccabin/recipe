@@ -9,6 +9,7 @@ class WelcomeController < ApplicationController
       # else
         #grab recipes with user's preferences and display images
         @recipes = recommend_recipes
+      # end
     elsif params[:tag]
       tag = Tag.find_by(name: params[:tag])
       @recipes = Myrecipe.all.to_a.select {|recipe| recipe.tags.include? tag}
@@ -74,9 +75,10 @@ class WelcomeController < ApplicationController
       end
     #if user doesn't have leftovers
     else
-      sorted_results = result_rstrn_tags
+      #sort by seasonal ingredients
+      sorted_results = seasonals_first(result_rstrn_tags)
     end
-    #return sorted results (future: sort recipes by seasonal ingredients)
+    #return sorted results
     sorted_results
   end
 
@@ -117,10 +119,10 @@ class WelcomeController < ApplicationController
         end
       end
     end
-    sorted_results = push_recipe(stats, 3, sorted_results)
-    sorted_results = push_recipe(stats, 2, sorted_results)
-    sorted_results = push_recipe(stats, 1, sorted_results)
-    sorted_results = push_recipe(stats, 0, sorted_results)
+    sorted_results = push_recipe_seasonals_first(stats, 3, sorted_results)
+    sorted_results = push_recipe_seasonals_first(stats, 2, sorted_results)
+    sorted_results = push_recipe_seasonals_first(stats, 1, sorted_results)
+    sorted_results = push_recipe_seasonals_first(stats, 0, sorted_results)
     # if stats.has_value?(2)
     #   selected = stats.select {|k,v| v == 2}
     #   sorted_results += selected.keys
@@ -155,10 +157,6 @@ class WelcomeController < ApplicationController
         if above_50_percent(quantity_recipe, quantity_leftover)
           stats_50[r] += 1
           break if stats_50[r] >= 3
-          # if stats_50[r] >= 3
-          #   sorted_results << r
-          #   break
-          # end
         else
           stats_reg[r] += 1
           break if stats_reg[r] >= 5
@@ -166,14 +164,14 @@ class WelcomeController < ApplicationController
       end
     end
     stats_reg = stats_reg.delete_if {|recipe| stats_50.include? recipe}
-    sorted_results = push_recipe(stats_50, 3, sorted_results)
-    sorted_results = push_recipe(stats_reg, 5, sorted_results)
-    sorted_results = push_recipe(stats_50, 2, sorted_results)
-    sorted_results = push_recipe(stats_reg, 4, sorted_results)
-    sorted_results = push_recipe(stats_reg, 3, sorted_results)
-    sorted_results = push_recipe(stats_50, 1, sorted_results)
-    sorted_results = push_recipe(stats_reg, 2, sorted_results)
-    sorted_results = push_recipe(stats_reg, 1, sorted_results)
+    sorted_results = push_recipe_seasonals_first(stats_50, 3, sorted_results)
+    sorted_results = push_recipe_seasonals_first(stats_reg, 5, sorted_results)
+    sorted_results = push_recipe_seasonals_first(stats_50, 2, sorted_results)
+    sorted_results = push_recipe_seasonals_first(stats_reg, 4, sorted_results)
+    sorted_results = push_recipe_seasonals_first(stats_reg, 3, sorted_results)
+    sorted_results = push_recipe_seasonals_first(stats_50, 1, sorted_results)
+    sorted_results = push_recipe_seasonals_first(stats_reg, 2, sorted_results)
+    sorted_results = push_recipe_seasonals_first(stats_reg, 1, sorted_results)
 
     # if stats_reg.has_value?(5)
     #   selected = stats_reg.select {|k,v| v == 5}
@@ -240,6 +238,14 @@ class WelcomeController < ApplicationController
     if stats.has_value?(val)
       selected = stats.select {|k,v| v == val}
       sorted_results += selected.keys
+    end
+    sorted_results
+  end
+
+  def push_recipe_seasonals_first(stats,val,sorted_results)
+    if stats.has_value?(val)
+      selected = stats.select {|k,v| v == val}
+      sorted_results += seasonals_first(selected.keys)
     end
     sorted_results
   end
@@ -445,5 +451,25 @@ def stringify_quantity(float)
       end
     end
     output
+  end
+
+  def seasonals_first(recipes)
+    myrecipes = recipes.to_a
+    output = []
+    count = {}
+    count.default = 0
+    myrecipes.each do |r|
+      count[r] = 0 unless count[r] > 0
+      next if count[r] == 5
+      r.myrecipeingredientlinks.each do |l|
+        if is_in_season? l.ingredient.name
+          count[r] += 1
+        end
+      end
+    end
+    5.downto(0) do |num|
+      output += push_recipe(count, num, output)
+    end
+    output.uniq
   end
 end
