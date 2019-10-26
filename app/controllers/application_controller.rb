@@ -29,6 +29,8 @@ class ApplicationController < ActionController::Base
     case cur_mo
     when '10'
       output = ['apple', 'artichoke', 'beet', 'broccoli', 'brussels sprouts', 'green cabbage', 'red cabbage', 'savoy cabbage', 'carrot', 'cauliflower', 'celery', 'corn', 'cranberry', 'cucumber', 'fennel bulb', 'garlic', 'kale', 'kiwi', 'leek', 'lettuce', 'mustard greens', 'red onion', 'yellow onion', 'parsnip', 'pear', 'pepper', 'potato', 'pumpkin', 'quince', 'radish', 'rutabaga', 'spinach', 'squash', 'swiss chard', 'tomato', 'turnip', 'zucchini', 'bean', 'shallot']
+    when '11'
+      output = ['apple', 'beet', 'broccoli', 'brussels sprouts', 'green cabbage', 'red cabbage', 'savoy cabbage', 'carrot', 'cauliflower', 'kale', 'kiwi', 'leek', 'lettuce', 'mustard greens', 'red onion', 'yellow onion', 'parsnip', 'pear', 'potato', 'pumpkin', 'quince', 'rutabaga', 'squash', 'swiss chard', 'tomato', 'turnip', 'bean', 'garlic', 'shallot']
     else
       output = []
     end
