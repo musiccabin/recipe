@@ -6,11 +6,23 @@
 <p style='text-align: center'><%=current_user.errors.full_messages.join('')%></p>
 <%end%>
 
-<div class='section-on-preferences'>
-    <!-- <h3 class='section-title-on-preferences'>Select dietary restrictions</h3> -->
+<div class='tags-on-preferences'>
+        <%Dietaryrestriction.all.each do |dr|%>
+    <%=form_with model: @user, local: true do |f|%>
+    <%= f.hidden_field :dr_id, value: dr.id %>
+    <%if current_user.dietaryrestrictions.find_by(id: dr)%>
+    <%=f.submit dr.name, class: 'button', style: 'background: red'%>
+    <%else%>
+    <%=f.submit dr.name, class: 'button'%>
+    <%end%>
+    <%end%>
+    <%end%>
+    </div>
+
+<!-- <div class='section-on-preferences'>
     <%=form_with model: @dietaryrestriction, local: true do |f|%>
     <%= f.select :name, ['vegetarian', 'vegan', 'gluten free', 'dairy free', 'halal']%>
-    <%=f.submit class: 'button small'%>
+    <%=f.submit class: 'button'%>
     <%end%>
     
     <div class='restrictions-on-preferences'>
@@ -20,12 +32,22 @@
     <%end%>
     <%end%>
     </div>
-    </div>
+    </div> -->
     
     <h1 class='page-title'>My Preferences</h1>
-
-    <div class='section-on-preferences'>
-        <!-- <h3 class='section-title-on-preferences'>Select categories</h3> -->
+    <div class='tags-on-preferences' style='margin-bottom: 4em;'>
+    <%Tag.all.each do |tag|%>
+<%=form_with model: @user, local: true do |f|%>
+<%= f.hidden_field :tag_id, value: tag.id %>
+<%if current_user.tags.find_by(id: tag.id)%>
+<%=f.submit tag.name, class: 'button', style: 'background: red'%>
+<%else%>
+<%=f.submit tag.name, class: 'button'%>
+<%end%>
+<%end%>
+<%end%>
+</div>
+    <!-- <div class='section-on-preferences'>
         <%=form_with model: @user, local: true do |f|%>
         <div class='tags-on-preferences'>
             <%=f.collection_check_boxes :tags, Tag.all, :id, :name do |b|%>
@@ -45,7 +67,7 @@
             <%end%>
             <%end%>
             </div>
-        </div>
+        </div> -->
 
 <script type="text/javascript">
     document.querySelector(".tags-on-preference").onclick = function(event) {

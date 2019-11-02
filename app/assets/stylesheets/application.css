@@ -433,7 +433,6 @@ ul {
 }
 
 .tags-on-myrecipe {
-  /* padding: 1em; */
   display: flex; flex-direction: row;
   justify-content: center;
 }
@@ -525,7 +524,7 @@ ul {
 }
 
 .tags-on-preferences {
-  display: flex; flex-direction: column;
+  display: flex; flex-flow: row wrap;
   align-items: center; justify-content: center;
 }
 
@@ -879,11 +878,23 @@ small {
 
 select {
   font-size: 1em;
+  color: white;
 }
 
-input[type="submit"] {
+/* input[type="submit"] {
   font-family: 'Raleway', sans-serif;
   border: none;
+} */
+
+input[type=checkbox]
+{
+  /* Double-sized Checkboxes */
+  -ms-transform: scale(2); /* IE */
+  -moz-transform: scale(2); /* FF */
+  -webkit-transform: scale(2); /* Safari and Chrome */
+  -o-transform: scale(2); /* Opera */
+  transform: scale(2);
+  padding: 10px;
 }
 
 /* option {

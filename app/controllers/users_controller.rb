@@ -54,22 +54,39 @@ class UsersController < ApplicationController
   end
 
   def preferences
-    if params.has_key?("name")
-      @restriction = Dietaryrestriction.find_by(name: params[:name])
-      link = Userdietaryrestrictionlink.new(user: current_user, dietaryrestriction: @restriction)
-      if link.save
+    if params[:dr_id]
+      restriction = Dietaryrestriction.find_by(id: params[:dr_id])
+      if restriction != nil
+        if !current_user.dietaryrestrictions.include?(Dietaryrestriction.find(restriction.id))
+          current_user.dietaryrestrictions << Dietaryrestriction.find(restriction.id)
+        else
+          delete_restriction
+        end
+      end
+      # link = Userdietaryrestrictionlink.new(user: current_user, dietaryrestriction: @restriction)
+      if current_user.save
         redirect_to user_preferences_path and return
       else
         render :preferences and return
       end
     end
-    if (params.has_key? 'tags')
-      tag_ids = params[:tags].reject(&:blank?).uniq
-      if current_user.tag_ids.to_s != ''
-        tag_ids.each do |id|
-          current_user.tags << Tag.find_by(id: id)
+    if params[:tag_id]
+      # byebug
+      tag = Tag.find_by(id: params[:tag_id])
+      if tag != nil
+        if !current_user.tags.include?(Tag.find(tag.id))
+          current_user.tags << Tag.find(tag.id)
+        else
+          delete_tag
         end
       end
+    # if (params.has_key? 'tags')
+    #   tag_ids = params[:tags].reject(&:blank?).uniq
+    #   if current_user.tag_ids.to_s != ''
+    #     tag_ids.each do |id|
+    #       current_user.tags << Tag.find_by(id: id)
+    #     end
+    #   end
       if (current_user.save)
         redirect_to user_preferences_path and return
       else
@@ -88,15 +105,15 @@ class UsersController < ApplicationController
   # end
 
   def delete_restriction
-    restriction = Dietaryrestriction.find(params[:id])
-    current_user.userdietaryrestrictionlinks.find_by(dietaryrestriction_id: params[:id]).destroy
-    redirect_to user_preferences_path
+    restriction = Dietaryrestriction.find(params[:dr_id])
+    current_user.userdietaryrestrictionlinks.find_by(dietaryrestriction_id: params[:dr_id]).destroy
+    # redirect_to user_preferences_path
   end
 
   def delete_tag
-    tag = Tag.find(params[:id])
-    current_user.usertaggings.find_by(tag_id: params[:id]).destroy
-    redirect_to user_preferences_path
+    tag = Tag.find(params[:tag_id])
+    current_user.usertaggings.find_by(tag_id: params[:tag_id]).destroy
+    # redirect_to user_preferences_path
   end
 
   def update
@@ -199,9 +216,9 @@ class UsersController < ApplicationController
     @restrictions = current_user.dietaryrestrictions
   end
 
-  def tags_params
-    params.require(:user).permit(:tags)
-  end
+  # def tags_params
+  #   params.require(:user).permit(:tags)
+  # end
 
   def leftover_params
     params.permit(:ingredient, :quantity, :unit, :expiry_date)
