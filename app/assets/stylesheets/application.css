@@ -21,7 +21,7 @@
 
 html {
   box-sizing: border-box;
-  /* background-image: url('groceries.jpg'); */
+  /* min-height: 100%; */
 }
 
 *,
@@ -37,7 +37,7 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  /* min-width: 50%; */
+  /* min-height: 100%; */
   padding: 1em;
 }
 
@@ -45,6 +45,7 @@ main {
   display: flex;
   flex-direction: column;
   width: 100%;
+  /* height: 100%; */
 }
 
 .grocery-page {
@@ -155,11 +156,12 @@ main {
 .setting {
   padding: 1em;
   color: white;
-  background-image: url('setting_long.jpg');
+  background-image: url('setting_og.jpg');
   background-size: cover;
+  flex: 1;
+  min-height: 100%;
   display: flex; flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  align-items: center; justify-content: center;
   text-align: center;
 }
 
@@ -183,14 +185,6 @@ main {
   left: 0;
   z-index: -1;
 } */
-
-.forgot-password {
-  background-image: url('setting.jpg');
-  background-size: cover;
-  flex: 1;
-  min-height: 100%;
-  color: white;
-}
 
 .page-title {
   font-size: 2em;
@@ -262,6 +256,19 @@ main {
   border-radius: 12px;
   background-color: black;
   color: white;
+  -webkit-transition-duration: 0.4s;
+  /* Safari */
+  transition-duration: 0.4s;
+  margin: 1em;
+}
+
+.button.tiny {
+  font-size: 1em;
+  padding: .5em 1em;
+  border: 1px solid red;
+  border-radius: 12px;
+  background-color: transparent;
+  color: red;
   -webkit-transition-duration: 0.4s;
   /* Safari */
   transition-duration: 0.4s;
@@ -359,7 +366,7 @@ main {
 }
 
 .fa-utensils {
-  padding: 1em;
+  padding-left: 1em;
   -webkit-transition-duration: 0.4s;
   /* Safari */
   transition-duration: 0.4s;
@@ -426,7 +433,7 @@ ul {
 }
 
 .tags-on-myrecipe {
-  padding: 1em;
+  /* padding: 1em; */
   display: flex; flex-direction: row;
   justify-content: center;
 }
@@ -473,6 +480,7 @@ ul {
 .leftovers {
   display: flex; flex-flow: column;
   justify-content: center;
+  margin-bottom: 2em;
 }
 
 .button-wrapper {
@@ -483,7 +491,7 @@ ul {
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  margin: 1em;
+  /* margin: 1em; */
 }
 
 .each-leftover {
@@ -517,7 +525,7 @@ ul {
 }
 
 .tags-on-preferences {
-  display: flex; flex-direction: row;
+  display: flex; flex-direction: column;
   align-items: center; justify-content: center;
 }
 
@@ -568,7 +576,7 @@ label::before {
 } */
 
 .restrictions-on-preferences {
-  display: flex; flex-direction: row;
+  display: flex; flex-wrap: wrap;
   align-items: center; justify-content: center;
 }
 

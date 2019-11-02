@@ -1,54 +1,54 @@
 <% content_for :body_class, 'setting' %>
 
-<h1 class='page-title'>My Preferences</h1>
+<h1 class='page-title'>My Dietary Restrictions</h1>
 
 <% if current_user.errors.any?%>
 <p style='text-align: center'><%=current_user.errors.full_messages.join('')%></p>
 <%end%>
 
 <div class='section-on-preferences'>
-<!-- <h3 class='section-title-on-preferences'>Select dietary restrictions</h3> -->
-<%=form_with model: @dietaryrestriction, local: true do |f|%>
-<%= f.select :name, ['vegetarian', 'vegan', 'gluten free', 'dairy free', 'halal']%>
-<%=f.submit class: 'button small'%>
-<%end%>
-
-<div class='restrictions-on-preferences'>
-<% if @restrictions %>
-<%@restrictions.each do |r|%>
-<p class='restriction-on-preferences'><%=r.name%> <%=link_to 'x', delete_restriction_path(r), method: :delete%></p>
-<%end%>
-<%end%>
-</div>
-</div>
-
-<div class='section-on-preferences'>
-<!-- <h3 class='section-title-on-preferences'>Select categories</h3> -->
-<%=form_with model: @user, local: true do |f|%>
-<div class='tags-on-preferences'>
-    <%=f.collection_check_boxes :tags, Tag.all, :id, :name do |b|%>
-    <div class='tag-wrapper'>
-        <%=b.check_box %>
-        <%=b.text.humanize%>
-    </div>
+    <!-- <h3 class='section-title-on-preferences'>Select dietary restrictions</h3> -->
+    <%=form_with model: @dietaryrestriction, local: true do |f|%>
+    <%= f.select :name, ['vegetarian', 'vegan', 'gluten free', 'dairy free', 'halal']%>
+    <%=f.submit class: 'button small'%>
     <%end%>
-</div>
-<div class='restrictions-on-preferences'>
-<%if current_user.tags%>
-<%current_user.tags.each do |t|%>
-<p class='restriction-on-preferences'><%=t.name%> <%=link_to 'x', delete_tag_path(t), method: :delete%></p>
-<%end%>
-<%end%>
-</div>
-</div>
+    
+    <div class='restrictions-on-preferences'>
+    <% if @restrictions %>
+    <%@restrictions.each do |r|%>
+    <p class='restriction-on-preferences'><%=r.name%> <%=link_to 'x', delete_restriction_path(r), method: :delete%></p>
+    <%end%>
+    <%end%>
+    </div>
+    </div>
+    
+    <h1 class='page-title'>My Preferences</h1>
 
-<div>
-<%=f.submit 'Save Preferences', class: 'button'%>
-</div>
-<%end%>
+    <div class='section-on-preferences'>
+        <!-- <h3 class='section-title-on-preferences'>Select categories</h3> -->
+        <%=form_with model: @user, local: true do |f|%>
+        <div class='tags-on-preferences'>
+            <%=f.collection_check_boxes :tags, Tag.all, :id, :name do |b|%>
+            <div class='tag-wrapper'>
+                <%=b.check_box %>
+                <%=b.text.humanize%>
+            </div>
+            <%end%>
+        </div>
+            <%=f.submit 'Save Preferences', class: 'button', style: 'margin-bottom: 4em'%>
+        <%end%>
+        
+        <div class='restrictions-on-preferences'>
+            <%if current_user.tags%>
+            <%current_user.tags.each do |t|%>
+            <p class='restriction-on-preferences'><%=t.name%> <%=link_to 'x', delete_tag_path(t), method: :delete%></p>
+            <%end%>
+            <%end%>
+            </div>
+        </div>
 
 <script type="text/javascript">
     document.querySelector(".tags-on-preference").onclick = function(event) {
-        event.target.classList.add('checked')
+        event.target.classList.add('checked');
     }
 </script>

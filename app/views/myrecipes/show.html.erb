@@ -9,22 +9,22 @@
 <div class='icons-on-myrecipe'>
 <% if current_user&.favourite_recipes&.include? @myrecipe%>
 <i class="fas fa-heart" style='padding: .5em'></i>
-<%= link_to "Forget it!", myrecipe_favourite_path(@myrecipe), method: :delete%>
+<%= link_to "Meh", myrecipe_favourite_path(@myrecipe), method: :delete%>
 <%else%>
 <i class="far fa-heart" style='padding: .5em'></i>
-<%= link_to 'Love it!', myrecipe_favourites_path(@myrecipe), method: :post%>
+<%= link_to 'Yas!', myrecipe_favourites_path(@myrecipe), method: :post%>
 <%end%>
 <div class='utensils-and-form'>
         <i class="fas fa-utensils"></i>
         <%if current_user&.mealplan&.myrecipemealplanlinks&.find_by(myrecipe: @myrecipe)%>
-        <%=form_with url: remove_from_mealplan_path, class: 'hide', local: true do |f|%>
+        <%=form_with url: remove_from_mealplan_path, local: true do |f|%>
             <%= f.hidden_field :myrecipe_id, value: @myrecipe.id %>
-            <%= f.submit 'forget it!', class: 'button small'%>
+            <%= f.submit 'forget it!', class: 'button tiny'%>
         <%end%>
         <%else%>
-        <%=form_with url: add_to_mealplan_path, class: 'hide', local: true do |f|%>
+        <%=form_with url: add_to_mealplan_path, local: true do |f|%>
             <%= f.hidden_field :myrecipe_id, value: @myrecipe.id %>
-            <%= f.submit 'cook it!', class: 'button small'%>
+            <%= f.submit 'cook it!', class: 'button tiny'%>
         <%end%>
         <%end%>
         </div>
@@ -35,10 +35,10 @@
 
 <div class='recipe-body'>
 
-<div class='image-and-reviews'>
-<%= image_tag @myrecipe.avatar.url(:medium), class: 'image-on-myrecipe' %>
+<!-- <div class='image-and-reviews'> -->
 <div>
 <% if @myrecipe.tags.any? %>
+<p style='text-align: center'>Perfect For</p>
 <div class='tags-on-myrecipe'>
 <% @myrecipe.tags.each do |tag|%>
 <%=link_to(
@@ -50,10 +50,7 @@
 </div>
 <%end%>
 </div>
-
-<%#if current_user%>
-<%#=link_to 'Add to Meal Plan', mealplan_path, method: :post%>
-<%#end%>
+<%= image_tag @myrecipe.avatar.url(:medium), class: 'image-on-myrecipe' %>
 
 <div class='admin-actions-on-myrecipe'>
 <% if can?(:crud, @myrecipe) %>
@@ -67,6 +64,34 @@
 <%end%>
 
 <%end%>
+</div>
+<!-- </div> -->
+
+<div class='ingredients-and-instructions'>
+    <button type="button" id='ingredients' class='button'>Ingredients</button>
+    <ul id="ingredients-content">
+        <%@links.each do |l|%>
+        <li><%=l.ingredient.name%>: <%=l.quantity%> <%=l.unit%></li>
+        <%end%>
+    </ul>
+    
+    <button type="button" id='instructions' class='button'>Instructions</button>
+    <div class='instructions-content' id="instructions-content">
+    <ul>
+    <%@instructions.each do |step|%>
+    <li><%=step%></li>
+    <%end%>
+    </ul>
+    <div style='text-align: center; margin-bottom: 2em'>
+    <%if current_user.present?%>
+    <% if current_user&.completed_recipes&.include? @myrecipe%>
+    <%= link_to 'Completed!', myrecipe_completion_path(@myrecipe), method: :delete%>
+    <%else%>
+    <%= link_to 'Done?', myrecipe_completions_path(@myrecipe), method: :post%>
+    <%end%>
+    </div>
+    <%end%>
+    </div>
 </div>
 
 <button type="button" id='reviews' class='button'>Reviews</button>
@@ -111,7 +136,7 @@
 <div class='form-group'>
     <%= f.text_area(:content, cols: 50, rows: 5, placeholder: "Share your experience of making this recipe...", class: "review-form-text-area") %>
 </div>
-<%= f.submit class: 'button'%>
+<%= f.submit class: 'button small'%>
 
 <ul class='review-list'>
     <% @reviews.each do |r| %>
@@ -129,34 +154,6 @@
 </ul>
 
 <% end %>
-</div>
-
-<div class='ingredients-and-instructions'>
-    <button type="button" id='ingredients' class='button'>Ingredients</button>
-    <ul id="ingredients-content">
-        <%@links.each do |l|%>
-        <li><%=l.ingredient.name%>: <%=l.quantity%> <%=l.unit%></li>
-        <%end%>
-    </ul>
-    
-    <button type="button" id='instructions' class='button'>Instructions</button>
-    <div class='instructions-content' id="instructions-content">
-    <ul>
-    <%@instructions.each do |step|%>
-    <li><%=step%></li>
-    <%end%>
-    </ul>
-    <div style='text-align: center'>
-    <%if current_user.present?%>
-    <% if current_user&.completed_recipes&.include? @myrecipe%>
-    <%= link_to 'Completed!', myrecipe_completion_path(@myrecipe), method: :delete%>
-    <%else%>
-    <%= link_to 'Done?', myrecipe_completions_path(@myrecipe), method: :post%>
-    <%end%>
-    </div>
-    <%end%>
-    </div>
-</div>
 
 </div>
 
@@ -196,9 +193,15 @@
 </script>
 
 <script type="text/javascript">
+$(document).ready(function() {
+    $(".button:not(.tiny, .small)").css("background-color", "red");
+})
+</script>
+
+<!-- <script type="text/javascript">
     $(document).ready(function() {
       $(".fa-utensils").click(function(event) {
             $(event.currentTarget).closest('div').find('form').removeClass("hide");
       });
     })
-    </script>
+    </script> -->
