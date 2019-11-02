@@ -21,7 +21,13 @@
   <!-- Hello <%= current_user.first_name%> -->
   <% if current_user.is_admin%>
   <div class='admin-menu'>
-    <%= link_to 'Add!', new_myrecipe_path, class: 'menu-item'%>
+      <%= link_to(new_myrecipe_path) do %>
+      <i class="far fa-plus-square fa-2x menu-item"></i>
+    <% end %>
+
+    <!-- <%= link_to new_myrecipe_path do%>
+    <%= fa_icon "plus-square 2x", class: 'menu-item' %>
+    <%end%> -->
     <!-- <%= link_to 'View System Stats', new_user_path%> -->
   </div>
   <%end%>
@@ -58,6 +64,17 @@
 <%= fa_icon "carrot 2x", class: 'menu-item' %>
 <%end%>
 </div>
+<div class='nav-menu-bottom-preferences'>
+    <%=link_to favourites_path do%>
+    <%= fa_icon "heartbeat 2x", class: 'menu-item'%>
+    <%end%>
+    <%=link_to completions_path do%>
+    <%= fa_icon "check-double 2x", class: 'menu-item'%>
+    <%end%>
+    <%=link_to setting_path do%>
+    <%= fa_icon "cogs 2x", class: 'menu-item'%>
+    <%end%>
+    </div>
 
 <%else%>
 <a href='/'><i class="fas fa-concierge-bell fa-2x menu-item"></i></a>
@@ -92,6 +109,14 @@
 
 <script type="text/javascript">
   $(document).ready(function() {
+    if ($('h1').hasClass('preferences-page-title')) {
+      // $('.nav-menu-bottom').css('display', 'none');
+      $('.nav-menu-bottom-preferences').css('display', 'block');
+    } else {
+      // $('.nav-menu-bottom').css('display', 'block');
+      $('.nav-menu-bottom-preferences').css('display', 'none');
+    };
+
     const pages = ['setting', 'sign-in', 'sign-up', 'forgot-password', 'new-recipe'];
     if (!pages.includes($('body').attr('class'))) {
       const menuPreferences = $("#preferences-menu");

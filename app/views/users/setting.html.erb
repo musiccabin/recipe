@@ -1,7 +1,7 @@
 <% content_for :body_class, 'setting' %>
 
 <div class='setting-page-content'>
-<h1 class='page-title'>The Essentials :)</h1>
+<h1 class='preferences-page-title'>The Essentials :)</h1>
 <%if current_user.errors.any?%>
 <% current_user.errors.full_messages.each do |error|%>
 <p><%=error%></p>

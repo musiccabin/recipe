@@ -194,6 +194,13 @@ main {
   /* word-wrap: normal; */
 }
 
+.preferences-page-title {
+  font-size: 2em;
+  margin-top: 6em;
+  text-align: center;
+  /* word-wrap: normal; */
+}
+
 .input-field {
   height: 3em;
   width: 30em;
@@ -515,13 +522,11 @@ ul {
   padding: .25em;
 }
 
-.recipes-i-made {
+/* .recipes-i-made {
   font-size: 2em;
-  padding: 1em;
+  padding-top: 2em;
   text-align: center;
-  width: 50%;
-  background-color: rgba(255,255,255,0.5);
-}
+} */
 
 .tags-on-preferences {
   display: flex; flex-flow: row wrap;
