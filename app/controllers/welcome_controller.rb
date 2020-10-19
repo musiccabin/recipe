@@ -147,6 +147,25 @@ class WelcomeController < ApplicationController
     stats_reg.default = 0
     stats_50 = {}
     stats_50.default = 0
+    #if mealplan already uses up a leftover ingredient, don't recommend recipes for this ingredient anymore.
+    #if mealplan uses a portion of a leftover ingredient, update recommendation to search for the remaining quantity.
+    non_exp_leftovers.each do |l|
+      if current_user&.mealplan&.myrecipes.any?
+        current_user.mealplan.myrecipes.each do |mealplan_recipe|
+          mealplan_recipe.ingredients.each do |i|
+            next if i != l.ingredient
+            quantity_in_recipe = proper_recipe_quantity(i, mealplan_recipe, l).to_f
+            l_quantity = l.quantity.to_f
+            if l_quantity - quantity_in_recipe > 0
+              l.quantity = l_quantity - quantity_in_recipe
+            else
+              non_exp_leftovers.delete(l)
+            end
+          end
+        end
+      end
+    end
+    #sort recipes
     result_rstrn_tags_non_exp.each do |r|
       non_exp_leftovers.each do |leftover|
         ingredient = leftover.ingredient
