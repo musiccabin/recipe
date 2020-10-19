@@ -34,14 +34,21 @@ class WelcomeController < ApplicationController
 
   private
   def recommend_recipes
-    result_rstrn = []
+    result_not_in_mealplan = []
+    #return recipes that aren't added to user's mealplan
+    if current_user.mealplan
+      result_not_in_mealplan += Myrecipe.all.select{|recipe| current_user.mealplan.myrecipes.exclude?(recipe)}
+    else
+      result_not_in_mealplan = Myrecipe.all
+    end
     #filter by user's dietary restrictions
+    result_rstrn = []
     if current_user.dietaryrestrictions.any?
       current_user.dietaryrestrictions.each do |restriction|
-        result_rstrn += Myrecipe.all.select{|recipe| recipe.dietaryrestrictions.include?(restriction)}
+        result_rstrn += result_not_in_mealplan.select{|recipe| recipe.dietaryrestrictions.include?(restriction)}
       end
     else
-      result_rstrn = Myrecipe.all
+      result_rstrn = result_not_in_mealplan
     end
     result_rstrn_tags = []
     #either filter by tag name in params
