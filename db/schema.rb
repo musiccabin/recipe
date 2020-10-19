@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_09_11_000431) do
+ActiveRecord::Schema.define(version: 2020_10_19_062304) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -73,6 +73,7 @@ ActiveRecord::Schema.define(version: 2019_09_11_000431) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "user_added", default: false
+    t.string "category"
     t.index ["is_completed"], name: "index_groceries_on_is_completed"
     t.index ["user_id"], name: "index_groceries_on_user_id"
   end
@@ -82,8 +83,20 @@ ActiveRecord::Schema.define(version: 2019_09_11_000431) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "myrecipeingredientlink_id"
+    t.string "category"
     t.index ["myrecipeingredientlink_id"], name: "index_ingredients_on_myrecipeingredientlink_id", unique: true
     t.index ["name"], name: "index_ingredients_on_name", unique: true
+  end
+
+  create_table "leftover_usages", force: :cascade do |t|
+    t.string "quantity"
+    t.string "unit"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id"
+    t.bigint "ingredient_id"
+    t.index ["ingredient_id"], name: "index_leftover_usages_on_ingredient_id"
+    t.index ["user_id"], name: "index_leftover_usages_on_user_id"
   end
 
   create_table "leftovers", force: :cascade do |t|
@@ -205,6 +218,9 @@ ActiveRecord::Schema.define(version: 2019_09_11_000431) do
     t.datetime "avatar_updated_at"
     t.boolean "is_admin", default: false
     t.integer "tags", default: [], array: true
+    t.string "city"
+    t.string "province"
+    t.string "postal"
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
@@ -225,6 +241,8 @@ ActiveRecord::Schema.define(version: 2019_09_11_000431) do
   add_foreign_key "favourites", "users"
   add_foreign_key "groceries", "users"
   add_foreign_key "ingredients", "myrecipeingredientlinks"
+  add_foreign_key "leftover_usages", "ingredients"
+  add_foreign_key "leftover_usages", "users"
   add_foreign_key "leftovers", "ingredients"
   add_foreign_key "leftovers", "users"
   add_foreign_key "likes", "reviews"

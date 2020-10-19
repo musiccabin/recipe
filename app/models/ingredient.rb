@@ -6,6 +6,7 @@ class Ingredient < ApplicationRecord
   has_many :unit, through: :myrecipeingredientlinks, source: :myrecipe
 
   validates :name, presence: true, uniqueness: true
+  validates_inclusion_of :category, :in => ['produce', 'meat', 'dairy', 'frozen', 'other'], :allow_nil => true
 
   before_validation :downcase_name
 
