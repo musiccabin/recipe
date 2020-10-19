@@ -55,6 +55,7 @@
 <div class='admin-actions-on-myrecipe'>
 <% if can?(:crud, @myrecipe) %>
 <%= link_to 'Edit', edit_myrecipe_path(@myrecipe), class: 'admin-action-on-myrecipe'%>
+<%= link_to 'Edit Ingredients', add_ingredients_path(@myrecipe), class: 'admin-action-on-myrecipe'%>
 <%= link_to 'Delete', myrecipe_path(@myrecipe), method: :delete, data: {confirm: "Delete?"}, class: 'admin-action-on-myrecipe'%>
 
 <% if @myrecipe.is_hidden%>

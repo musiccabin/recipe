@@ -5,6 +5,7 @@ class IngredientsController < ApplicationController
   def create
   end
 
+  
   def edit
   end
 
@@ -13,4 +14,5 @@ class IngredientsController < ApplicationController
 
   def destroy
   end
+
 end

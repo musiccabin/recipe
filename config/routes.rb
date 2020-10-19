@@ -13,10 +13,10 @@ Rails.application.routes.draw do
     resources :ingredients
     resources :completions, only: [:create, :destroy]
     resources :favourites, only: [:create, :destroy]
-  end
+  end 
 
 
-  get '/', {to: 'welcome#index', as: 'root'}
+  get '/', {to: 'welcome#index', as: 'root'}     
   get 'welcome/index', {to: 'welcome#index'}
   get '/forgot_password', {to: 'users#forgot_password', as: 'forgot_password'}
   post '/forgot_password', {to: 'users#send_email', as: 'send_email'}

@@ -66,6 +66,10 @@ class MyrecipesController < ApplicationController
   def edit
   end
 
+  def edit_ingredient
+    redirect_to add_ingredients_path
+  end
+
   def destroy
     @myrecipe.destroy
     redirect_to root_path, notice: 'this recipe is deleted.'
