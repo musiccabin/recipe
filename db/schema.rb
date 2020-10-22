@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_10_19_062304) do
+ActiveRecord::Schema.define(version: 2020_10_22_203743) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -88,6 +88,15 @@ ActiveRecord::Schema.define(version: 2020_10_19_062304) do
     t.index ["name"], name: "index_ingredients_on_name", unique: true
   end
 
+  create_table "leftover_usage_mealplan_links", force: :cascade do |t|
+    t.bigint "leftover_usage_id"
+    t.bigint "mealplan_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["leftover_usage_id"], name: "index_leftover_usage_mealplan_links_on_leftover_usage_id"
+    t.index ["mealplan_id"], name: "index_leftover_usage_mealplan_links_on_mealplan_id"
+  end
+
   create_table "leftover_usages", force: :cascade do |t|
     t.string "quantity"
     t.string "unit"
@@ -95,7 +104,13 @@ ActiveRecord::Schema.define(version: 2020_10_19_062304) do
     t.datetime "updated_at", null: false
     t.bigint "user_id"
     t.bigint "ingredient_id"
+    t.bigint "myrecipe_id"
+    t.bigint "mealplan_id"
+    t.bigint "leftover_usage_mealplan_links_id"
     t.index ["ingredient_id"], name: "index_leftover_usages_on_ingredient_id"
+    t.index ["leftover_usage_mealplan_links_id"], name: "index_leftover_usages_on_leftover_usage_mealplan_links_id"
+    t.index ["mealplan_id"], name: "index_leftover_usages_on_mealplan_id"
+    t.index ["myrecipe_id"], name: "index_leftover_usages_on_myrecipe_id"
     t.index ["user_id"], name: "index_leftover_usages_on_user_id"
   end
 
@@ -124,6 +139,8 @@ ActiveRecord::Schema.define(version: 2020_10_19_062304) do
     t.bigint "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "leftover_usage_mealplan_links_id"
+    t.index ["leftover_usage_mealplan_links_id"], name: "index_mealplans_on_leftover_usage_mealplan_links_id"
     t.index ["user_id"], name: "index_mealplans_on_user_id", unique: true
   end
 
@@ -242,11 +259,15 @@ ActiveRecord::Schema.define(version: 2020_10_19_062304) do
   add_foreign_key "groceries", "users"
   add_foreign_key "ingredients", "myrecipeingredientlinks"
   add_foreign_key "leftover_usages", "ingredients"
+  add_foreign_key "leftover_usages", "leftover_usage_mealplan_links", column: "leftover_usage_mealplan_links_id"
+  add_foreign_key "leftover_usages", "mealplans"
+  add_foreign_key "leftover_usages", "myrecipes"
   add_foreign_key "leftover_usages", "users"
   add_foreign_key "leftovers", "ingredients"
   add_foreign_key "leftovers", "users"
   add_foreign_key "likes", "reviews"
   add_foreign_key "likes", "users"
+  add_foreign_key "mealplans", "leftover_usage_mealplan_links", column: "leftover_usage_mealplan_links_id"
   add_foreign_key "mealplans", "users"
   add_foreign_key "myrecipeingredientlinks", "ingredients"
   add_foreign_key "myrecipeingredientlinks", "myrecipes"

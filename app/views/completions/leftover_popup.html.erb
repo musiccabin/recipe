@@ -1,0 +1,96 @@
+<div class='welcome-bg-image'></div>
+
+<h1 class='page-title'>Add a leftover ingredient</h1>
+
+<%if @leftover&.errors&.any?%>
+<p style='text-align: center'><%=@leftover.errors.full_messages.join('')%></p>
+<%end%>
+
+<p class='error'>To maximize usage of leftovers, please enter expiry date and unit to the best of your knowledge.</p>
+
+<%if @error%>
+<p style='text-align: center'><%=@error%></p>
+<%end%>
+
+<%=form_with url: save_leftover_path, local: true do |f|%>
+<div class='add-leftover-form'>
+<div class='leftover-form-element'><%=f.label :ingredient%>
+<%=f.text_field :ingredient, placeholder: "'pear', not 'pears'", class: 'leftover-input'%></div>
+<div class='leftover-form-element'><%=f.label :quantity%>
+<%=f.text_field :quantity, placeholder: "'1 1/2' for one & a half", class: 'leftover-input'%></div>
+<div class='leftover-form-element'><%=f.label :unit%>
+<%=f.text_field :unit, placeholder: "'tbsp'", class: 'leftover-input'%></div>
+<div class='leftover-form-element'><%=f.label :expiry_date%>
+<%=f.text_field :expiry_date, placeholder: "'07-11' for July 11", class: 'leftover-input'%></div>
+<div class='leftover-form-element'><%=f.submit class: 'button small'%></div>
+</div>
+<%end%>
+
+<h3 style='text-align: center; font-weight: 700; margin: 1em'>Here are the ingredients you used:</h3>
+<%if @links%>
+<ul class='leftovers'>
+<%@links.each do |l|%>
+
+<div class='button-wrapper'>
+<li class='each-leftover'>
+    <div class='leftover-info'>
+    <%usage = @leftover_usages&.detect{|usage| usage.ingredient == l.ingredient}%>
+    <%if usage %>
+        <%=usage.ingredient.name%> : 
+        <%=usage.quantity%> <%=usage.unit%>
+    <%else%>
+    <%=l.ingredient.name%>
+    <%if l.quantity.to_s != ''%>
+    : <%=l.quantity%> <%=l.unit%>
+    <%end%>
+    <%end%>
+</div>
+<i class="fas fa-pen"></i>
+<%ingredient = Ingredient.find_by(id: l.ingredient)%>
+<%=link_to delete_leftover_path(ingredient), method: :delete do%>
+<i class="fas fa-trash"></i>
+<%end%>
+<!-- <button class='button small'>Edit</button><small><%=link_to 'Delete', delete_leftover_path(ingredient), method: :delete%></small> -->
+</li>
+<li class='update-leftover'>
+    <p style='font-weight: 700; text-decoration: underline; margin-bottom: 1em'><%=ingredient.name%></p> 
+<%=form_with url: edit_usage_path(ingredient), method: :get, local: true do |f|%>
+    <p><%= f.hidden_field :myrecipe_id, :value => @myrecipe.id %></p>
+<p><%= f.hidden_field :id, :value => ingredient.id %></p>
+<%if usage%>
+<p><%=f.text_field :quantity, value: usage.quantity, placeholder: "quantity", class: 'leftover-input'%></p>
+<%else%>
+<p><%=f.text_field :quantity, value: l.quantity, placeholder: "quantity", class: 'leftover-input'%></p>
+<%end%>
+<p><%=f.text_field :unit, value: l.unit, placeholder: "unit", class: 'leftover-input'%></p>
+<p><%=f.text_field :expiry_date, value: '', placeholder: "exp: 'mm-dd' (optional)", class: 'leftover-input'%></p>
+<%=f.submit class: 'button small'%>
+<%end%>
+</li>
+</div>
+
+<%end%>
+</ul>
+<%end%>
+
+<script type="text/javascript">
+    document.querySelectorAll(".update-leftover").forEach(function(e) {
+        e.style.display = 'none';
+    });
+    // document.querySelectorAll('.leftover-info').forEach(function(e) {
+    //     e.style.display = 'block';
+    // });
+    document.querySelectorAll(".fa-pen").forEach(function(i) {
+        i.onclick = function (event) {
+        event.target.closest('div').querySelector('.each-leftover').style.display = 'none';
+        event.target.closest('div').querySelector('.update-leftover').style.display = 'block';
+        // if (x.style.display === "none") {
+        //     x.style.display = "block";
+        //     y.style.display = 'none';
+        // } else {
+        //     x.style.display = "none";
+        //     y.style.display = 'block';
+        // }
+        }
+    });
+</script>

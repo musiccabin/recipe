@@ -3,6 +3,7 @@ class Leftover < ApplicationRecord
   belongs_to :user
 
   validate :accepted_expiry_date
+  validate :non_negative_quantity
   validates :ingredient, uniqueness: {scope: :user}
   
   private
@@ -15,6 +16,12 @@ class Leftover < ApplicationRecord
       self.errors.add(:expiry_date,error_text) unless mo <= 12 && day <= 31
     else
       self.errors.add(:expiry_date,error_text)
+    end
+  end
+
+  def non_negative_quantity
+    if (quantity.include? '-')
+      self.errors.add(:quantity, 'leftover quantity cannot be negative.')
     end
   end
 end
