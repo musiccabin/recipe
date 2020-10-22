@@ -154,8 +154,8 @@ class WelcomeController < ApplicationController
         current_user.mealplan.myrecipes.each do |mealplan_recipe|
           mealplan_recipe.ingredients.each do |i|
             next if i != l.ingredient
-            quantity_in_recipe = proper_recipe_quantity(i, mealplan_recipe, l).to_f
-            l_quantity = l.quantity.to_f
+            quantity_in_recipe = floatify(proper_recipe_quantity(i, mealplan_recipe, l))
+            l_quantity = floatify(l.quantity)
             if l_quantity - quantity_in_recipe > 0
               l.quantity = l_quantity - quantity_in_recipe
             else
@@ -290,7 +290,7 @@ class WelcomeController < ApplicationController
     elsif quantity_leftover.to_s == ''
       return true
     # byebug
-    elsif quantity_recipe >= 0.5 * floatify(quantity_leftover)
+    elsif floatify(quantity_recipe) >= 0.5 * floatify(quantity_leftover)
       return true
     else
       return false

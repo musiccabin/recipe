@@ -51,6 +51,7 @@ class ApplicationController < ActionController::Base
   helper_method(:is_in_season?)
 
   def floatify(quantity)
+    return quantity if quantity.is_a? Float
     output = 0
     quantity = quantity.lstrip.reverse.lstrip.reverse
     if quantity.include? ' '
