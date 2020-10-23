@@ -26,7 +26,16 @@ class WelcomeController < ApplicationController
   end
 
   def remove_from_mealplan
-    link = current_user.mealplan.myrecipemealplanlinks.find_by(myrecipe: Myrecipe.find_by(id: params[:myrecipe_id]))
+    recipe = Myrecipe.find_by(id: params[:myrecipe_id])
+    user_recipe_usages = current_user.mealplan.leftover_usages.where(myrecipe: recipe)
+    # byebug
+    if user_recipe_usages
+      user_recipe_usages.each do |usage|
+        usage.update(mealplan: nil)
+        usage.leftover_usage_mealplan_link.destroy
+      end
+    end
+    link = current_user.mealplan.myrecipemealplanlinks.find_by(myrecipe: recipe)
     link.destroy
     add_groceries_from_mealplan
     redirect_to root_path, notice: "Alright, removed!"
@@ -430,54 +439,6 @@ class WelcomeController < ApplicationController
 
     output
 end
-
-def stringify_quantity(float)
-    output = ''
-    # byebug
-    if float != nil
-      if float.floor == float
-        output += float.floor.to_s
-      else
-        num = float - float.floor
-        if float.floor == 0
-          case true
-          when num >= (0.875)
-            output += float.ceil.to_s
-          when num >= (0.7)
-            output += "3/4"
-          when num >= (0.6)
-            output += "2/3"
-          when num >= (0.4)
-            output += "1/2"
-          when num >= (0.29)
-            output += "1/3"
-          when num >= (0.2)
-            output += "1/4"
-          else
-            output += ''
-          end
-        else
-          case true
-          when num >= (0.875)
-            output += float.ceil.to_s
-          when num >= (0.7)
-            output += "#{float.floor.to_s} 3/4"
-          when num >= (0.6)
-            output += "#{float.floor.to_s} 2/3"
-          when num >= (0.4)
-            output += "#{float.floor.to_s} 1/2"
-          when num >= (0.29)
-            output += "#{float.floor.to_s} 1/3"
-          when num >= (0.125)
-            output += "#{float.floor.to_s} 1/4"
-          else
-            output += ''
-          end
-        end
-      end
-    end
-    output
-  end
 
   def seasonals_first(recipes)
     myrecipes = recipes.to_a

@@ -142,6 +142,7 @@ class UsersController < ApplicationController
   end
 
   def add_leftover
+    # byebug
     params = leftover_params
     if params[:ingredient]
       leftover = Leftover.new(user: current_user)

@@ -49,6 +49,8 @@ Rails.application.routes.draw do
   post '/add_leftover', {to: 'users#add_leftover', as: 'save_leftover'}
   patch '/add_leftover/:id/update', {to: 'users#update_leftover', as: 'update_leftover'}
   delete '/add_leftover/:id', {to: 'users#delete_leftover', as: 'delete_leftover'}
+  get '/leftover_popup/:id', {to: 'completions#leftover_popup', as: 'leftover_popup'}
+  get '/edit_usage', {to: 'completions#edit_usage', as: 'edit_usage'}
 
   post '/add_to_mealplan', {to: 'welcome#add_to_mealplan', as: 'add_to_mealplan'}
   post '/remove_from_mealplan', {to: 'welcome#remove_from_mealplan', as: 'remove_from_mealplan'}

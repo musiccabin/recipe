@@ -53,7 +53,7 @@ class ApplicationController < ActionController::Base
   def floatify(quantity)
     return quantity if quantity.is_a? Float
     output = 0
-    quantity = quantity.lstrip.reverse.lstrip.reverse
+    quantity = quantity.to_s.lstrip.reverse.lstrip.reverse
     if quantity.include? ' '
       output += quantity.split(" ")[0].to_i
       to_process = quantity.split(" ")[1]
@@ -68,6 +68,55 @@ class ApplicationController < ActionController::Base
     output
   end
   helper_method(:floatify)
+
+  def stringify_quantity(float)
+    output = ''
+    # byebug
+    if float != nil
+      if float.floor == float
+        output += float.floor.to_s
+      else
+        num = float - float.floor
+        if float.floor == 0
+          case true
+          when num >= (0.875)
+            output += float.ceil.to_s
+          when num >= (0.7)
+            output += "3/4"
+          when num >= (0.6)
+            output += "2/3"
+          when num >= (0.4)
+            output += "1/2"
+          when num >= (0.29)
+            output += "1/3"
+          when num >= (0.2)
+            output += "1/4"
+          else
+            output += ''
+          end
+        else
+          case true
+          when num >= (0.875)
+            output += float.ceil.to_s
+          when num >= (0.7)
+            output += "#{float.floor.to_s} 3/4"
+          when num >= (0.6)
+            output += "#{float.floor.to_s} 2/3"
+          when num >= (0.4)
+            output += "#{float.floor.to_s} 1/2"
+          when num >= (0.29)
+            output += "#{float.floor.to_s} 1/3"
+          when num >= (0.125)
+            output += "#{float.floor.to_s} 1/4"
+          else
+            output += ''
+          end
+        end
+      end
+    end
+    output
+  end
+  helper_method(:stringify_quantity)
 
    def user_signed_in?
     current_user.present?

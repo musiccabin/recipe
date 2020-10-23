@@ -12,6 +12,7 @@ class Myrecipe < ApplicationRecord
     has_many :tags, through: :taggings
     has_many :myrecipemealplanlinks, dependent: :destroy
     has_many :mealplans, through: :myrecipemealplanlinks
+    has_many :leftover_usages, dependent: :nullify
 
     has_attached_file :avatar, styles: {custom: "500x500#", medium: "700x700#", thumb: "500x500#" }, default_url: "/images/:style/missing.png"
     validates_attachment_content_type :avatar, content_type: /\Aimage\/.*\z/
