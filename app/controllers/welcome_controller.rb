@@ -38,7 +38,7 @@ class WelcomeController < ApplicationController
     link = current_user.mealplan.myrecipemealplanlinks.find_by(myrecipe: recipe)
     link.destroy
     add_groceries_from_mealplan
-    redirect_to root_path, notice: "Alright, removed!"
+    redirect_to user_mealplan_path(current_user), notice: "Alright, removed!"
   end
 
   private
