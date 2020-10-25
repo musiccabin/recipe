@@ -118,6 +118,24 @@ class ApplicationController < ActionController::Base
   end
   helper_method(:stringify_quantity)
 
+  def convert_quantity(ingredient, quantity, unit)
+    output = floatify(quantity)
+    case ingredient.name
+    when 'cucumber'
+      if unit == 'cup'
+        # quantity = link.quantity
+        output /= 2
+      end
+    when 'strawberry'
+      if unit == 'cup'
+        # quantity = link.quantity
+        output *= 8
+      end
+    end
+    output
+  end
+  helper_method(:convert_quantity)
+
    def user_signed_in?
     current_user.present?
    end

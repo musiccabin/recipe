@@ -124,22 +124,5 @@ class CompletionsController < ApplicationController
     params.permit(:id, :quantity, :unit, :expiry_date)
   end
 
-  def convert_quantity(ingredient, quantity, unit)
-    output = quantity
-    case ingredient.name
-    when 'cucumber'
-      if unit == 'cup'
-        # quantity = link.quantity
-        output = floatify(quantity) / 2
-      end
-    when 'strawberry'
-      if unit == 'cup'
-        # quantity = link.quantity
-        output = floatify(quantity) * 8
-      end
-    else
-      output = quantity
-    end
-    output
-  end
+
 end

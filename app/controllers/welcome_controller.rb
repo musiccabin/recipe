@@ -28,7 +28,6 @@ class WelcomeController < ApplicationController
   def remove_from_mealplan
     recipe = Myrecipe.find_by(id: params[:myrecipe_id])
     user_recipe_usages = current_user.mealplan.leftover_usages.where(myrecipe: recipe)
-    # byebug
     if user_recipe_usages
       user_recipe_usages.each do |usage|
         usage.update(mealplan: nil)
@@ -123,7 +122,6 @@ class WelcomeController < ApplicationController
         quantity_leftover = l.quantity
         quantity_recipe = proper_recipe_quantity(ingredient, r, l)
         if above_50_percent(quantity_recipe, quantity_leftover)
-          # byebug
           stats[r] += 1
           break if stats[r] >= 3
           # if stats[r] >= 3
@@ -246,28 +244,28 @@ class WelcomeController < ApplicationController
     if unit_recipe == unit_leftover
       return floatify(link.quantity)
     else
-      return convert_quantity(ingredient, link, recipe, leftover)
+      return convert_quantity(ingredient, link.quantity, link.unit)
     end
   end
 
-  def convert_quantity(ingredient, link, recipe, leftover)
-    output = link.quantity
-    case ingredient.name
-    when 'cucumber'
-      if link.unit == 'cup'
-        # quantity = link.quantity
-        output = floatify(link.quantity) / 2
-      end
-    when 'strawberry'
-      if link.unit == 'cup'
-        # quantity = link.quantity
-        output = floatify(link.quantity) * 8
-      end
-    else
-      output = link.quantity
-    end
-    output
-  end
+  # def convert_quantity(ingredient, link, leftover)
+  #   output = link.quantity
+  #   case ingredient.name
+  #   when 'cucumber'
+  #     if link.unit == 'cup'
+  #       # quantity = link.quantity
+  #       output = floatify(link.quantity) / 2
+  #     end
+  #   when 'strawberry'
+  #     if link.unit == 'cup'
+  #       # quantity = link.quantity
+  #       output = floatify(link.quantity) * 8
+  #     end
+  #   else
+  #     output = link.quantity
+  #   end
+  #   output
+  # end
 
   def push_recipe(stats,val,sorted_results)
     if stats.has_value?(val)
@@ -305,7 +303,6 @@ class WelcomeController < ApplicationController
       return false
     elsif quantity_leftover.to_s == ''
       return true
-    # byebug
     elsif floatify(quantity_recipe) >= 0.5 * floatify(quantity_leftover)
       return true
     else
@@ -348,15 +345,15 @@ class WelcomeController < ApplicationController
     end
 
     # subtract_leftovers = []
-    # added_up.each do |stats|
-    #     if current_user&.leftovers&.find_by(ingredient: Ingredient.find_by(name: stats[:name]))
-    #         stats[]
-    #     else
-    #         output_quantity = quantity
-    #     end
-    # end
+    added_up.each do |stats|
+      ingredient = Ingredient.find_by(name: stats[:name])
+      leftover = current_user.leftovers&.find_by(ingredient: ingredient)
+      if leftover
+        stats[:quantity] -= convert_quantity(ingredient, leftover.quantity, leftover.unit)
+        stats[:quantity] = 0 if stats[:quantity] < 0
+      end
+    end
 
-    # byebug
     current_user.groceries.where(:user_added => false).destroy_all
 
     added_up.each do |stats|
@@ -373,9 +370,7 @@ class WelcomeController < ApplicationController
 
       stats[:quantity] = stringify_quantity(stats[:quantity])
       
-      # current_user.groceries.destroy_all
-      # byebug
-      Grocery.create(name: stats[:name], quantity: stats[:quantity], unit: stats[:unit], user: current_user, is_completed: false)
+      Grocery.create(name: stats[:name], quantity: stats[:quantity], unit: stats[:unit], user: current_user, is_completed: false) unless stats[:quantity] == '0'
     end
   end
 
