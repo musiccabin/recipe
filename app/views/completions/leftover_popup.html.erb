@@ -30,7 +30,8 @@
 <%if @links%>
 <ul class='leftovers'>
 <%@links.each do |l|%>
-
+    <%next if l.ingredient.name == 'water'%>
+    <%next if l.ingredient.name == 'ice cube'%>
 <div class='button-wrapper'>
 <li class='each-leftover'>
     <div class='leftover-info'>

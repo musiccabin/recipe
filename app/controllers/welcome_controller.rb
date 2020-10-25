@@ -321,6 +321,7 @@ class WelcomeController < ApplicationController
     end
     links.each do |link|
       next if link.ingredient.name == 'water'
+      next if link.ingredient.name == 'ice cube'
       if added_up == []
         stats = {}
         stats[:name] = link.ingredient.name
