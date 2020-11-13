@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_10_22_203743) do
+ActiveRecord::Schema.define(version: 2020_11_11_061635) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -237,7 +237,7 @@ ActiveRecord::Schema.define(version: 2020_10_22_203743) do
     t.integer "tags", default: [], array: true
     t.string "city"
     t.string "province"
-    t.string "postal"
+    t.string "region"
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 

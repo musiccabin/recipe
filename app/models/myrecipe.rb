@@ -5,6 +5,7 @@ class Myrecipe < ApplicationRecord
     has_many :myrecipeingredientlinks, dependent: :destroy
     has_many :ingredients, through: :myrecipeingredientlinks
     has_many :completions, dependent: :destroy
+    has_many :favourites, dependent: :destroy
     has_many :reviews, dependent: :destroy
     has_many :dietaryrestrictionlinks, dependent: :destroy
     has_many :dietaryrestrictions, through: :dietaryrestrictionlinks

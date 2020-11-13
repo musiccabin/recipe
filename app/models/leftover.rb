@@ -2,7 +2,7 @@ class Leftover < ApplicationRecord
   belongs_to :ingredient
   belongs_to :user
 
-  validate :accepted_expiry_date
+  # validate :accepted_expiry_date
   validate :non_negative_quantity
   validate :no_ice_cube
   validates :ingredient, uniqueness: {scope: :user}
