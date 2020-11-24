@@ -6,7 +6,7 @@ module Mutations
       field :grocery, Types::GroceryType, null: true
       field :errors, Types::ValidationErrorsType, null: true
   
-      def resolve(attributes:)
+      def resolve(attributes:, id:)
         check_authentication!
         grocery = Grocery.find_by(id: id)
         if grocery.nil?
@@ -19,11 +19,11 @@ module Mutations
                 "You are not allowed to edit this item."
         end
   
-        if grocery.update(attributes.to_h)
+        if grocery.update(name: attributes.ingredient_name, quantity: attributes.quantity, unit: attributes.unit)
           RecipeSchema.subscriptions.trigger("groceryUpdated", {}, grocery)
           { grocery: grocery }
         else
-          { errors: myrecipe.errors }
+          { errors: grocery.errors }
         end
       end
     end

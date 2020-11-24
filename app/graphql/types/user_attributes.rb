@@ -2,6 +2,7 @@ module Types
     class UserAttributes < Types::BaseInputObject
       description "Attributes for creating or updating a user"
 
+      argument :id, ID, required: true
       argument :first_name, String, required: true
       argument :last_name, String, required: true
       # argument :email, String, required: true
@@ -14,7 +15,5 @@ module Types
       argument :city, String, required: true
       argument :province, String, required: true
       argument :region, String, required: true
-      argument :dietaryrestriction_ids, [Integer], required: false
-      argument :tag_ids, [Integer], required: false
     end
   end

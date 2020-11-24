@@ -7,7 +7,7 @@ class Ingredient < ApplicationRecord
   has_many :leftover_usages, dependent: :nullify
 
   validates :name, presence: true, uniqueness: true
-  validates_inclusion_of :category, :in => ['produce', 'meat', 'dairy', 'frozen', 'other'], :allow_nil => true
+  validates_inclusion_of :category, :in => ['produce', 'meat', 'dairy', 'frozen', 'nuts & seeds', 'other'], :allow_nil => false
 
   before_validation :downcase_name
 

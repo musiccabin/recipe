@@ -1,8 +1,10 @@
 module Mutations
     class RemoveCompletionMutation < Mutations::BaseMutation
       argument :recipe_id, ID, required: true
+
+      field :status, String, null: true
   
-      def resolve(id:)
+      def resolve(recipe_id:)
         check_authentication!
 
         completion = current_user.completions&.find_by(myrecipe: recipe_id)

@@ -8,7 +8,7 @@ module Mutations
       def resolve(attributes:)
         check_authentication!
   
-        grocery = Grocery.new(attributes.to_h.merge(user: current_user))
+        grocery = Grocery.new(name: attributes.ingredient_name, quantity: attributes.quantity, unit: attributes.unit, user: current_user, user_added: true)
   
         if grocery.save
           RecipeSchema.subscriptions.trigger("groceryAdded", {}, grocery)

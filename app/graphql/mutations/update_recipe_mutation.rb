@@ -2,11 +2,12 @@ module Mutations
   class UpdateRecipeMutation < Mutations::BaseMutation
     argument :id, ID, required: true
     argument :attributes, Types::RecipeAttributes, required: true
+    argument :ingredients, [Types::IngredientAttributes], required: false
 
     field :myrecipe, Types::MyrecipeType, null: true
     field :errors, Types::ValidationErrorsType, null: true
 
-    def resolve(attributes:)
+    def resolve(attributes:, id:, ingredients: nil)
       check_authentication!
       myrecipe = Myrecipe.find_by(id: id)
       if myrecipe.nil?
@@ -20,6 +21,7 @@ module Mutations
       end
 
       if myrecipe.update(attributes.to_h)
+        add_ingredients_to_recipe(myrecipe, ingredients) if ingredients
         RecipeSchema.subscriptions.trigger("recipeUpdated", {}, myrecipe)
         { myrecipe: myrecipe }
       else

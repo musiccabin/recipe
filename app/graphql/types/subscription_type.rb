@@ -1,7 +1,7 @@
 module Types
     class SubscriptionType < GraphQL::Schema::Object
       field :recipe_added, Types::MyrecipeType, null: false, description: "A new recipe was added"
-      field :recipe_updated, Types::MyrcipeType, null: false, description: "Existing recipe was updated"
+      field :recipe_updated, Types::MyrecipeType, null: false, description: "Existing recipe was updated"
       field :leftover_added, Types::LeftoverType, null: false, description: "A new leftover was added"
       field :leftover_updated, Types::LeftoverType, null: false, description: "Leftover was updated"
       field :recipe_added_to_mealplan, Types::MyrecipemealplanlinkType, null: false, description: "Recipe is added to mealplan"

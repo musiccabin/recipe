@@ -3,6 +3,7 @@ class Myrecipeingredientlink < ApplicationRecord
   belongs_to :ingredient
 
   validates :quantity, presence: true
+  validates :ingredient, uniqueness: {scope: :myrecipe}
   validate :quantity_is_number
 
   private

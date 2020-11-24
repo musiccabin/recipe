@@ -1,11 +1,13 @@
 module Mutations
     class RemoveFromMealplanMutation < Mutations::BaseMutation
       argument :recipe_id, ID, required: true
+
+      field :status, String, null: true
   
       def resolve(recipe_id:)
         check_authentication!
 
-        recipe = Myrecipe.find_by(id: myrecipe_id)
+        recipe = Myrecipe.find_by(id: recipe_id)
         if recipe.nil?
           raise GraphQL::ExecutionError,
                 "Recipe not found."
@@ -17,11 +19,16 @@ module Mutations
             usage.leftover_usage_mealplan_link.destroy
           end
         end
+        # byebug
         link = current_user.mealplan.myrecipemealplanlinks.find_by(myrecipe: recipe)
-        link.destroy
-        add_groceries_from_mealplan
-        RecipeSchema.subscriptions.trigger("recipeRemovedFromMealplan", {}, current_user.mealplan)
-        { status: 'recipe removed from mealplan!' }
+        if link.present?
+          link.destroy
+          add_groceries_from_mealplan
+          RecipeSchema.subscriptions.trigger("recipeRemovedFromMealplan", {}, current_user.mealplan)
+          { status: 'recipe removed from mealplan!' }
+        else
+          { status: 'this recipe was not in your mealplan.'}
+        end
       end
     end
 end

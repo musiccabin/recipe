@@ -1,8 +1,11 @@
 module Mutations
     class NewCompletionMutation < Mutations::BaseMutation
       argument :recipe_id, ID, required: true
+
+      field :completion, Types::CompletionType, null: true
+      field :errors, Types::ValidationErrorsType, null: true
   
-      def resolve(attributes:)
+      def resolve(recipe_id:)
         check_authentication!
   
         myrecipe = Myrecipe.find_by(id: recipe_id)

@@ -74,7 +74,7 @@ class WelcomeController < ApplicationController
     if current_user.leftovers.any?
       sorted_results = []
       #select user's leftovers that are expiring in 3 days
-      exp_leftovers = current_user.leftovers.select {|l| l.expiry_date != ''}
+      exp_leftovers = current_user.leftovers.select {|l| l.expiry_date.present? && l.expiry_date != ''}
       if exp_leftovers.any?
         sorted_results = dont_let_them_expire(exp_leftovers, result_rstrn_tags)
       end

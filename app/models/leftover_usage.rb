@@ -6,4 +6,5 @@ class LeftoverUsage < ApplicationRecord
     has_one :mealplan, through: :leftover_usage_mealplan_link, dependent: :nullify
 
     validates :quantity, presence: true
+    validates :ingredient, uniqueness: {scope: [:myrecipe, :mealplan]}
 end

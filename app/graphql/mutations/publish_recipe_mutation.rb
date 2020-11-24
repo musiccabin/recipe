@@ -1,6 +1,8 @@
 module Mutations
     class PublishRecipeMutation < Mutations::BaseMutation
       argument :id, ID, required: true
+
+      field :status, String, null: false
   
       def resolve(id:)
         check_authentication!
@@ -11,7 +13,7 @@ module Mutations
             raise GraphQL::ExecutionError,
                 "You are not allowed to remove this recipe."
           end
-          recipe.is_hidden = false
+          recipe.update(is_hidden: false)
           RecipeSchema.subscriptions.trigger("recipeIsPublished", {}, recipe)
           { status: 'recipe is published!'}
         else

@@ -7,8 +7,13 @@ module Mutations
   
       def resolve(attributes:)
         check_authentication!
-  
-        leftover = Leftover.new(attributes.to_h.merge(user: current_user))
+
+        ingredient = Ingredient.find_by(name: attributes.ingredient_name)
+        if ingredient.nil?
+          raise GraphQL::ExecutionError,
+                "Ingredient not found."
+        end
+        leftover = Leftover.new(ingredient: ingredient, quantity: attributes.quantity, unit: attributes.unit, user: current_user)
   
         if leftover.save
           RecipeSchema.subscriptions.trigger("leftoverAdded", {}, leftover)

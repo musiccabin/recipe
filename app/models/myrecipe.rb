@@ -89,7 +89,6 @@ class Myrecipe < ApplicationRecord
         self.tags == tags.reject{ |e| e.to_s.empty? }.uniq unless tags == nil
     end
 
-    private
     def unique_restrictions
         self.dietaryrestrictions == dietaryrestrictions.reject(&:blank?).uniq unless dietaryrestrictions == nil
     end

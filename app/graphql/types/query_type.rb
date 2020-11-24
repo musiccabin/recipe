@@ -21,164 +21,204 @@ module Types
       description: "Returns all unhidden recipes in the order of maximizing leftover usage"
     def recommended_recipes
       # Myrecipe.preload(:user)
-      if current_user
-        recommend_recipes
-      else
-        Myrecipe.where(is_hidden: false).order(created_at: :desc)
-      end
+      authenticate_user!
+      recommend_recipes
+    end
+
+    field :all_recipes, [Types::MyrecipeType], null: false,
+      description: "Returns unhidden recipes favoured by 20%+ of users"
+    def all_recipes
+      # Myrecipe.preload(:user)
+     
     end
 
     field :popular_recipes, [Types::MyrecipeType], null: false,
-      description: "Returns unhidden recipes favoured by 20%+ of users"
+      description: "Returns unhidden recipes in descending order of popularity"
     def popular_recipes
-      # Myrecipe.preload(:user)
       stats = {}
       Myrecipe.where(is_hidden: false).each do |recipe|
         stats[recipe] = recipe.favourites.count
       end
-      user_count = User.count
-      stats.delete_if {|recipe, count| count < (user_count / 5)}
-      stats.sort_by! {|recipe, count| -count}
-      stats.keys      
+      popular = stats.sort_by {|recipe, count| -count}.to_h.keys
+      return popular unless current_user
+      restrictions = current_user.dietaryrestrictions
+      if restrictions.any?
+        restrictions.each do |restriction|
+          popular = popular.select{|recipe| recipe.dietaryrestrictions.include?(restriction)}
+        end
+      end
+      tags = current_user.tags
+      if tags.any?
+        tags.each do |tag|
+          popular = popular.select{|recipe| recipe.tags.include?(tag)}
+        end
+      end
+      popular    
     end
+    
 
-    field :mealplan, [Types::MealplanType], null: true,
+    field :mealplan, Types::MealplanType, null: true,
       description: "Returns current user's mealplan"
     def mealplan
-      current_user.mealplan if current_user
+      authenticate_user!
+      current_user.mealplan
     end
 
     field :recipes_in_mealplan, [Types::MyrecipeType], null: true,
     description: "Returns recipes in current user's mealplan"
     def recipes_in_mealplan
-      recipes = []
-      links = current_user.mealplan.myrecipeingredientlinks
-      if links
-        links.each do |link|
-          recipes << link.myrecipe
-        end
-      end
-      recipes
+      mealplan&.myrecipes
     end
 
     field :recipe_info, Types::MyrecipeType, null: true,
-    description: "Returns a recipe"
-    def recipe_info(:id)
-      Myrecipe.find_by(id: id)
+    description: "Returns a recipe" do
+      argument :id, ID, required: true      
+    end   
+    def recipe_info(id:)
+      recipe = Myrecipe.find_by(id: id)
+      if recipe.present?
+        return recipe
+      else
+        raise GraphQL::ExecutionError,
+            "Recipe not found."
+      end
     end
 
     field :ingredient_list, [Types::MyrecipeingredientlinkType], null: false,
-      description: "Returns a list of recipe's ingredients"
-    def ingredient_list(myrecipe:)
-      recipe = Myrecipe.find(myrecipe)
-      if recipe.present?
-        recipe.myrecipeingredientlinks
-      end
+    description: "Returns a list of recipe's ingredients" do
+      argument :id, ID, required: true
+    end
+    def ingredient_list(id:)
+      # byebug
+      recipe_info(id: id)&.myrecipeingredientlinks
     end
     
     field :leftovers, [Types::LeftoverType], null: true,
       description: "Returns user's leftovers"
     def leftovers
-      user_leftovers = []
-      list = current_user&.leftovers
-      if list
-        list.each do |leftover|
-          to_add = {}
-          to_add(name: Ingredient.find_by(id: leftover.ingredient)&.name, quantity: leftover.quantity, unit: leftover.unit)
-          user_leftovers << to_add
+      authenticate_user!
+      current_user.leftovers
+    end
+
+    field :completed_recipes, [Types::MyrecipeType], null: true,
+    description: "Returns user's completed recipes"
+    def completed_recipes
+      authenticate_user!
+      completed_recipes = []
+      completions = current_user.completions
+      if completions
+        completions.each do |c|
+          completed_recipes << c.myrecipe
         end
       end
-      user_leftovers
+      completed_recipes
     end
 
-    field :top_ten_ingredients_last_week, Hash, null: true,
+    field :fav_recipes, [Types::MyrecipeType], null: true,
+    description: "Returns user's fav recipes"
+    def fav_recipes
+      authenticate_user!
+      fav_recipes = []
+      favs = current_user&.favourites
+      if favs
+        favs.each do |f|
+          fav_recipes << f.myrecipe
+        end
+      end
+      fav_recipes
+    end
+
+    field :dashboard_ind_stats_last_week, Types::IndDashboardStatsType, null: false,
     description: "Returns top-10 leftover ingredients used in the last week by user"
-    def top_ten_ingredients_last_week
-      usages = current_user&.leftover_usages.select{|usage| usage.created_at >= (Time.now - (24*7).hours)} if current_user
-      select_top_10(usages)
+    def dashboard_ind_stats_last_week
+      authenticate_user!
+      usages = current_user.leftover_usages.select{|usage| usage.created_at >= (Time.now - (24*7).hours)}
+      make_stats(usages)
     end
 
-    field :top_ten_ingredients_last_30_days, Hash, null: true,
+    field :dashboard_ind_stats_last_30_days, Types::IndDashboardStatsType, null: false,
     description: "Returns top-10 leftover ingredients used in the last 30 days by user"
-    def top_ten_ingredients_last_30_days
-      usages = current_user&.leftover_usages.select{|usage| usage.created_at >= (Time.now - (24*30).hours)} if current_user
-      select_top_10(usages)
+    def dashboard_ind_stats_last_30_days
+      authenticate_user!
+      usages = current_user.leftover_usages.select{|usage| usage.created_at >= (Time.now - (24*30).hours)}
+      make_stats(usages)
     end
 
-    field :top_ten_ingredients_last_6_months, Hash, null: true,
+    field :dashboard_ind_stats_last_6_months, Types::IndDashboardStatsType, null: false,
     description: "Returns top-10 leftover ingredients used in the last 24 hours by user"
-    def top_ten_ingredients_last_6_months
-      usages = current_user&.leftover_usages.select{|usage| usage.created_at >= (Time.now - 6.months)} if current_user
-      select_top_10(usages)
+    def dashboard_ind_stats_last_6_months
+      authenticate_user!
+      usages = current_user&.leftover_usages.select{|usage| usage.created_at >= (Time.now - 6.months)}
+      make_stats(usages)
     end
 
-    field :top_ten_ingredients_last_week_by_city, Hash, null: true,
+    field :dashboard_com_stats_last_week_by_city, [Types::ComDashboardStatsType], null: false,
     description: "Returns top-10 leftover ingredients used in the last week by users from the same cities"
-    def top_ten_ingredients_last_week_by_city
+    def dashboard_com_stats_last_week_by_city
       usages = LeftoverUsage.select{|usage| usage.created_at >= (Time.now - (24*7).hours)}
-      select_top_10_by_city(usages)
+      make_stats_by_city(usages) if usages
     end
 
-    field :top_ten_ingredients_last_week_by_region, Hash, null: true,
+    field :dashboard_com_stats_last_week_by_region, [Types::ComDashboardStatsType], null: false,
     description: "Returns top-10 leftover ingredients used in the last week by users from the same regions"
-    def top_ten_ingredients_last_week_by_region
+    def dashboard_com_stats_last_week_by_region
       usages = LeftoverUsage.select{|usage| usage.created_at >= (Time.now - (24*7).hours)}
-      select_top_10_by_region(usages)
+      make_stats_by_region(usages) if usages
     end
 
-    field :top_ten_ingredients_last_week_by_province, Hash, null: true,
+    field :dashboard_com_stats_last_week_by_province, [Types::ComDashboardStatsType], null: false,
     description: "Returns top-10 leftover ingredients used in the last week by users from the same provinces"
-    def top_ten_ingredients_last_week_by_province
+    def dashboard_com_stats_last_week_by_province
       usages = LeftoverUsage.select{|usage| usage.created_at >= (Time.now - (24*7).hours)}
-      select_top_10_by_province(usages)
+      make_stats_by_province(usages) if usages
     end
 
-    field :top_ten_ingredients_last_30_days_by_city, Hash, null: true,
+    field :dashboard_com_stats_last_30_days_by_city, [Types::ComDashboardStatsType], null: false,
     description: "Returns top-10 leftover ingredients used in the last 30 days by users from the same city"
-    def top_ten_ingredients_last_30_days_by_city
+    def dashboard_com_stats_last_30_days_by_city
       usages = LeftoverUsage.select{|usage| usage.created_at >= (Time.now - (24*30).hours)}
-      select_top_10_by_city(usages)
+      make_stats_by_city(usages) if usages
     end
 
-    field :top_ten_ingredients_last_30_days_by_region, Hash, null: true,
+    field :dashboard_com_stats_last_30_days_by_region, [Types::ComDashboardStatsType], null: false,
     description: "Returns top-10 leftover ingredients used in the last 30 days by users from the same region"
-    def top_ten_ingredients_last_30_days_by_region
+    def dashboard_com_stats_last_30_days_by_region
       usages = LeftoverUsage.select{|usage| usage.created_at >= (Time.now - (24*30).hours)}
-      select_top_10_by_region(usages)
+      make_stats_by_region(usages) if usages
     end
 
-    field :top_ten_ingredients_last_30_days_by_province, Hash, null: true,
+    field :dashboard_com_stats_last_30_days_by_province, [Types::ComDashboardStatsType], null: false,
     description: "Returns top-10 leftover ingredients used in the last 30 days by users from the same province"
-    def top_ten_ingredients_last_30_days_by_province
+    def dashboard_com_stats_last_30_days_by_province
       usages = LeftoverUsage.select{|usage| usage.created_at >= (Time.now - (24*30).hours)}
-      select_top_10_by_province(usages)
+      make_stats_by_province(usages) if usages
     end
 
-    field :top_ten_ingredients_last_6_months_by_city, Hash, null: true,
+    field :dashboard_com_stats_last_6_months_by_city, [Types::ComDashboardStatsType], null: false,
     description: "Returns top-10 leftover ingredients used in the last 30 days by users from the same city"
-    def top_ten_ingredients_last_6_months_by_city
+    def dashboard_com_stats_last_6_months_by_city
       usages = LeftoverUsage.select{|usage| usage.created_at >= (Time.now - 6.months)}
-      select_top_10_by_city(usages)
+      make_stats_by_city(usages) if usages
     end
 
-    field :top_ten_ingredients_last_6_months_by_region, Hash, null: true,
+    field :dashboard_com_stats_last_6_months_by_region, [Types::ComDashboardStatsType], null: false,
     description: "Returns top-10 leftover ingredients used in the last 30 days by users from the same region"
-    def top_ten_ingredients_last_6_months_by_region
+    def dashboard_com_stats_last_6_months_by_region
       usages = LeftoverUsage.select{|usage| usage.created_at >= (Time.now - 6.months)}
-      select_top_10_by_region(usages)
+      make_stats_by_region(usages) if usages
     end
 
-    field :top_ten_ingredients_last_6_months_by_province, Hash, null: true,
+    field :dashboard_com_stats_last_6_months_by_province, [Types::ComDashboardStatsType], null: false,
     description: "Returns top-10 leftover ingredients used in the last 30 days by users from the same province"
-    def top_ten_ingredients_last_6_months_by_province
+    def dashboard_com_stats_last_6_months_by_province
       usages = LeftoverUsage.select{|usage| usage.created_at >= (Time.now - 6.months)}
-      select_top_10_by_province(usages)
+      make_stats_by_province(usages) if usages
     end
     
     field :groceries, [Types::GroceryType], null: true,
     description: "Returns user's grocery items"
     def groceries
-      current_user&.groceries if current_user
+      current_user.groceries
     end
 
     field :all_dietary_restrictions, [Types::DietaryrestrictionType], null: true,
@@ -196,16 +236,23 @@ module Types
     field :all_tags, [Types::TagType], null: true,
     description: "Returns all tags"
     def all_tags
-      Tags.all
+      Tag.all
     end
 
     field :user_tags, [Types::TagType], null: true,
     description: "Returns user's tags"
-    def all_tags
+    def user_tags
       current_user.tags
     end
   
     private
+    def authenticate_user!
+      if current_user.nil?
+        raise GraphQL::ExecutionError,
+          "No user is signed in."
+      end
+    end
+
     def recommend_recipes
       result_not_in_mealplan = []
       #return recipes that aren't added to user's mealplan
@@ -223,6 +270,19 @@ module Types
       else
         result_rstrn = result_not_in_mealplan
       end
+      result_rstrn_tags = []
+      # #either filter by tag name in params
+      # if params[:tag]
+      #   tag = Tag.find_by(name: params[:tag])
+      #   result_rstrn_tags += result_rstrn.select {|recipe| recipe.tags.include? tag}
+      #or filter by user's tag selections
+      if current_user.tags.any?
+        current_user.tags.each do |tag|
+          result_rstrn_tags += result_rstrn.select{|recipe| recipe.tags.include?(tag)}
+        end
+      else
+        result_rstrn_tags = result_rstrn
+      end
       if current_user.leftovers.any?
         sorted_results = []
         sorted_results += use_up_leftovers(current_user.leftovers, result_rstrn)
@@ -231,7 +291,7 @@ module Types
           sorted_results << result unless sorted_results.include?(result)
         end
       else
-        sorted_results = result_rstrn
+        sorted_results = result_rstrn_tags
       end
       #return sorted results
       sorted_results
@@ -346,97 +406,203 @@ module Types
       end
     end
 
-    def select_top_10(usages)
-      # remember to incorporate unit conversions later!
-      top_ten = {}
-      top_ten[:frozen] = []
-      top_ten[:produce] = []
-      top_ten[:dairy] = []
-      top_ten[:meat] = []
-      top_ten[:other] = []
+    def floatify(quantity)
+      return quantity if quantity.is_a? Float
+      output = 0
+      quantity = quantity.to_s.lstrip.reverse.lstrip.reverse
+      if quantity.include? ' '
+        output += quantity.split(" ")[0].to_i
+        to_process = quantity.split(" ")[1]
+      else
+        to_process = quantity
+      end
+      if to_process.include? '/'
+        output += (to_process.split("/")[0].to_f / to_process.split("/")[1].to_f)
+      else
+        output += to_process.to_f
+      end
+      output
+    end
+
+    def stringify_quantity(float)
+      output = ''
+      if float != nil
+        if float.floor == float
+          output += float.floor.to_s
+        else
+          num = float - float.floor
+          if float.floor == 0
+            case true
+            when num >= (0.875)
+              output += float.ceil.to_s
+            when num >= (0.7)
+              output += "3/4"
+            when num >= (0.6)
+              output += "2/3"
+            when num >= (0.4)
+              output += "1/2"
+            when num >= (0.29)
+              output += "1/3"
+            when num >= (0.2)
+              output += "1/4"
+            else
+              output += ''
+            end
+          else
+            case true
+            when num >= (0.875)
+              output += float.ceil.to_s
+            when num >= (0.7)
+              output += "#{float.floor.to_s} 3/4"
+            when num >= (0.6)
+              output += "#{float.floor.to_s} 2/3"
+            when num >= (0.4)
+              output += "#{float.floor.to_s} 1/2"
+            when num >= (0.29)
+              output += "#{float.floor.to_s} 1/3"
+            when num >= (0.125)
+              output += "#{float.floor.to_s} 1/4"
+            else
+              output += ''
+            end
+          end
+        end
+      end
+      output
+    end
+
+    def make_stats(usages)
+      # TODO: remember to incorporate unit conversions later!
+      count = { frozen: 0, produce: 0, dairy: 0, meat: 0, nuts_and_seeds: 0, other: 0 }
+      return {count: count} unless usages.present?
+      organized_stats = {}
+      organized_stats[:frozen] = []
+      organized_stats[:produce] = []
+      organized_stats[:dairy] = []
+      organized_stats[:meat] = []
+      organized_stats[:nuts_and_seeds] = []
+      organized_stats[:other] = []
       all_stats = []
       usages.each do |usage|
         ingredient = usage.ingredient
+        category = ingredient.category
+        category = 'nuts_and_seeds' if category == 'nuts & seeds'
         stats = all_stats.detect {|e| e[:ingredient] == ingredient}
         if stats
-          stats[:quantity] += usage.quantity
+          stats[:quantity] = stringify_quantity(floatify(stats[:quantity]) + floatify(usage.quantity))
           stats[:count] += 1
         else
           all_stats << { ingredient: ingredient, quantity: usage.quantity, unit: usage.unit, count: 1 }
         end
+        # byebug
+        count[category.to_sym] += 1
       end
       all_stats.each do |stats|
-        case stats.ingredient.category
+        case stats[:ingredient].category
         when 'frozen'
-          top_ten[:frozen] << stats
+          organized_stats[:frozen] << stats
         when 'produce'
-          top_ten[:produce] << stats
+          organized_stats[:produce] << stats
         when 'dairy'
-          top_ten[:dairy] << stats
+          organized_stats[:dairy] << stats
         when 'meat'
-          top_ten[:meat] << stats
+          organized_stats[:meat] << stats
+        when 'nuts & seeds'
+          organized_stats[:nuts_and_seeds] << stats
         when 'other'
-          top_ten[:other] << stats
+          organized_stats[:other] << stats
         else
         end
       end
-      top_ten[:frozen] = top_ten[:frozen].sort_by { |stats| -stats[:count]}.first(10)
-      top_ten[:produce] = top_ten[:produce].sort_by { |stats| -stats[:count]}.first(10)
-      top_ten[:dairy] = top_ten[:dairy].sort_by { |stats| -stats[:count]}.first(10)
-      top_ten[:meat] = top_ten[:meat].sort_by { |stats| -stats[:count]}.first(10)
-      top_ten[:other] = top_ten[:other].sort_by { |stats| -stats[:count]}.first(10)
+      { count: count, usages: select_top_10(organized_stats) }
+    end
+
+    def include_tied_usages(category_stats)
+      return [] unless category_stats.present?
+      # byebug
+      num_of_stats = category_stats.count
+      if num_of_stats <= 10
+        category_stats
+      else
+        tenth_item_usage_count = category_stats[9][:count]
+        if tenth_item_usage_count > category_stats[10][:count]
+          category_stats.first(10)
+        else
+          how_many = 10
+          category_stats[10..num_of_stats-1].each do |stats|
+            if stats.count == tenth_item_usage_count
+             how_many += 1
+            else
+              category_stats.first(how_many)
+            end
+          end
+        end
+      end
+    end
+
+    def select_top_10(organized_stats)
+      top_ten = {}
+      top_ten[:frozen] = include_tied_usages(organized_stats[:frozen]&.sort_by { |stats| -stats[:count]})
+      top_ten[:produce] = include_tied_usages(organized_stats[:produce]&.sort_by { |stats| -stats[:count]})
+      top_ten[:dairy] = include_tied_usages(organized_stats[:dairy]&.sort_by { |stats| -stats[:count]})
+      top_ten[:meat] = include_tied_usages(organized_stats[:meat]&.sort_by { |stats| -stats[:count]})
+      top_ten[:nuts_and_seeds] = include_tied_usages(organized_stats[:nuts_and_seeds]&.sort_by { |stats| -stats[:count]})
+      top_ten[:other] = include_tied_usages(organized_stats[:other]&.sort_by { |stats| -stats[:count]})
       top_ten
     end
 
-    def select_top_10_by_city(usages)
+    def make_stats_by_city(usages)
       all_usages = []
       usages.each do |usage|
-        stats = all_usages.detect {|stats| stats[:city] == usage.user.city}
+        stats = all_usages.detect {|stats| stats[:city] == usage.user.city.downcase}
         if stats
-          stats[:usage] << usage
+          stats[:geo_usage] << usage
         else
           city_usage = []
           city_usage << usage
-          all_usages << { city: usage.user.city, usage: city_usage }
+          all_usages << { city: usage.user.city.downcase, geo_usage: city_usage }
         end
       end
       all_usages.each do |city_hash|
-        city_hash[:usage] = select_top_10(city_hash[:usage])
+        city_hash[:geo_usage] = make_stats(city_hash[:geo_usage])
       end
+      all_usages
     end
 
-    def select_top_10_by_region(usages)
+    def make_stats_by_region(usages)
       all_usages = []
       usages.each do |usage|
-        stats = all_usages.detect {|stats| stats[:region] == usage.user.region}
+        stats = all_usages.detect {|stats| stats[:region] == usage.user.region.downcase}
         if stats
-          stats[:usage] << usage
+          stats[:geo_usage] << usage
         else
           region_usage = []
           region_usage << usage
-          all_usages << { region: usage.user.region, usage: region_usage }
+          all_usages << { region: usage.user.region.downcase, geo_usage: region_usage }
         end
       end
       all_usages.each do |region_hash|
-        region_hash[:usage] = select_top_10(region_hash[:usage])
+        region_hash[:geo_usage] = make_stats(region_hash[:geo_usage])
       end
+      all_usages
     end
 
-    def select_top_10_by_province(usages)
+    def make_stats_by_province(usages)
       all_usages = []
       usages.each do |usage|
-        stats = all_usages.detect {|stats| stats[:province] == usage.user.province}
+        stats = all_usages.detect {|stats| stats[:province] == usage.user.province.downcase}
         if stats
-          stats[:usage] << usage
+          stats[:geo_usage] << usage
         else
           province_usage = []
           province_usage << usage
-          all_usages << { province: usage.user.province, usage: province_usage }
+          all_usages << { province: usage.user.province.downcase, geo_usage: province_usage }
         end
       end
       all_usages.each do |province_hash|
-        province_hash[:usage] = select_top_10(province_hash[:usage])
+        province_hash[:geo_usage] = make_stats(province_hash[:geo_usage])
       end
+      all_usages
     end
   end
 end

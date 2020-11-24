@@ -33,14 +33,11 @@ module Mutations
           added_up << stats
         else
           ingredient_exists = false
-          added_up.each do |stats|
-            if stats[:name] == link.ingredient.name
-              stats[:quantity] += calculated_quantity(link) unless is_seasoning?(link.ingredient.name)
-              ingredient_exists = true
-              break
-            end
-          end
-          if ingredient_exists == false
+          existing_stats = added_up.detect {|stat| stat[:name] == link.ingredient.name}
+          if existing_stats.present?
+            # byebug
+            existing_stats[:quantity] += calculated_quantity(link) unless is_seasoning?(link.ingredient.name)
+          else
             stats = {}
             stats[:name] = link.ingredient.name
             stats[:unit] = appropriate_unit(link.ingredient, link.unit)
@@ -100,7 +97,6 @@ module Mutations
 
     def stringify_quantity(float)
       output = ''
-      # byebug
       if float != nil
         if float.floor == float
           output += float.floor.to_s
@@ -199,7 +195,7 @@ module Mutations
           output = nil
       end
   
-      if is_produce?(ingredient.name) || is_seasoning?(ingredient.name)
+      if is_produce?(ingredient.name) || is_seasoning?(ingredient.name) || is_countable?(ingredient.name)
           output ||= ''
       else
           output ||= 'cup'
@@ -208,10 +204,22 @@ module Mutations
       output
     end
 
+    def is_produce?(item)
+      produce = ['cucumber', 'strawberry', 'onion', 'garlic', 'green onions', 'onion', 'red onion', 'yellow onion', 'jalapeno', 'corn', 'green bell pepper', 'tomato', 'avocado', 'banana', 'red chili pepper', 'oregano', 'egg']
+  
+      produce.include? item
+    end
+
     def is_seasoning?(item)
       seasoning = ['salt', 'black pepper', 'cayenne pepper']
   
       seasoning.include? item
+    end
+
+    def is_countable?(item)
+      countable = ['chicken breast']
+  
+      countable.include? item
     end
 
     def add_leftover_usage(recipe, ingredient, quantity, unit, old_usage_quantity, errors)
@@ -223,11 +231,10 @@ module Mutations
       link = recipe.myrecipeingredientlinks.find_by(ingredient: ingredient)
       quantity_bought = grocery.present? ? floatify(grocery.quantity) : 0
       if leftover.present?
-        # byebug
         if grocery.present? && grocery.unit != leftover.unit
           quantity_bought = convert_quantity(ingredient, quantity_bought, grocery.unit)
         end
-        if unit != leftover.unit
+        if unit.to_s != leftover.unit.to_s
           quantity_used = convert_quantity(ingredient, quantity_used, unit)
         end
         if old_usage_quantity.present?
@@ -283,6 +290,42 @@ module Mutations
         end
       end
       errors
+    end
+
+    def add_ingredients_to_recipe(recipe, ingredients)
+      ingredients.each do |i|
+        if i.quantity.to_s == ''
+          raise GraphQL::ExecutionError,
+                "Ingredient must have a quantity. Please enter 'to taste' for seasoning."
+        end
+        ingredient = Ingredient.find_or_initialize_by(name: i.ingredient_name)
+        existing_link = recipe.myrecipeingredientlinks.find_by(ingredient: ingredient)
+        if existing_link
+          return existing_link.errors.full_messages unless existing_link.update(quantity: i.quantity, unit: i.unit)
+        else
+          link = Myrecipeingredientlink.new(quantity: i.quantity, unit: i.unit)
+          link.myrecipe = recipe
+          link.ingredient = ingredient
+          return link.errors.full_messages unless link.save
+        end
+      end
+    end
+
+    def convert_quantity(ingredient, quantity, unit)
+      output = floatify(quantity)
+      case ingredient.name
+      when 'cucumber'
+        if unit == 'cup'
+          # quantity = link.quantity
+          output /= 2
+        end
+      when 'strawberry'
+        if unit == 'cup'
+          # quantity = link.quantity
+          output *= 8
+        end
+      end
+      output
     end
   end
 end

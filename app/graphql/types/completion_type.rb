@@ -5,8 +5,7 @@ module Types
     # field :myrecipe_id, Integer, null: true
     field :created_at, GraphQL::Types::ISO8601DateTime, null: false
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: false
-
-    field :belongs_to, UserType, null: false, method: :user
-    field :belongs_to, MyrecipeType, null: false, method: :myrecipe
+    field :user, Types::UserType, null: false
+    field :myrecipe, Types::MyrecipeType, null: false
   end
 end
