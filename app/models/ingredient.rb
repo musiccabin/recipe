@@ -7,12 +7,22 @@ class Ingredient < ApplicationRecord
   has_many :leftover_usages, dependent: :nullify
 
   validates :name, presence: true, uniqueness: true
+  validate :singular
   validates_inclusion_of :category, :in => ['produce', 'meat', 'dairy', 'frozen', 'nuts & seeds', 'other'], :allow_nil => false
 
   before_validation :downcase_name
 
   private
     def downcase_name
-        self.name&.downcase!
+      self.name&.downcase!
+    end
+
+    def singular
+      name = self.name.downcase.strip
+      # allowed = ['asparagus']
+      # return if allowed.include? name
+      if Ingredient.find_by(name: name.delete_suffix('es')) || Ingredient.find_by(name: name.delete_suffix('s'))
+        self.errors.add(:name, 'please use singular form of ingredient name.')
+      end
     end
 end

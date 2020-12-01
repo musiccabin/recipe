@@ -48,31 +48,49 @@ class CompletionsController < ApplicationController
   end
 
   def add_leftover_usage(ingredient, quantity, unit, expiry_date, old_usage_quantity)
-    quantity_used = floatify(quantity)
+    ingredient_name = ingredient.name
+    appropriate_unit = appropriate_unit(ingredient_name, unit)
+    grocery = current_user.groceries.find_by(name: ingredient_name)
+    quantity_bought = grocery.present? ? floatify(grocery.quantity) : 0
+    if unit != appropriate_unit
+      # byebug
+      quantity_used = convert_quantity(ingredient_name, quantity, unit, appropriate_unit)
+    else
+      quantity_used = floatify(quantity)
+    end
     @leftover_usage = LeftoverUsage.new(user: current_user, myrecipe: @myrecipe)
     @leftover_usage.ingredient = ingredient
     leftover = current_user.leftovers.find_by(ingredient: ingredient)
-    grocery = current_user.groceries.find_by(name: ingredient.name)
+    unit_grocery = grocery&.unit
     link = @myrecipe.myrecipeingredientlinks.find_by(ingredient: ingredient)
-    quantity_bought = grocery.present? ? floatify(grocery.quantity) : 0
+    if grocery.present? && grocery.unit.to_s != appropriate_unit
+      quantity_bought = convert_quantity(ingredient_name, quantity_bought, unit_grocery, appropriate_unit)
+    end
     if leftover.present?
       # byebug
-      if grocery.present? && grocery.unit != leftover.unit
-        quantity_bought = convert_quantity(ingredient, quantity_bought, grocery.unit)
-      end
-      if unit != leftover.unit
-        quantity_used = convert_quantity(ingredient, quantity_used, unit)
+      unit_leftover = leftover.unit
+      quantity_leftover = leftover.quantity
+      if unit_leftover != appropriate_unit
+        quantity_leftover = convert_quantity(ingredient_name, quantity_leftover, unit_leftover, appropriate_unit)
       end
       if old_usage_quantity.present?
-        leftover.quantity = stringify_quantity(floatify(old_usage_quantity) + floatify(leftover.quantity) - quantity_used)
+        # byebug
+        leftover.quantity = stringify_quantity(floatify(old_usage_quantity) + floatify(quantity_leftover) - quantity_used)
       else
         leftover.quantity = stringify_quantity(quantity_bought + floatify(leftover.quantity) - quantity_used)
       end
+      leftover.unit = appropriate_unit
       leftover.expiry_date = expiry_date
+      if leftover.quantity != '0' && ['cup', 'tbsp', 'tsp'].include?(appropriate_unit)
+        converted = cup_tbsp_tsp(floatify(quantity_leftover), appropriate_unit)
+        leftover.unit = converted[:unit]
+        leftover.quantity = stringify_quantity(converted[:quantity])
+      end
       @leftover_usage.quantity = stringify_quantity(quantity_used)
-      @leftover_usage.unit = leftover.unit
+      @leftover_usage.unit = appropriate_unit
       @leftover_usage.save && leftover.save
-      leftover.destroy if leftover.quantity == '0'
+      # byebug
+      leftover.destroy if ['0', ''].include?(leftover.quantity)
       usage_link = LeftoverUsageMealplanLink.new(mealplan: current_user.mealplan, leftover_usage: @leftover_usage)
       usage_link.save
       @leftover_usage.update(mealplan: current_user.mealplan, leftover_usage_mealplan_link: usage_link)
@@ -81,17 +99,22 @@ class CompletionsController < ApplicationController
       new_leftover.ingredient = ingredient
       if old_usage_quantity.present?
         new_leftover.quantity = stringify_quantity(floatify(old_usage_quantity) - quantity_used)
-        @leftover_usage = LeftoverUsage.create(user: current_user, ingredient: ingredient, quantity: quantity, unit: unit, myrecipe: @myrecipe)
+        @leftover_usage = LeftoverUsage.create(user: current_user, ingredient: ingredient, quantity: stringify_quantity(quantity_used), unit: appropriate_unit, myrecipe: @myrecipe)
         usage_link = LeftoverUsageMealplanLink.new(mealplan: current_user.mealplan, leftover_usage: @leftover_usage)
         usage_link.save
         @leftover_usage.update(mealplan: current_user.mealplan, leftover_usage_mealplan_link: usage_link)
       else
         new_leftover.quantity = stringify_quantity(quantity_bought - quantity_used)
       end
-      new_leftover.unit = unit
+      new_leftover.unit = appropriate_unit
       new_leftover.expiry_date = expiry_date
+      if ['cup', 'tbsp', 'tsp'].include? appropriate_unit
+        converted = cup_tbsp_tsp(floatify(new_leftover.quantity), appropriate_unit)
+        new_leftover.unit = converted[:unit]
+        new_leftover.quantity = stringify_quantity(converted[:quantity])
+      end
       new_leftover.save
-      new_leftover.destroy if new_leftover.quantity == '0'
+      new_leftover.destroy if ['', '0'].include?(new_leftover.quantity)
     end
   end
   

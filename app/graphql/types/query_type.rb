@@ -361,9 +361,9 @@ module Types
       unit_recipe = link.unit
       unit_leftover = leftover.unit.to_s
       if unit_recipe == unit_leftover
-        return floatify(link.quantity)
+        floatify(link.quantity)
       else
-        return convert_quantity(ingredient, link.quantity, link.unit)
+        convert_quantity(ingredient, link.quantity, unit_recipe, unit_leftover)
       end
     end
 
@@ -406,22 +406,22 @@ module Types
       end
     end
 
-    def floatify(quantity)
-      return quantity if quantity.is_a? Float
-      output = 0
-      quantity = quantity.to_s.lstrip.reverse.lstrip.reverse
-      if quantity.include? ' '
-        output += quantity.split(" ")[0].to_i
-        to_process = quantity.split(" ")[1]
-      else
-        to_process = quantity
-      end
-      if to_process.include? '/'
-        output += (to_process.split("/")[0].to_f / to_process.split("/")[1].to_f)
-      else
-        output += to_process.to_f
-      end
-      output
+    def is_produce?(item)
+      produce = ['cucumber', 'strawberry', 'onion', 'garlic', 'green onion', 'cilantro', 'red onion', 'yellow onion', 'jalapeno', 'corn', 'green bell pepper', 'tomato', 'avocado', 'banana', 'red chili pepper', 'oregano', 'egg']
+  
+      produce.include? item
+    end
+
+    def is_seasoning?(item)
+      seasoning = ['salt', 'black pepper', 'cayenne pepper']
+  
+      seasoning.include? item
+    end
+
+    def is_countable?(item)
+      countable = ['chicken breast']
+  
+      countable.include? item
     end
 
     def stringify_quantity(float)
@@ -471,6 +471,179 @@ module Types
       output
     end
 
+    def convert_quantity(name, quantity, unit_input, unit_output)
+      return 0 if ['to taste', ''].include? quantity.to_s
+      output = floatify(quantity)
+      if unit_input == 'cup'
+        case unit_output
+        when ''
+          case name
+          when 'green bell pepper'
+            output
+          when 'red bell pepper'
+            output
+          when 'yellow bell pepper'
+            output
+          when 'cilantro'
+            output
+          when 'green onion'
+            output *= 9
+          when 'strawberry'
+            output *= 8
+          when 'cucumber'
+            output /= 2
+          when 'avocado'
+            output /= 2
+          when 'red onion'
+            output *= 3
+          end
+        when 'tbsp'
+          output *= 16
+        when 'tsp'
+          output *= 48
+        end
+      end
+  
+      if unit_input == 'tbsp'
+        case unit_output
+        when ''
+          case name
+          when 'green bell pepper'
+            output /= 16
+          when 'red bell pepper'
+            output /= 16
+          when 'yellow bell pepper'
+            output /= 16
+          when 'cilantro'
+            output /= 16
+          when 'green onion'
+            output = output * 9 / 16
+          when 'strawberry'
+            output = output * 8 / 16
+          when 'cucumber'
+            output = output / 2 / 16
+          when 'avocado'
+            output = output / 2 / 16
+          when 'red onion'
+            output = output * 3 / 16
+          end
+        when 'cup'
+          output /= 16
+        when 'tsp'
+          output *= 3
+        end
+      end
+  
+      if unit_input == 'tsp'
+        case unit_output
+        when ''
+          case name
+          when 'green bell pepper'
+            output /= 48
+          when 'red bell pepper'
+            output /= 48
+          when 'yellow bell pepper'
+            output /= 48
+          when 'cilantro'
+            output /= 48
+          when 'green onion'
+            output = output * 9 / 48
+          when 'strawberry'
+            output = output * 8 / 48
+          when 'cucumber'
+            output = output / 2 / 48
+          when 'avocado'
+            output = output / 2 / 48
+          when 'red onion'
+            output = output * 3 / 48
+          end
+        when 'cup'
+          output /= 48
+        when 'tbsp'
+          output /= 3
+        end
+      end
+  
+      output
+    end
+
+    def cup_tbsp_tsp(quantity, unit)
+      converted = {unit: unit, quantity: quantity}
+      if unit == 'cup'
+        if quantity < 0.2
+          converted[:unit] = 'tbsp'
+          converted[:quantity] /= 0.0625
+          if converted[:quantity] < 1
+            converted[:unit] = 'tsp'
+            converted[:quantity] /= 0.333
+          end
+        end
+      end
+  
+      if unit == 'tbsp'
+        if quantity > 3
+          converted[:unit] = 'cup'
+          converted[:quantity] /= 16
+        end
+  
+        if quantity <= 0.666
+          converted[:unit] = 'tsp'
+          converted[:quantity] *= 3
+        end
+      end
+  
+      if unit == 'tsp'
+        if quantity >= 12
+          converted[:unit] = 'cup'
+          converted[:quantity] /= 48
+        end
+  
+        if quantity >= 3
+          converted[:unit] = 'tbsp'
+          converted[:quantity] /= 3
+        end
+      end
+  
+      converted
+    end
+
+    def optimize_unit(list_of_stats)
+      list_of_stats.each do |stat|
+        if ['cup', 'tbsp', 'tsp'].include? stat[:unit]
+          converted = cup_tbsp_tsp(floatify(stat[:quantity]), stat[:unit])
+          stat[:quantity] = stringify_quantity(converted[:quantity])
+          stat[:unit] = converted[:unit]
+        end
+      end
+    end
+
+    def appropriate_unit(name, unit)
+      output = unit
+  
+      if is_produce?(name) || is_countable?(name)
+        output = ''
+    # else
+    #     output ||= 'cup'
+      end
+      
+      case name
+      when 'corn'
+          output = 'ear'
+      when 'bacon'
+          output = 'strip'
+      when 'chicken bouillon'
+          output = 'cube'
+      when 'linguine'
+          output = 'pkg'
+      when 'garlic'
+          output = 'clove'
+      when 'cilantro'
+        output = 'bunch'
+      end
+  
+      output
+    end
+
     def make_stats(usages)
       # TODO: remember to incorporate unit conversions later!
       count = { frozen: 0, produce: 0, dairy: 0, meat: 0, nuts_and_seeds: 0, other: 0 }
@@ -488,11 +661,24 @@ module Types
         category = ingredient.category
         category = 'nuts_and_seeds' if category == 'nuts & seeds'
         stats = all_stats.detect {|e| e[:ingredient] == ingredient}
+        unit_usage = usage.unit
+        quantity_usage = usage.quantity
+        name = ingredient.name
+        unit = appropriate_unit(name, unit_usage)
         if stats
-          stats[:quantity] = stringify_quantity(floatify(stats[:quantity]) + floatify(usage.quantity))
+          if stats[:unit] != unit
+            stats[:unit] = unit     
+            stats[:quantity] = stringify_quantity(convert_quantity(name, stats[:quantity], stats[:unit], unit))
+          end   
+          if stats[:unit] != unit_usage
+            stats[:quantity] = stringify_quantity(floatify(stats[:quantity]) + convert_quantity(stats[:name], quantity_usage, unit_usage, stats[:unit]))
+          else
+            stats[:quantity] = stringify_quantity(floatify(stats[:quantity]) + floatify(quantity_usage))
+          end          
           stats[:count] += 1
         else
-          all_stats << { ingredient: ingredient, quantity: usage.quantity, unit: usage.unit, count: 1 }
+          quantity = stringify_quantity(convert_quantity(name, quantity_usage, unit_usage, unit))
+          all_stats << { ingredient: ingredient, quantity: quantity, unit: unit, count: 1 }
         end
         # byebug
         count[category.to_sym] += 1
@@ -522,18 +708,18 @@ module Types
       # byebug
       num_of_stats = category_stats.count
       if num_of_stats <= 10
-        category_stats
+        optimize_unit(category_stats)
       else
         tenth_item_usage_count = category_stats[9][:count]
         if tenth_item_usage_count > category_stats[10][:count]
-          category_stats.first(10)
+          optimize_unit(category_stats.first(10))
         else
           how_many = 10
           category_stats[10..num_of_stats-1].each do |stats|
             if stats.count == tenth_item_usage_count
              how_many += 1
             else
-              category_stats.first(how_many)
+              return optimize_unit(category_stats.first(how_many))
             end
           end
         end

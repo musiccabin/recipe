@@ -25,55 +25,55 @@ module Mutations
       links.each do |link|
         next if link.ingredient.name == 'water'
         next if link.ingredient.name == 'ice cube'
-        if added_up == []
-          stats = {}
-          stats[:name] = link.ingredient.name
-          stats[:unit] = appropriate_unit(link.ingredient, link.unit)
-          stats[:quantity] = calculated_quantity(link)
-          added_up << stats
-        else
-          ingredient_exists = false
-          existing_stats = added_up.detect {|stat| stat[:name] == link.ingredient.name}
-          if existing_stats.present?
-            # byebug
-            existing_stats[:quantity] += calculated_quantity(link) unless is_seasoning?(link.ingredient.name)
-          else
-            stats = {}
-            stats[:name] = link.ingredient.name
-            stats[:unit] = appropriate_unit(link.ingredient, link.unit)
-            stats[:quantity] = calculated_quantity(link)
-            added_up << stats
+        ingredient_name = link.ingredient.name
+        unit = link.unit
+        appropriate_unit = appropriate_unit(ingredient_name, unit)
+        found = added_up.detect {|stat| stat[:name] == ingredient_name}
+        if found
+          if found[:unit].to_s == ''
+            found[:unit] = appropriate_unit
+          elsif found[:unit] != appropriate_unit
+            appropriate_unit = found[:unit]
           end
+          found[:quantity] += convert_quantity(ingredient_name, link.quantity, unit, appropriate_unit)
+        else
+          added_up << { name: ingredient_name, quantity: convert_quantity(ingredient_name, link.quantity, unit, appropriate_unit), unit: appropriate_unit }
         end
       end
   
-      # subtract_leftovers
+      # subtract_leftovers = []
       added_up.each do |stats|
         ingredient = Ingredient.find_by(name: stats[:name])
         leftover = current_user.leftovers&.find_by(ingredient: ingredient)
         if leftover
-          stats[:quantity] -= convert_quantity(ingredient, leftover.quantity, leftover.unit)
-          stats[:quantity] = 0 if stats[:quantity] < 0
+          ingredient_name = ingredient.name
+          stats[:quantity] -= convert_quantity(ingredient_name, leftover.quantity, leftover.unit, stats[:unit]) unless stats[:quantity].to_s == '' && is_seasoning?(ingredient_name)
+          added_up.delete(stats) if stats[:quantity] <= 0
         end
       end
   
       current_user.groceries.where(:user_added => false).destroy_all
   
       added_up.each do |stats|
-        if stats[:quantity] != nil
-          if stats[:unit] == 'cup' && stats[:quantity] < 0.2
-            stats[:unit] = 'tbsp'
-            stats[:quantity] /= 0.0625
-            if stats[:quantity] < 1
-              stats[:unit] = 'tsp'
-              stats[:quantity] /= 0.333
-            end
-          end
+        if stats[:quantity] != nil && ['cup', 'tbsp', 'tsp'].include?(stats[:unit])
+          converted = cup_tbsp_tsp(stats[:quantity], stats[:unit])
+          stats[:unit] = converted[:unit]
+          stats[:quantity] = stringify_quantity(converted[:quantity])
         end
-  
-        stats[:quantity] = stringify_quantity(stats[:quantity])
         
-        Grocery.create(name: stats[:name], quantity: stats[:quantity], unit: stats[:unit], user: current_user, is_completed: false) unless stats[:quantity] == '0'
+        user_already_added = current_user.groceries.find_by(name: stats[:name])
+        if user_already_added
+          existing_unit = user_already_added.unit
+          existing_quantity = user_already_added.quantity
+          appropriate_unit = appropriate_unit(stats[:name], existing_unit)
+          stats[:unit] = appropriate_unit
+          existing_quantity = '0' if existing_quantity.to_s == ''
+          stats[:quantity] += convert_quantity(stats[:name], existing_quantity, existing_unit, appropriate_unit)
+          stats[:quantity] = stringify_quantity(stats[:quantity])
+          user_already_added.update(user_added: false)
+        else
+          Grocery.create(name: stats[:name], quantity: stringify_quantity(stats[:quantity]), unit: stats[:unit], user: current_user, is_completed: false) unless stats[:quantity] == '0'
+        end
       end
     end
 
@@ -142,45 +142,51 @@ module Mutations
       output
     end
 
-    def calculated_quantity(link)
-      output = nil
-      return output if is_seasoning?(link.ingredient.name)
-      if link.unit == appropriate_unit(link.ingredient, link.unit)
-          output = floatify(link.quantity)
-      elsif link.unit == 'cup'
-        case link.ingredient.name
-        when 'green bell pepper'
-          output = floatify(link.quantity) / 1.25
-        when 'red bell pepper'
-          output = floatify(link.quantity) / 1.25
-        when 'yellow bell pepper'
-          output = floatify(link.quantity) / 1.25
-        when 'green onions'
-          output = floatify(link.quantity) * 9
-        when 'strawberry'
-          output = floatify(link.quantity) * 8
-        when 'cucumber'
-          output = floatify(link.quantity) / 2
-        when 'avocado'
-          output = floatify(link.quantity) / 2
-        when 'red onion'
-          output = floatify(link.quantity) * 3
-        else
-          output = floatify(link.quantity)
-        end
-      elsif link.unit == 'tbsp'
-        output = floatify(link.quantity) * 0.0625
-      elsif link.unit == 'tsp'
-        output = floatify(link.quantity) * 0.0625 * 0.333
-      end
-      output = nil if output == 0
-      output
-    end
+    # def calculated_quantity(link)
+    #   output = nil
+    #   return output if is_seasoning?(link.ingredient.name)
+    #   if link.unit == appropriate_unit(link.ingredient, link.unit)
+    #       output = floatify(link.quantity)
+    #   elsif link.unit == 'cup'
+    #     case link.ingredient.name
+    #     when 'green bell pepper'
+    #       output = floatify(link.quantity) / 1.25
+    #     when 'red bell pepper'
+    #       output = floatify(link.quantity) / 1.25
+    #     when 'yellow bell pepper'
+    #       output = floatify(link.quantity) / 1.25
+    #     when 'green onion'
+    #       output = floatify(link.quantity) * 9
+    #     when 'strawberry'
+    #       output = floatify(link.quantity) * 8
+    #     when 'cucumber'
+    #       output = floatify(link.quantity) / 2
+    #     when 'avocado'
+    #       output = floatify(link.quantity) / 2
+    #     when 'red onion'
+    #       output = floatify(link.quantity) * 3
+    #     else
+    #       output = floatify(link.quantity)
+    #     end
+    #   elsif link.unit == 'tbsp'
+    #     output = floatify(link.quantity) * 0.0625
+    #   elsif link.unit == 'tsp'
+    #     output = floatify(link.quantity) * 0.0625 * 0.333
+    #   end
+    #   output = nil if output == 0
+    #   output
+    # end
 
-    def appropriate_unit(ingredient, unit)
-      output = nil
+    def appropriate_unit(name, unit)
+      output = unit
+  
+      if is_produce?(name) || is_countable?(name)
+        output = ''
+    # else
+    #     output ||= 'cup'
+      end
       
-      case ingredient.name
+      case name
       when 'corn'
           output = 'ear'
       when 'bacon'
@@ -191,21 +197,15 @@ module Mutations
           output = 'pkg'
       when 'garlic'
           output = 'clove'
-      else
-          output = nil
-      end
-  
-      if is_produce?(ingredient.name) || is_seasoning?(ingredient.name) || is_countable?(ingredient.name)
-          output ||= ''
-      else
-          output ||= 'cup'
+      when 'cilantro'
+        output = 'bunch'
       end
   
       output
     end
 
     def is_produce?(item)
-      produce = ['cucumber', 'strawberry', 'onion', 'garlic', 'green onions', 'onion', 'red onion', 'yellow onion', 'jalapeno', 'corn', 'green bell pepper', 'tomato', 'avocado', 'banana', 'red chili pepper', 'oregano', 'egg']
+      produce = ['cucumber', 'strawberry', 'onion', 'garlic', 'green onion', 'cilantro', 'red onion', 'yellow onion', 'jalapeno', 'corn', 'green bell pepper', 'tomato', 'avocado', 'banana', 'red chili pepper', 'oregano', 'egg']
   
       produce.include? item
     end
@@ -223,27 +223,43 @@ module Mutations
     end
 
     def add_leftover_usage(recipe, ingredient, quantity, unit, old_usage_quantity, errors)
+      ingredient_name = ingredient.name
+      appropriate_unit = appropriate_unit(ingredient_name, unit)
       quantity_used = floatify(quantity)
+      grocery = current_user.groceries.find_by(name: ingredient_name)
+      quantity_bought = grocery.present? ? floatify(grocery.quantity) : 0
+      if unit != appropriate_unit
+        # byebug
+        quantity_used = convert_quantity(ingredient_name, quantity, unit, appropriate_unit)
+      end
       leftover_usage = LeftoverUsage.new(user: current_user, myrecipe: recipe)
       leftover_usage.ingredient = ingredient
       leftover = current_user.leftovers.find_by(ingredient: ingredient)
-      grocery = current_user.groceries.find_by(name: ingredient.name)
+      unit_grocery = grocery&.unit
       link = recipe.myrecipeingredientlinks.find_by(ingredient: ingredient)
       quantity_bought = grocery.present? ? floatify(grocery.quantity) : 0
+      if grocery.present? && grocery.unit.to_s != appropriate_unit
+        quantity_bought = convert_quantity(ingredient_name, quantity_bought, unit_grocery, appropriate_unit)
+      end
       if leftover.present?
-        if grocery.present? && grocery.unit != leftover.unit
-          quantity_bought = convert_quantity(ingredient, quantity_bought, grocery.unit)
-        end
-        if unit.to_s != leftover.unit.to_s
-          quantity_used = convert_quantity(ingredient, quantity_used, unit)
+        unit_leftover = leftover.unit
+        quantity_leftover = leftover.quantity
+        if unit_leftover != appropriate_unit
+          quantity_leftover = convert_quantity(ingredient_name, quantity_leftover, unit_leftover, appropriate_unit)
         end
         if old_usage_quantity.present?
-          leftover.quantity = stringify_quantity(floatify(old_usage_quantity) + floatify(leftover.quantity) - quantity_used)
+          leftover.quantity = stringify_quantity(floatify(old_usage_quantity) + floatify(quantity_leftover) - quantity_used)
         else
           leftover.quantity = stringify_quantity(quantity_bought + floatify(leftover.quantity) - quantity_used)
         end
+        leftover.unit = appropriate_unit
+        if leftover.quantity != '0' && ['cup', 'tbsp', 'tsp'].include?(appropriate_unit)
+          converted = cup_tbsp_tsp(floatify(quantity_leftover), appropriate_unit)
+          leftover.unit = converted[:unit]
+          leftover.quantity = stringify_quantity(converted[:quantity])
+        end
         leftover_usage.quantity = stringify_quantity(quantity_used)
-        leftover_usage.unit = leftover.unit
+        leftover_usage.unit = appropriate_unit
         if leftover_usage.save
           RecipeSchema.subscriptions.trigger("leftoverUsageAdded", {}, leftover_usage)
           usage_link = LeftoverUsageMealplanLink.new(mealplan: current_user.mealplan, leftover_usage: leftover_usage)
@@ -253,7 +269,7 @@ module Mutations
           errors << leftover_usage.errors
         end
         if leftover.save
-          if leftover.quantity == '0'
+          if ['0', ''].include?(leftover.quantity)
             leftover.destroy
           else
             RecipeSchema.subscriptions.trigger("leftoverAdded", {}, leftover)
@@ -266,7 +282,7 @@ module Mutations
         new_leftover.ingredient = ingredient
         if old_usage_quantity.present?
           new_leftover.quantity = stringify_quantity(floatify(old_usage_quantity) - quantity_used)
-          leftover_usage = LeftoverUsage.new(user: current_user, ingredient: ingredient, quantity: quantity, unit: unit, myrecipe: recipe)
+          leftover_usage = LeftoverUsage.new(user: current_user, ingredient: ingredient, quantity: stringify_quantity(quantity_used), unit: appropriate_unit, myrecipe: recipe)
           if leftover_usage.save
             RecipeSchema.subscriptions.trigger("leftoverUsageAdded", {}, leftover_usage)
             usage_link = LeftoverUsageMealplanLink.new(mealplan: current_user.mealplan, leftover_usage: leftover_usage)
@@ -278,9 +294,14 @@ module Mutations
         else
           new_leftover.quantity = stringify_quantity(quantity_bought - quantity_used)
         end
-        new_leftover.unit = unit
+        new_leftover.unit = appropriate_unit
+        if ['cup', 'tbsp', 'tsp'].include? appropriate_unit
+          converted = cup_tbsp_tsp(floatify(new_leftover.quantity), appropriate_unit)
+          new_leftover.unit = converted[:unit]
+          new_leftover.quantity = stringify_quantity(converted[:quantity])
+        end
         if new_leftover.save
-          if new_leftover.quantity == '0'
+          if ['', '0'].include?(new_leftover.quantity)
             new_leftover.destroy
           else
             RecipeSchema.subscriptions.trigger("leftoverAdded", {}, leftover)
@@ -311,21 +332,140 @@ module Mutations
       end
     end
 
-    def convert_quantity(ingredient, quantity, unit)
+    def convert_quantity(name, quantity, unit_input, unit_output)
+      return 0 if ['to taste', ''].include? quantity.to_s
       output = floatify(quantity)
-      case ingredient.name
-      when 'cucumber'
-        if unit == 'cup'
-          # quantity = link.quantity
-          output /= 2
-        end
-      when 'strawberry'
-        if unit == 'cup'
-          # quantity = link.quantity
-          output *= 8
+      if unit_input == 'cup'
+        case unit_output
+        when ''
+          case name
+          when 'green bell pepper'
+            output
+          when 'red bell pepper'
+            output
+          when 'yellow bell pepper'
+            output
+          when 'cilantro'
+            output
+          when 'green onion'
+            output *= 9
+          when 'strawberry'
+            output *= 8
+          when 'cucumber'
+            output /= 2
+          when 'avocado'
+            output /= 2
+          when 'red onion'
+            output *= 3
+          end
+        when 'tbsp'
+          output *= 16
+        when 'tsp'
+          output *= 48
         end
       end
+  
+      if unit_input == 'tbsp'
+        case unit_output
+        when ''
+          case name
+          when 'green bell pepper'
+            output /= 16
+          when 'red bell pepper'
+            output /= 16
+          when 'yellow bell pepper'
+            output /= 16
+          when 'cilantro'
+            output /= 16
+          when 'green onion'
+            output = output * 9 / 16
+          when 'strawberry'
+            output = output * 8 / 16
+          when 'cucumber'
+            output = output / 2 / 16
+          when 'avocado'
+            output = output / 2 / 16
+          when 'red onion'
+            output = output * 3 / 16
+          end
+        when 'cup'
+          output /= 16
+        when 'tsp'
+          output *= 3
+        end
+      end
+  
+      if unit_input == 'tsp'
+        case unit_output
+        when ''
+          case name
+          when 'green bell pepper'
+            output /= 48
+          when 'red bell pepper'
+            output /= 48
+          when 'yellow bell pepper'
+            output /= 48
+          when 'cilantro'
+            output /= 48
+          when 'green onion'
+            output = output * 9 / 48
+          when 'strawberry'
+            output = output * 8 / 48
+          when 'cucumber'
+            output = output / 2 / 48
+          when 'avocado'
+            output = output / 2 / 48
+          when 'red onion'
+            output = output * 3 / 48
+          end
+        when 'cup'
+          output /= 48
+        when 'tbsp'
+          output /= 3
+        end
+      end
+  
       output
+    end
+
+    def cup_tbsp_tsp(quantity, unit)
+      converted = {unit: unit, quantity: quantity}
+      if unit == 'cup'
+        if quantity < 0.2
+          converted[:unit] = 'tbsp'
+          converted[:quantity] /= 0.0625
+          if converted[:quantity] < 1
+            converted[:unit] = 'tsp'
+            converted[:quantity] /= 0.333
+          end
+        end
+      end
+  
+      if unit == 'tbsp'
+        if quantity > 3
+          converted[:unit] = 'cup'
+          converted[:quantity] /= 16
+        end
+  
+        if quantity <= 0.666
+          converted[:unit] = 'tsp'
+          converted[:quantity] *= 3
+        end
+      end
+  
+      if unit == 'tsp'
+        if quantity >= 12
+          converted[:unit] = 'cup'
+          converted[:quantity] /= 48
+        end
+  
+        if quantity >= 3
+          converted[:unit] = 'tbsp'
+          converted[:quantity] /= 3
+        end
+      end
+  
+      converted
     end
   end
 end

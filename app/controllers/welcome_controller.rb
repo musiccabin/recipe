@@ -244,7 +244,7 @@ class WelcomeController < ApplicationController
     if unit_recipe == unit_leftover
       return floatify(link.quantity)
     else
-      return convert_quantity(ingredient, link.quantity, link.unit)
+      return convert_quantity(ingredient.name, link.quantity, unit_recipe, unit_leftover)
     end
   end
 
@@ -319,28 +319,19 @@ class WelcomeController < ApplicationController
     links.each do |link|
       next if link.ingredient.name == 'water'
       next if link.ingredient.name == 'ice cube'
-      if added_up == []
-        stats = {}
-        stats[:name] = link.ingredient.name
-        stats[:unit] = appropriate_unit(link.ingredient, link.unit)
-        stats[:quantity] = calculated_quantity(link)
-        added_up << stats
+      ingredient_name = link.ingredient.name
+      unit = link.unit
+      appropriate_unit = appropriate_unit(ingredient_name, unit)
+      found = added_up.detect {|stat| stat[:name] == ingredient_name}
+      if found
+        if found[:unit].to_s == ''
+          found[:unit] = appropriate_unit
+        elsif found[:unit] != appropriate_unit
+          appropriate_unit = found[:unit]
+        end
+        found[:quantity] += convert_quantity(ingredient_name, link.quantity, unit, appropriate_unit)
       else
-        ingredient_exists = false
-        added_up.each do |stats|
-          if stats[:name] == link.ingredient.name
-            stats[:quantity] += calculated_quantity(link) unless is_seasoning?(link.ingredient.name)
-            ingredient_exists = true
-            break
-          end
-        end
-        if ingredient_exists == false
-          stats = {}
-          stats[:name] = link.ingredient.name
-          stats[:unit] = appropriate_unit(link.ingredient, link.unit)
-          stats[:quantity] = calculated_quantity(link)
-          added_up << stats
-        end
+        added_up << { name: ingredient_name, quantity: convert_quantity(ingredient_name, link.quantity, unit, appropriate_unit), unit: appropriate_unit }
       end
     end
 
@@ -349,92 +340,36 @@ class WelcomeController < ApplicationController
       ingredient = Ingredient.find_by(name: stats[:name])
       leftover = current_user.leftovers&.find_by(ingredient: ingredient)
       if leftover
-        stats[:quantity] -= convert_quantity(ingredient, leftover.quantity, leftover.unit)
-        stats[:quantity] = 0 if stats[:quantity] < 0
+        ingredient_name = ingredient.name
+        stats[:quantity] -= convert_quantity(ingredient_name, leftover.quantity, leftover.unit, stats[:unit]) unless stats[:quantity].to_s == '' && is_seasoning?(ingredient_name)
+        added_up.delete(stats) if stats[:quantity] <= 0
       end
     end
 
     current_user.groceries.where(:user_added => false).destroy_all
 
     added_up.each do |stats|
-      if stats[:quantity] != nil
-        if stats[:unit] == 'cup' && stats[:quantity] < 0.2
-          stats[:unit] = 'tbsp'
-          stats[:quantity] /= 0.0625
-          if stats[:quantity] < 1
-            stats[:unit] = 'tsp'
-            stats[:quantity] /= 0.333
-          end
-        end
+      if stats[:quantity] != nil && ['cup', 'tbsp', 'tsp'].include?(stats[:unit])
+        converted = cup_tbsp_tsp(stats[:quantity], stats[:unit])
+        stats[:unit] = converted[:unit]
+        stats[:quantity] = converted[:quantity]
       end
-
-      stats[:quantity] = stringify_quantity(stats[:quantity])
       
-      Grocery.create(name: stats[:name], quantity: stats[:quantity], unit: stats[:unit], user: current_user, is_completed: false) unless stats[:quantity] == '0'
-    end
-  end
-
-  def calculated_quantity(link)
-    output = nil
-    return output if is_seasoning?(link.ingredient.name)
-    if link.unit == appropriate_unit(link.ingredient, link.unit)
-        output = floatify(link.quantity)
-    elsif link.unit == 'cup'
-      case link.ingredient.name
-      when 'green bell pepper'
-        output = floatify(link.quantity) / 1.25
-      when 'red bell pepper'
-        output = floatify(link.quantity) / 1.25
-      when 'yellow bell pepper'
-        output = floatify(link.quantity) / 1.25
-      when 'green onions'
-        output = floatify(link.quantity) * 9
-      when 'strawberry'
-        output = floatify(link.quantity) * 8
-      when 'cucumber'
-        output = floatify(link.quantity) / 2
-      when 'avocado'
-        output = floatify(link.quantity) / 2
-      when 'red onion'
-        output = floatify(link.quantity) * 3
+      user_already_added = current_user.groceries.find_by(name: stats[:name])
+      if user_already_added
+        existing_unit = user_already_added.unit
+        existing_quantity = user_already_added.quantity
+        appropriate_unit = appropriate_unit(stats[:name], existing_unit)
+        stats[:unit] = appropriate_unit
+        existing_quantity = '0' if existing_quantity.to_s == ''
+        stats[:quantity] += convert_quantity(stats[:name], existing_quantity, existing_unit, appropriate_unit)
+        stats[:quantity] = stringify_quantity(stats[:quantity])
+        user_already_added.update(user_added: false)
       else
-        output = floatify(link.quantity)
+        Grocery.create(name: stats[:name], quantity: stringify_quantity(stats[:quantity]), unit: stats[:unit], user: current_user, is_completed: false) unless stats[:quantity] == '0'
       end
-    elsif link.unit == 'tbsp'
-      output = floatify(link.quantity) * 0.0625
-    elsif link.unit == 'tsp'
-      output = floatify(link.quantity) * 0.0625 * 0.333
     end
-    output = nil if output == 0
-    output
   end
-
-  def appropriate_unit(ingredient, unit)
-    output = nil
-    
-    case ingredient.name
-    when 'corn'
-        output = 'ear'
-    when 'bacon'
-        output = 'strip'
-    when 'chicken bouillon'
-        output = 'cube'
-    when 'linguine'
-        output = 'pkg'
-    when 'garlic'
-        output = 'clove'
-    else
-        output = nil
-    end
-
-    if is_produce?(ingredient.name) || is_seasoning?(ingredient.name)
-        output ||= ''
-    else
-        output ||= 'cup'
-    end
-
-    output
-end
 
   def seasonals_first(recipes)
     myrecipes = recipes.to_a

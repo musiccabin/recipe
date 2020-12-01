@@ -8,18 +8,25 @@ class ApplicationController < ActionController::Base
   helper_method(:current_user)
 
   def is_produce?(item)
-    produce = ['cucumber', 'strawberry', 'onion', 'garlic', 'green onions', 'onion', 'red onion', 'yellow onion', 'jalapeno', 'corn', 'green bell pepper', 'tomato', 'avocado', 'banana', 'red chili pepper', 'oregano', 'egg']
+    produce = ['cucumber', 'strawberry', 'onion', 'garlic', 'green onion', 'cilantro', 'red onion', 'yellow onion', 'jalapeno', 'corn', 'green bell pepper', 'tomato', 'avocado', 'banana', 'red chili pepper', 'egg']
 
     produce.include? item
   end
   helper_method(:is_produce?)
 
   def is_seasoning?(item)
-    seasoning = ['salt', 'black pepper', 'cayenne pepper']
+    seasoning = ['salt', 'black pepper', 'cayenne pepper', 'oregano']
 
     seasoning.include? item
   end
   helper_method(:is_seasoning?)
+
+  def is_countable?(item)
+    countable = ['chicken breast']
+
+    countable.include? item
+  end
+  helper_method(:is_countable?)
 
   #info from: https://bcfarmersmarket.org/why-bc-farmers-markets/whats-in-season/
   def seasonal_ingredients
@@ -74,7 +81,7 @@ class ApplicationController < ActionController::Base
     # byebug
     if float != nil
       if float.floor == float
-        output += float.floor.to_s
+        output += float.floor.to_s unless float == 0
       else
         num = float - float.floor
         if float.floor == 0
@@ -118,23 +125,171 @@ class ApplicationController < ActionController::Base
   end
   helper_method(:stringify_quantity)
 
-  def convert_quantity(ingredient, quantity, unit)
+  def convert_quantity(name, quantity, unit_input, unit_output)
+    return 0 if ['to taste', ''].include? quantity.to_s
     output = floatify(quantity)
-    case ingredient.name
-    when 'cucumber'
-      if unit == 'cup'
-        # quantity = link.quantity
-        output /= 2
-      end
-    when 'strawberry'
-      if unit == 'cup'
-        # quantity = link.quantity
-        output *= 8
+    if unit_input == 'cup'
+      case unit_output
+      when ''
+        case name
+        when 'green bell pepper'
+          output
+        when 'red bell pepper'
+          output
+        when 'yellow bell pepper'
+          output
+        when 'cilantro'
+          output
+        when 'green onion'
+          output *= 9
+        when 'strawberry'
+          output *= 8
+        when 'cucumber'
+          output /= 2
+        when 'avocado'
+          output /= 2
+        when 'red onion'
+          output *= 3
+        end
+      when 'tbsp'
+        output *= 16
+      when 'tsp'
+        output *= 48
       end
     end
+
+    if unit_input == 'tbsp'
+      case unit_output
+      when ''
+        case name
+        when 'green bell pepper'
+          output /= 16
+        when 'red bell pepper'
+          output /= 16
+        when 'yellow bell pepper'
+          output /= 16
+        when 'cilantro'
+          output /= 16
+        when 'green onion'
+          output = output * 9 / 16
+        when 'strawberry'
+          output = output * 8 / 16
+        when 'cucumber'
+          output = output / 2 / 16
+        when 'avocado'
+          output = output / 2 / 16
+        when 'red onion'
+          output = output * 3 / 16
+        end
+      when 'cup'
+        output /= 16
+      when 'tsp'
+        output *= 3
+      end
+    end
+
+    if unit_input == 'tsp'
+      case unit_output
+      when ''
+        case name
+        when 'green bell pepper'
+          output /= 48
+        when 'red bell pepper'
+          output /= 48
+        when 'yellow bell pepper'
+          output /= 48
+        when 'cilantro'
+          output /= 48
+        when 'green onion'
+          output = output * 9 / 48
+        when 'strawberry'
+          output = output * 8 / 48
+        when 'cucumber'
+          output = output / 2 / 48
+        when 'avocado'
+          output = output / 2 / 48
+        when 'red onion'
+          output = output * 3 / 48
+        end
+      when 'cup'
+        output /= 48
+      when 'tbsp'
+        output /= 3
+      end
+    end
+
     output
   end
   helper_method(:convert_quantity)
+
+  def appropriate_unit(name, unit)
+    output = unit
+
+    if is_produce?(name) || is_countable?(name)
+      output = ''
+  # else
+  #     output ||= 'cup'
+    end
+    
+    case name
+    when 'corn'
+        output = 'ear'
+    when 'bacon'
+        output = 'strip'
+    when 'chicken bouillon'
+        output = 'cube'
+    when 'linguine'
+        output = 'pkg'
+    when 'garlic'
+        output = 'clove'
+    when 'cilantro'
+      output = 'bunch'
+    end
+
+    output
+  end
+  helper_method(:appropriate_unit)
+
+  def cup_tbsp_tsp(quantity, unit)
+    converted = {unit: unit, quantity: quantity}
+    if unit == 'cup'
+      if quantity < 0.2
+        converted[:unit] = 'tbsp'
+        converted[:quantity] /= 0.0625
+        if converted[:quantity] < 1
+          converted[:unit] = 'tsp'
+          converted[:quantity] /= 0.333
+        end
+      end
+    end
+
+    if unit == 'tbsp'
+      if quantity > 3
+        converted[:unit] = 'cup'
+        converted[:quantity] /= 16
+      end
+
+      if quantity <= 0.666
+        converted[:unit] = 'tsp'
+        converted[:quantity] *= 3
+      end
+    end
+
+    if unit == 'tsp'
+      if quantity >= 12
+        converted[:unit] = 'cup'
+        converted[:quantity] /= 48
+      end
+
+      if quantity >= 3
+        converted[:unit] = 'tbsp'
+        converted[:quantity] /= 3
+      end
+    end
+
+    converted
+  end
+  helper_method(:cup_tbsp_tsp)
 
    def user_signed_in?
     current_user.present?
