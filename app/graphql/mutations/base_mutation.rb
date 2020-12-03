@@ -96,6 +96,7 @@ module Mutations
     end
 
     def stringify_quantity(float)
+      float = floatify(float) unless float.is_a? Float
       output = ''
       if float != nil
         if float.floor == float

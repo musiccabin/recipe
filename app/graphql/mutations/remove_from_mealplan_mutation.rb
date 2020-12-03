@@ -20,6 +20,8 @@ module Mutations
           end
         end
         # byebug
+        existing_completion = current_user.completions&.find_by(myrecipe: recipe)
+        existing_completion.update(previously_completed: true) if existing_completion
         link = current_user.mealplan.myrecipemealplanlinks.find_by(myrecipe: recipe)
         if link.present?
           link.destroy

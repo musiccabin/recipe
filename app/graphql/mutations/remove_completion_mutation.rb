@@ -8,6 +8,7 @@ module Mutations
         check_authentication!
 
         completion = current_user.completions&.find_by(myrecipe: recipe_id)
+        return { status: 'recipe is previously completed. completion not removed.' } if completion&.previously_completed
         if completion.present?
             if current_user != completion.user 
                 raise GraphQL::ExecutionError,

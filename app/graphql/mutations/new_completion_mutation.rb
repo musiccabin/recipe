@@ -2,6 +2,7 @@ module Mutations
     class NewCompletionMutation < Mutations::BaseMutation
       argument :recipe_id, ID, required: true
 
+      field :status, String, null: true
       field :completion, Types::CompletionType, null: true
       field :errors, Types::ValidationErrorsType, null: true
   
@@ -14,6 +15,8 @@ module Mutations
                 "Recipe not found."
         end
   
+        completion_exists = current_user.completions&.find_by(myrecipe: myrecipe)
+        return { status: 'recipe has been completed before.' } if completion_exists
         completion = Completion.new(myrecipe: myrecipe, user: current_user)
         if completion.save
           RecipeSchema.subscriptions.trigger("completionAdded", {}, completion)
