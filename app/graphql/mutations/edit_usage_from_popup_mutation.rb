@@ -5,6 +5,7 @@ module Mutations
   
       field :status, String, null: true
       field :errors, [Types::ValidationErrorsType], null: true
+      field :warning_ingredients, [String], null: true
   
       def resolve(attributes:, recipe_id:)
         check_authentication!
@@ -25,7 +26,8 @@ module Mutations
           quantity = floatify(a.quantity)
           unit = a.unit
           old_usage = current_user.mealplan.leftover_usages.find_by(ingredient: ingredient, myrecipe: recipe)
-          errors = add_leftover_usage(recipe, ingredient, quantity, unit, old_usage&.quantity, [])
+          warning_ingredients = []
+          errors = add_leftover_usage(recipe, ingredient, quantity, unit, old_usage&.quantity, old_usage&.unit, [], warning_ingredients)
           old_usage.destroy if old_usage.present?
         end
         RecipeSchema.subscriptions.trigger("leftoverUsageRemoved", {}, current_user)
@@ -33,6 +35,7 @@ module Mutations
             { errors: errors }
         else
             { status: 'usage updated!'}
+            { warning_ingredients: warning_ingredients }
         end
       end
     end

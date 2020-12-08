@@ -4,6 +4,7 @@ module Mutations
   
       field :status, String, null: true
       field :errors, [Types::ValidationErrorsType], null: true
+      field :warning_ingredients, [String], null: true
   
       def resolve(recipe_id:)
         check_authentication!
@@ -27,16 +28,16 @@ module Mutations
           end
         end
         errors = []
-        # byebug
+        warning_ingredients = []
         if recipe_leftover_usages.empty?
           links.each do |link|
-            error = add_leftover_usage(recipe, link.ingredient, link.quantity, link.unit, nil, [])
+            error = add_leftover_usage(recipe, link.ingredient, link.quantity, link.unit, nil, nil, [], warning_ingredients)
             # byebug
             errors += error unless error.empty?
           end
+          { errors: errors, status: 'leftovers updated according to amounts used in recipe!', warning_ingredients: warning_ingredients }
         end
-        { errors: errors }
-        { status: 'leftovers updated according to amounts used in recipe!' }
+        # byebug
       end
     end
 end

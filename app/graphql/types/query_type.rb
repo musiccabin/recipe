@@ -25,12 +25,11 @@ module Types
       recommend_recipes
     end
 
-    field :all_recipes, [Types::MyrecipeType], null: false,
-      description: "Returns unhidden recipes favoured by 20%+ of users"
-    def all_recipes
-      # Myrecipe.preload(:user)
-     
-    end
+    # field :all_recipes, [Types::MyrecipeType], null: false,
+    #   description: "Returns unhidden recipes favoured by 20%+ of users"
+    # def all_recipes
+    #    Myrecipe.preload(:user)
+    # end
 
     field :popular_recipes, [Types::MyrecipeType], null: false,
       description: "Returns unhidden recipes in descending order of popularity"
@@ -425,6 +424,8 @@ module Types
     end
 
     def stringify_quantity(float)
+      float = floatify (float) unless float.is_a? Float
+      return '0' if float <= 0
       output = ''
       if float != nil
         if float.floor == float
@@ -471,6 +472,87 @@ module Types
       output
     end
 
+    def appropriate_unit(name, unit)
+      output = unit
+  
+      if is_produce?(name) || is_countable?(name)
+        output = ''
+    # else
+    #     output ||= 'cup'
+      end
+      
+      case name
+      when 'almond milk'
+        output = 'cup'
+      when 'baby spinach'
+        output = 'cup'
+      when 'bacon'
+        output = 'strip'
+      when 'butter'
+        output = 'kg'
+      when 'butter lettuce'
+        output = 'head'
+      when 'chashu pork'
+        output = 'slice'
+      when 'cheddar cheese'
+        output = 'kg'
+      when 'chicken bouillon'
+        output = 'cube'
+      when 'cilantro'
+        output = 'bunch'
+      when 'corn'
+          output = 'ear'
+      when 'dried shiitaki mushroom'
+        output = ''
+      when 'frozen corn'
+        output = 'kg'
+      when 'garlic'
+        output = 'clove'
+      when 'ginger'
+        output = 'slice'
+      when 'green bean'
+        output = 'kg'
+      when 'ground oat'
+        output = 'kg'
+      when 'heavy cream'
+        output = 'cup'
+      when 'kidney bean'
+        output = 'kg'
+      when 'linguine'
+        output = 'pkg'
+      when 'milk'
+        output = 'cup'
+      when 'mozzarella cheese'
+        output = 'kg'
+      when 'peanut'
+          output = 'cup'
+      when 'peeled shrimp'
+        output = 'kg'
+      when 'raisin'
+        output = 'kg'
+      when 'ramen noodle'
+        output = 'bowl'
+      when 'shrimp'
+        output = 'kg'
+      when 'sirloin steak'
+        output = 'kg'
+      when 'spinach'
+        output = 'cup'
+      when 'whipping cream'
+        output = 'cup'
+      end
+  
+      output
+    end
+
+    def kg_to_lb (num_in_kg)
+      num_in_kg / 0.453592
+    end
+
+    def lb_to_kg (num_in_lb)
+      num_in_lb * 0.453592
+    end
+
     def convert_quantity(name, quantity, unit_input, unit_output)
       return 0 if ['to taste', ''].include? quantity.to_s
       output = floatify(quantity)
@@ -478,27 +560,90 @@ module Types
         case unit_output
         when ''
           case name
+          when 'avocado'
+            output /= 2
+          when 'carrot'
+            output *= 2
+          when 'cucumber'
+            output /= 2
+          when 'dried shiitaki mushroom'
+            output *= (8/3)
           when 'green bell pepper'
-            output
-          when 'red bell pepper'
-            output
-          when 'yellow bell pepper'
-            output
-          when 'cilantro'
             output
           when 'green onion'
             output *= 9
-          when 'strawberry'
-            output *= 8
-          when 'cucumber'
-            output /= 2
-          when 'avocado'
-            output /= 2
+          when 'kidney bean'
+            output 
+          when 'mushroom'
+            output *= 4.5
+          when 'onion'
+            output *= 3
+          when 'red bell pepper'
+            output
           when 'red onion'
             output *= 3
+          when 'strawberry'
+            output *= 8
+          when 'yellow bell pepper'
+            output
           end
+
+        when 'bunch'
+          case name
+          when 'cilantro'
+            output
+          end
+
+        when 'clove'
+          output *= 48
+
+        # when 'lb'
+          # case name
+          # when 'baby spinach'
+          #   output = kg_to_lb(output * 0.03)
+          # when 'ground oat'
+          #   output = kg_to_lb(output * 0.088)
+          # when 'sirloin steak'
+          #   output /= 2
+          # when 'spinach'
+          #   output = kg_to_lb(output * 0.03)
+          # end
+
+        when 'kg'
+          case name
+          # when 'baby spinach'
+          #   output *= 0.03
+          when 'butter'
+            output *= 0.227
+          when 'cheddar cheese'
+            output *= 0.113
+          when 'firm tofu'
+            output *= 0.2520273
+          when 'frozen corn'
+            output *= 0.165
+          when 'ground oat'
+            output *= 0.088
+          when 'kidney bean'
+            output = lb_to_kg(output / 6.5)
+          when 'mozzarella cheese'
+            output *= 0.113
+          when 'raisin'
+            output *= 0.15
+          when 'sirloin steak'
+            output = lb_to_kg(output / 2)
+          # when 'spinach'
+          #   output *= 0.03
+          end
+
+        when 'slice'
+          case name
+          when 'ginger'
+            output = output * 3 * 48
+          end
+
         when 'tbsp'
           output *= 16
+
         when 'tsp'
           output *= 48
         end
@@ -508,27 +653,86 @@ module Types
         case unit_output
         when ''
           case name
+          when 'avocado'
+            output = output / 2 / 16
+          when 'carrot'
+            output = output * 2 / 16
+          when 'cucumber'
+            output = output / 2 / 16
+          when 'dried shiitaki mushroom'
+            output = output * (8/3) / 16
           when 'green bell pepper'
-            output /= 16
-          when 'red bell pepper'
-            output /= 16
-          when 'yellow bell pepper'
-            output /= 16
-          when 'cilantro'
             output /= 16
           when 'green onion'
             output = output * 9 / 16
-          when 'strawberry'
-            output = output * 8 / 16
-          when 'cucumber'
-            output = output / 2 / 16
-          when 'avocado'
-            output = output / 2 / 16
+          when 'mushroom'
+            output = output * 4.5 / 16
+          when 'onion'
+            output = output * 3 / 16
+          when 'red bell pepper'
+            output /= 16
           when 'red onion'
             output = output * 3 / 16
+          when 'strawberry'
+            output = output * 8 / 16
+          when 'yellow bell pepper'
+            output /= 16
           end
+
+        when 'bunch'
+          case name
+          when 'cilantro'
+            output /= 16
+          end
+
+        when 'clove'
+          output *= 3
+
+        when 'slice'
+          case name
+          when 'ginger'
+            output = output * 3 * 3
+          end
+
+        # when 'lb'
+          # case name
+          # when 'baby spinach'
+          #   output = kg_to_lb(output * 0.03 / 16)
+          # when 'sirloin steak'
+          #   output = output / 2 / 16
+          # when 'spinach'
+          #   output = kg_to_lb(output * 0.03 / 16)
+          # end
+
+        when 'kg'
+          case name
+          # when 'baby spinach'
+          #   output = output * 0.03 / 16
+          when 'butter'
+            output = output * 0.227 / 16
+          when 'cheddar cheese'
+            output = output * 0.113 / 16
+          when 'firm tofu'
+            output = output * 0.2520273 / 16
+          when 'frozen corn'
+          output = output * 0.165 / 16
+          when 'ground oat'
+            output = output * 0.088 / 16
+          when 'kidney bean'
+            output = lb_to_kg(output / 6.5 / 16)
+          when 'mozzarella cheese'
+            output = output * 0.113 / 16
+          when 'raisin'
+            output = output * 0.15 / 16
+          when 'sirloin steak'
+            output = lb_to_kg(output / 2 / 16)
+          # when 'spinach'
+          #   output = output * 0.03 / 16
+          end
+
         when 'cup'
           output /= 16
+
         when 'tsp'
           output *= 3
         end
@@ -538,29 +742,182 @@ module Types
         case unit_output
         when ''
           case name
+          when 'avocado'
+            output = output / 2 / 48
+          when 'carrot'
+            output = output * 2 / 48
+          when 'cucumber'
+            output = output / 2 / 48
+          when 'dried shiitaki mushroom'
+            output = output * (8/3) / 48
           when 'green bell pepper'
-            output /= 48
-          when 'red bell pepper'
-            output /= 48
-          when 'yellow bell pepper'
-            output /= 48
-          when 'cilantro'
             output /= 48
           when 'green onion'
             output = output * 9 / 48
-          when 'strawberry'
-            output = output * 8 / 48
-          when 'cucumber'
-            output = output / 2 / 48
-          when 'avocado'
-            output = output / 2 / 48
+          when 'mushroom'
+            output = output * 4.5 / 48
+          when 'onion'
+            output = output * 3 / 48
+          when 'red bell pepper'
+            output /= 48
           when 'red onion'
             output = output * 3 / 48
+          when 'strawberry'
+            output = output * 8 / 48
+          when 'yellow bell pepper'
+            output /= 48
           end
+
+        when 'bunch'
+          case name
+          when 'cilantro'
+            output /= 48
+          end
+
+        when 'clove'
+          output
+
+        when 'slice'
+          case name
+          when 'ginger'
+            output *= 3
+          end
+
+        # when 'lb'
+          # case name
+          # when 'baby spinach'
+          #   output = lb_to_kg(output * 0.03 / 48)
+          # when 'sirloin steak'
+          #   output = output / 2 / 48
+          # when 'spinach'
+          #   output = lb_to_kg(output * 0.03 / 48)
+          # end
+
+        when 'kg'
+          case name
+          # when 'baby spinach'
+          #   output = output * 0.03 / 48
+          when 'butter'
+            output = output * 0.227 / 48
+          when 'cheddar cheese'
+            output = output * 0.113 / 48
+          when 'firm tofu'
+            output = output * 0.2520273 / 48
+          when 'frozen corn'
+            output = output * 0.165 / 48
+          when 'ground oat'
+            output = output * 0.088 / 48
+          when 'kidney bean'
+            output = lb_to_kg(output / 6.5 / 48)
+          when 'mozzarella cheese'
+            output = output * 0.113 / 48
+          when 'raisin'
+            output = output * 0.15 / 48
+          when 'sirloin steak'
+            output = lb_to_kg(output / 2 / 48)
+          # when 'spinach'
+          #   output = output * 0.03 / 48
+          end
+
         when 'cup'
           output /= 48
+
         when 'tbsp'
           output /= 3
+        end
+      end
+
+      if unit_input == 'kg'
+        case unit_output
+        when 'cup'
+          case name
+          when 'baby spinach'
+            output /= 0.03
+          when 'sirloin steak'
+            output = lb_to_kg(output * 2)
+          when 'spinach'
+            output /= 0.03
+          end
+          
+        # when 'slice'
+        #   case name
+        #   when 'cheddar cheese'
+        #     output = kg_to_lb(output) * 20
+        #   end
+        end
+      end
+
+      if unit_input == 'lb'
+        case unit_output
+        when 'cup'
+          case name
+          when 'baby spinach'
+            output = kg_to_lb(output / 0.03)
+          when 'sirloin steak'
+            output *= 2
+          when 'spinach'
+            output = kg_to_lb(output / 0.03)
+          end
+
+        when 'slice'
+          case name
+          when 'cheddar cheese'
+            output *= 20
+          end
+
+        when 'kg'
+          lb_to_kg(output)
+        end        
+      end
+
+      if unit_input == 'slice'
+        case unit_output
+        # when 'lb'
+        #   case name
+        #   when 'cheddar cheese'
+        #     output /= 20
+        #   end
+        # end
+
+        when 'kg'
+          case name
+          when 'cheddar cheese'
+            output = lb_to_kg(output / 20)
+          end
+        end
+      end
+
+      if unit_input == ''
+        case unit_output
+        when 'kg'
+          case name
+          when 'peeled shrimp'
+            output = lb_to_kg(output / 23)
+          when 'shrimp'
+            output = lb_to_kg(output / 23)
+          end
+        end
+      end
+
+      if unit_input == 'ml'
+        case unit_output
+        when 'cup'
+          case name
+          when 'almond milk'
+            output /= 240
+          when 'heavy cream'
+            output /= 240
+          when 'milk'
+            output /= 237
+          when 'whipping cream'
+            output /= 240
+          end
+
+        when 'kg'
+          case name
+          when 'kidney bean'
+            output /= (0.761 * 1000)
+          end
         end
       end
   
@@ -617,35 +974,7 @@ module Types
       end
     end
 
-    def appropriate_unit(name, unit)
-      output = unit
-  
-      if is_produce?(name) || is_countable?(name)
-        output = ''
-    # else
-    #     output ||= 'cup'
-      end
-      
-      case name
-      when 'corn'
-          output = 'ear'
-      when 'bacon'
-          output = 'strip'
-      when 'chicken bouillon'
-          output = 'cube'
-      when 'linguine'
-          output = 'pkg'
-      when 'garlic'
-          output = 'clove'
-      when 'cilantro'
-        output = 'bunch'
-      end
-  
-      output
-    end
-
     def make_stats(usages)
-      # TODO: remember to incorporate unit conversions later!
       count = { frozen: 0, produce: 0, dairy: 0, meat: 0, nuts_and_seeds: 0, other: 0 }
       return {count: count} unless usages.present?
       organized_stats = {}
