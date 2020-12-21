@@ -9,21 +9,12 @@ module Mutations
       def resolve(id:, attributes:)
         check_authentication!
         leftover = Leftover.find_by(id: id)
-        if leftover.nil?
-          raise GraphQL::ExecutionError,
-                "Leftover item not found."
-        end
+        check_leftover_exists!(leftover)
 
         ingredient = Ingredient.find_by(name: attributes.ingredient_name)
-        if ingredient.nil?
-          raise GraphQL::ExecutionError,
-                "Ingredient not found."
-        end
+        check_ingredient_exists!(ingredient)
   
-        if current_user != leftover.user
-          raise GraphQL::ExecutionError,
-                "You are not allowed to edit this leftover."
-        end
+        authenticate_item_owner!(leftover)
   
         if leftover.update(ingredient: ingredient, quantity: attributes.quantity, unit: attributes.unit)
           RecipeSchema.subscriptions.trigger("leftoverUpdated", {}, leftover)

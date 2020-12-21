@@ -18,8 +18,9 @@ module Types
     field :new_grocery, mutation: Mutations::NewGroceryMutation
     field :update_grocery, mutation: Mutations::UpdateGroceryMutation
     field :remove_grocery, mutation: Mutations::RemoveGroceryMutation
-    field :edit_usage_from_popup, mutation: Mutations::EditUsageFromPopupMutation
-    field :update_leftover_from_popup, mutation: Mutations::UpdateLeftoverFromPopupMutation
+    field :update_usages, mutation: Mutations::UpdateUsagesMutation
+    field :used_recipe_amounts, mutation: Mutations::UsedRecipeAmountsMutation
+    field :remove_usages, mutation: Mutations::RemoveUsagesMutation
     field :new_fav, mutation: Mutations::NewFavMutation
     field :remove_fav, mutation: Mutations::RemoveFavMutation
     field :new_completion, mutation: Mutations::NewCompletionMutation

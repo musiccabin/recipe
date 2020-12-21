@@ -8,13 +8,10 @@ module Mutations
       def resolve(recipe_id:)
         check_authentication!
   
-        myrecipe = Myrecipe.find_by(id: recipe_id)
-        if myrecipe.nil?
-          raise GraphQL::ExecutionError,
-                "Recipe not found."
-        end
+        recipe = Myrecipe.find_by(id: recipe_id)
+        check_recipe_exists!(recipe)
   
-        fav = Favourite.new(myrecipe: myrecipe, user: current_user)
+        fav = Favourite.new(myrecipe: recipe, user: current_user)
         if fav.save
           RecipeSchema.subscriptions.trigger("favouriteAdded", {}, fav)
           { favourite: fav }

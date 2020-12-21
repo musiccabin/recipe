@@ -16,6 +16,48 @@ module Mutations
       return context[:current_user]
     end
 
+    def check_recipe_exists!(recipe)
+      if recipe.nil?
+        raise GraphQL::ExecutionError,
+              "Recipe not found."
+      end
+    end
+
+    def check_ingredient_exists!(ingredient)
+      if ingredient.nil?
+        raise GraphQL::ExecutionError,
+              "Ingredient not found."
+      end
+    end
+
+    def check_leftover_exists!(leftover)
+      if leftover.nil?
+        raise GraphQL::ExecutionError,
+              "Leftover item not found."
+      end
+    end
+
+    def check_grocery_exists!(grocery)
+      if grocery.nil?
+        raise GraphQL::ExecutionError,
+              "Grocery item not found."
+      end
+    end
+
+    def check_recipe_in_mealplan!(recipe)
+      if current_user.mealplan.myrecipes.exclude? recipe
+        raise GraphQL::ExecutionError,
+              "This action is only available for recipes in your mealplan."
+      end
+    end
+
+    def authenticate_item_owner!(item)
+      if current_user != item.user 
+        raise GraphQL::ExecutionError,
+            "You are not allowed to manage this item."
+      end
+    end
+
     def add_groceries_from_mealplan
       links = []
       added_up = []
@@ -217,6 +259,7 @@ module Mutations
     end
 
     def add_leftover_usage(recipe, ingredient, quantity, unit, old_usage_quantity, old_usage_unit, errors, warning_ingredients)
+      # byebug
       ingredient_name = ingredient.name
       appropriate_unit = old_usage_unit
       appropriate_unit = appropriate_unit(ingredient_name, unit) unless old_usage_unit.present?
@@ -248,11 +291,15 @@ module Mutations
       else
         warning_ingredients << ingredient_name if quantity_leftover + quantity_bought < quantity_used
       end
-      leftover_usage.quantity = quantity_used
+      leftover_usage.quantity = stringify_quantity(quantity_used)
       if leftover_usage.save
-        RecipeSchema.subscriptions.trigger("leftoverUsageAdded", {}, leftover_usage)
-        usage_link = LeftoverUsageMealplanLink.create(mealplan: current_user.mealplan, leftover_usage: leftover_usage)
-        leftover_usage.update(mealplan: current_user.mealplan, leftover_usage_mealplan_link: usage_link)
+        if leftover_usage.quantity == '0'
+          leftover_usage.destroy 
+        else
+          RecipeSchema.subscriptions.trigger("leftoverUsageAdded", {}, leftover_usage)
+          usage_link = LeftoverUsageMealplanLink.create(mealplan: current_user.mealplan, leftover_usage: leftover_usage)
+          leftover_usage.update(mealplan: current_user.mealplan, leftover_usage_mealplan_link: usage_link)
+        end
       else
         errors << leftover_usage.errors
       end
@@ -273,10 +320,14 @@ module Mutations
         leftover_usage.quantity = stringify_quantity(quantity_used)
         leftover_usage.unit = appropriate_unit
         if leftover_usage.save
-          RecipeSchema.subscriptions.trigger("leftoverUsageAdded", {}, leftover_usage)
-          usage_link = LeftoverUsageMealplanLink.new(mealplan: current_user.mealplan, leftover_usage: leftover_usage)
-          usage_link.save
-          leftover_usage.update(mealplan: current_user.mealplan, leftover_usage_mealplan_link: usage_link)
+          if leftover_usage.quantity == '0'
+            leftover_usage.destroy 
+          else
+            RecipeSchema.subscriptions.trigger("leftoverUsageAdded", {}, leftover_usage)
+            usage_link = LeftoverUsageMealplanLink.new(mealplan: current_user.mealplan, leftover_usage: leftover_usage)
+            usage_link.save
+            leftover_usage.update(mealplan: current_user.mealplan, leftover_usage_mealplan_link: usage_link)
+          end
         else
           errors << leftover_usage.errors
         end
@@ -296,10 +347,14 @@ module Mutations
           new_leftover.quantity = stringify_quantity(floatify(old_usage_quantity) - quantity_used)
           leftover_usage = LeftoverUsage.new(user: current_user, ingredient: ingredient, quantity: stringify_quantity(quantity_used), unit: appropriate_unit, myrecipe: recipe)
           if leftover_usage.save
-            RecipeSchema.subscriptions.trigger("leftoverUsageAdded", {}, leftover_usage)
-            usage_link = LeftoverUsageMealplanLink.new(mealplan: current_user.mealplan, leftover_usage: leftover_usage)
-            usage_link.save
-            leftover_usage.update(mealplan: current_user.mealplan, leftover_usage_mealplan_link: usage_link)
+            if leftover_usage.quantity == '0'
+              leftover_usage.destroy 
+            else
+              RecipeSchema.subscriptions.trigger("leftoverUsageAdded", {}, leftover_usage)
+              usage_link = LeftoverUsageMealplanLink.new(mealplan: current_user.mealplan, leftover_usage: leftover_usage)
+              usage_link.save
+              leftover_usage.update(mealplan: current_user.mealplan, leftover_usage_mealplan_link: usage_link)
+            end
           else
             errors << leftover_usage.errors
           end

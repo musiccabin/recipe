@@ -9,15 +9,12 @@ module Mutations
       def resolve(recipe_id:)
         check_authentication!
   
-        myrecipe = Myrecipe.find_by(id: recipe_id)
-        if myrecipe.nil?
-          raise GraphQL::ExecutionError,
-                "Recipe not found."
-        end
+        recipe = Myrecipe.find_by(id: recipe_id)
+        check_recipe_exists!(recipe)
   
-        completion_exists = current_user.completions&.find_by(myrecipe: myrecipe)
+        completion_exists = current_user.completions&.find_by(myrecipe: recipe)
         return { status: 'recipe has been completed before.' } if completion_exists
-        completion = Completion.new(myrecipe: myrecipe, user: current_user)
+        completion = Completion.new(myrecipe: recipe, user: current_user)
         if completion.save
           RecipeSchema.subscriptions.trigger("completionAdded", {}, completion)
           { completion: completion }

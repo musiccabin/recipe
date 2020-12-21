@@ -48,6 +48,7 @@ class CompletionsController < ApplicationController
   end
 
   def add_leftover_usage(ingredient, quantity, unit, expiry_date, old_usage_quantity)
+    # byebug
     ingredient_name = ingredient.name
     appropriate_unit = appropriate_unit(ingredient_name, unit)
     grocery = current_user.groceries.find_by(name: ingredient_name)

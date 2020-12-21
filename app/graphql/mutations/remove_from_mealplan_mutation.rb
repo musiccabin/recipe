@@ -2,16 +2,14 @@ module Mutations
     class RemoveFromMealplanMutation < Mutations::BaseMutation
       argument :recipe_id, ID, required: true
 
-      field :status, String, null: true
+      field :status, String, null: false
   
       def resolve(recipe_id:)
         check_authentication!
 
         recipe = Myrecipe.find_by(id: recipe_id)
-        if recipe.nil?
-          raise GraphQL::ExecutionError,
-                "Recipe not found."
-        end
+        check_recipe_exists!(recipe)
+
         user_recipe_usages = current_user.mealplan&.leftover_usages.where(myrecipe: recipe)
         if user_recipe_usages
           user_recipe_usages.each do |usage|

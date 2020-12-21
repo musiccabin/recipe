@@ -10,10 +10,7 @@ module Mutations
         completion = current_user.completions&.find_by(myrecipe: recipe_id)
         return { status: 'recipe is previously completed. completion not removed.' } if completion&.previously_completed
         if completion.present?
-            if current_user != completion.user 
-                raise GraphQL::ExecutionError,
-                    "You are not allowed to edit this completion."
-            end
+            authenticate_item_owner!(completion)
             completion.destroy
             RecipeSchema.subscriptions.trigger("completionRemoved", {}, current_user)
             { status: 'completion of this recipe is removed!'}

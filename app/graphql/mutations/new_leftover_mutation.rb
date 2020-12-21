@@ -9,10 +9,7 @@ module Mutations
         check_authentication!
 
         ingredient = Ingredient.find_by(name: attributes.ingredient_name)
-        if ingredient.nil?
-          raise GraphQL::ExecutionError,
-                "Ingredient not found."
-        end
+        check_ingredient_exists!(ingredient)
         leftover = Leftover.new(ingredient: ingredient, quantity: attributes.quantity, unit: attributes.unit, user: current_user)
   
         if leftover.save

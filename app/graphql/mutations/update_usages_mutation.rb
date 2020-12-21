@@ -1,5 +1,5 @@
 module Mutations
-    class EditUsageFromPopupMutation < Mutations::BaseMutation
+    class UpdateUsagesMutation < Mutations::BaseMutation
       argument :recipe_id, ID, required: true
       argument :attributes, [Types::IngredientAttributes], required: true
   
@@ -11,17 +11,12 @@ module Mutations
         check_authentication!
 
         recipe = Myrecipe.find_by(id: recipe_id)
-        if recipe.nil?
-            raise GraphQL::ExecutionError,
-                  "Recipe not found."
-        end
+        check_recipe_exists!(recipe)
+
         attributes.each do |a|
           leftover_usage = LeftoverUsage.new(user: current_user)
           ingredient = Ingredient.find_by(name: a.ingredient_name)
-          if ingredient.nil?
-              raise GraphQL::ExecutionError,
-                    "Ingredient not found."
-          end            
+          check_ingredient_exists!(ingredient)           
           leftover_usage.ingredient = ingredient
           quantity = floatify(a.quantity)
           unit = a.unit
@@ -34,7 +29,7 @@ module Mutations
         if errors.any?
             { errors: errors }
         else
-            { status: 'usage updated!'}
+            { status: 'usages updated!'}
             { warning_ingredients: warning_ingredients }
         end
       end

@@ -8,17 +8,17 @@ class Leftover < ApplicationRecord
   validates :ingredient, uniqueness: {scope: :user}
   
   private
-  def accepted_expiry_date
-    error_text = 'please follow the format of mm-dd.'
-    input = expiry_date.gsub(/\s+/, "")
-    if input.length <= 5
-      mo = input.split('-')[0].to_i
-      day = input.split('-')[1].to_i
-      self.errors.add(:expiry_date,error_text) unless mo <= 12 && day <= 31
-    else
-      self.errors.add(:expiry_date,error_text)
-    end
-  end
+  # def accepted_expiry_date
+  #   error_text = 'please follow the format of mm-dd.'
+  #   input = expiry_date.gsub(/\s+/, "")
+  #   if input.length <= 5
+  #     mo = input.split('-')[0].to_i
+  #     day = input.split('-')[1].to_i
+  #     self.errors.add(:expiry_date,error_text) unless mo <= 12 && day <= 31
+  #   else
+  #     self.errors.add(:expiry_date,error_text)
+  #   end
+  # end
 
   def no_ice_cube
     if ingredient.name == 'ice cube'

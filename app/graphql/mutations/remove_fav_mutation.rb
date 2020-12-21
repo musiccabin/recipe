@@ -9,10 +9,7 @@ module Mutations
 
         fav = current_user.favourites&.find_by(myrecipe: recipe_id)
         if fav.present?
-            if current_user != fav.user 
-                raise GraphQL::ExecutionError,
-                    "You are not allowed to edit this favourite."
-            end
+            authenticate_item_owner!(fav)
             fav.destroy
             RecipeSchema.subscriptions.trigger("favouriteRemoved", {}, current_user)
             { status: 'this recipe is removed from favourites!'}

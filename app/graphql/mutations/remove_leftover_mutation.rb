@@ -8,18 +8,11 @@ module Mutations
         check_authentication!
 
         leftover = Leftover.find_by(id: id)
-        if leftover.present?
-          if current_user != leftover.user 
-            raise GraphQL::ExecutionError,
-                "You are not allowed to remove this leftover item."
-          end
-          leftover.destroy
-          RecipeSchema.subscriptions.trigger("leftoverRemoved", {}, current_user)
-          { status: 'leftover item is removed!' }
-        else
-          raise GraphQL::ExecutionError,
-              "Leftover item not found."
-        end
+        check_leftover_exists!(leftover)
+        authenticate_item_owner!(leftover)
+        leftover.destroy
+        RecipeSchema.subscriptions.trigger("leftoverRemoved", {}, current_user)
+        { status: 'leftover item is removed!' }
       end
     end
 end

@@ -9,23 +9,17 @@ module Mutations
 
     def resolve(attributes:, id:, ingredients: nil)
       check_authentication!
-      myrecipe = Myrecipe.find_by(id: id)
-      if myrecipe.nil?
-        raise GraphQL::ExecutionError,
-                "Recipe not found."
-      end
 
-      if current_user != myrecipe.user
-        raise GraphQL::ExecutionError,
-              "You are not allowed to edit this recipe."
-      end
+      recipe = Myrecipe.find_by(id: id)
+      check_recipe_exists!(recipe)
+      authenticate_recipe_owner!(recipe)
 
-      if myrecipe.update(attributes.to_h)
+      if recipe.update(attributes.to_h)
         add_ingredients_to_recipe(myrecipe, ingredients) if ingredients
         RecipeSchema.subscriptions.trigger("recipeUpdated", {}, myrecipe)
-        { myrecipe: myrecipe }
+        { myrecipe: recipe }
       else
-        { errors: myrecipe.errors }
+        { errors: recipe.errors }
       end
     end
   end
