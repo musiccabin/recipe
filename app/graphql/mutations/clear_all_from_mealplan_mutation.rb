@@ -1,6 +1,6 @@
 module Mutations
     class ClearAllFromMealplanMutation < Mutations::BaseMutation
-      field :status, String, null: true
+      field :status, String, null: false
   
       def resolve
         check_authentication!

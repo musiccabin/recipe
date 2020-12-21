@@ -8,7 +8,6 @@ module Mutations
       def resolve(recipe_id:)
         check_authentication!
   
-        # byebug
         link = Myrecipemealplanlink.new(myrecipe: Myrecipe.find_by(id: recipe_id), mealplan: current_user.mealplan)
   
         if link.save

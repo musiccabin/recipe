@@ -2,7 +2,7 @@ module Mutations
     class RemoveGroceryMutation < Mutations::BaseMutation
       argument :id, ID, required: true
 
-      field :status, String, null: true
+      field :status, String, null: false
   
       def resolve(id:)
         check_authentication!

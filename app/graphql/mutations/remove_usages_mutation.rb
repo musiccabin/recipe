@@ -2,7 +2,7 @@ module Mutations
     class RemoveUsagesMutation < Mutations::BaseMutation
       argument :recipe_id, ID, required: true
 
-      field :status, String, null: true
+      field :status, String, null: false
       field :errors, [Types::ValidationErrorsType], null: false
   
       def resolve(recipe_id:)
