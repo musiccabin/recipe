@@ -97,10 +97,20 @@ module Mutations
       current_user.groceries.where(:user_added => false).destroy_all
   
       added_up.each do |stats|
-        if stats[:quantity] != nil && ['cup', 'tbsp', 'tsp'].include?(stats[:unit])
-          converted = cup_tbsp_tsp(stats[:quantity], stats[:unit])
-          stats[:unit] = converted[:unit]
-          stats[:quantity] = stringify_quantity(converted[:quantity])
+        if stats[:quantity] != nil
+          if ['cup', 'tbsp', 'tsp'].include?(stats[:unit])
+            converted = cup_tbsp_tsp(stats[:quantity], stats[:unit])
+            stats[:unit] = converted[:unit]
+            stats[:quantity] = stringify_quantity(converted[:quantity])
+          elsif ['kg', 'g'].include?(stats[:unit])
+            converted = kg_g(stats[:quantity], stats[:unit])
+            stats[:unit] = converted[:unit]
+            stats[:quantity] = stringify_quantity(converted[:quantity])
+          elsif ['lb', 'oz'].include?(stats[:unit])
+            converted = lb_oz(stats[:quantity], stats[:unit])
+            stats[:unit] = converted[:unit]
+            stats[:quantity] = stringify_quantity(converted[:quantity])
+          end
         end
         
         user_already_added = current_user.groceries.find_by(name: stats[:name])
@@ -259,124 +269,119 @@ module Mutations
     end
 
     def add_leftover_usage(recipe, ingredient, quantity, unit, old_usage_quantity, old_usage_unit, errors, warning_ingredients)
-      # byebug
       ingredient_name = ingredient.name
-      appropriate_unit = old_usage_unit
-      appropriate_unit = appropriate_unit(ingredient_name, unit) unless old_usage_unit.present?
-      if unit != appropriate_unit
-        quantity_used = convert_quantity(ingredient_name, quantity, unit, appropriate_unit)
-      else
-        quantity_used = floatify(quantity)
-      end
+      old_usage_exists = old_usage_quantity.present?
+
+      # if user bought this ingredient, find it
       grocery = current_user.groceries.find_by(name: ingredient_name)
       unit_grocery = grocery&.unit
-      quantity_bought = grocery.present? ? floatify(grocery.quantity) : 0
-      if grocery.present? && grocery.unit.to_s != appropriate_unit
-        quantity_bought = convert_quantity(ingredient_name, quantity_bought, unit_grocery, appropriate_unit)
-      end
-      link = recipe.myrecipeingredientlinks.find_by(ingredient: ingredient)
+      grocery_exists = grocery.present? ? true : false
+      quantity_bought = grocery_exists ? floatify(grocery.quantity) : 0
 
-      leftover_usage = LeftoverUsage.new(user: current_user, myrecipe: recipe)
-      leftover_usage.ingredient = ingredient
-      leftover_usage.unit = appropriate_unit
-
+      # if user has leftovers of this ingredient, find it
       leftover = current_user.leftovers&.find_by(ingredient: ingredient)
       leftover_exists = leftover.present? ? true : false
-      unit_leftover = leftover.present? ? leftover.unit.to_s : nil
-      quantity_leftover = leftover_exists ? convert_quantity(ingredient_name, leftover.quantity, unit_leftover, appropriate_unit) : 0
+      unit_leftover = leftover_exists ? leftover.unit.to_s : nil
+
+      # if units are all consistent, don't need to convert unit
+      should_convert_unit = true
+      units = []
+      units << old_usage_unit if old_usage_exists
+      units << unit_grocery if grocery_exists
+      units << unit_leftover if leftover_exists
+      units << unit.to_s
+      should_convert_unit = false if units.uniq.size <= 1
+
+      # convert quantities if needed
+      if should_convert_unit
+        # unit to convert to: if old usage is present: old_usage_unit; otherwise, appropriate_unit
+        if old_usage_unit.present?
+          appropriate_unit = old_usage_unit
+        else
+          appropriate_unit = appropriate_unit(ingredient_name, unit)
+        end
+
+        quantity_used = convert_quantity(ingredient_name, quantity, unit, appropriate_unit)
+        quantity_bought = grocery_exists ? convert_quantity(ingredient_name, quantity_bought, unit_grocery, appropriate_unit) : 0
+        quantity_leftover = leftover_exists ? convert_quantity(ingredient_name, leftover.quantity, unit_leftover, appropriate_unit) : 0
+      else
+        appropriate_unit = unit
+        quantity_used = floatify(quantity)
+        quantity_bought = grocery_exists ? floatify(grocery.quantity) : 0
+        quantity_leftover = leftover_exists ? floatify(leftover.quantity) : 0
+      end
 
       # user has used from leftovers but did not update accurate leftovers info in the app
-      if old_usage_quantity.present?
+      if old_usage_exists
         warning_ingredients << ingredient_name if floatify(old_usage_quantity) + quantity_leftover < quantity_used
       else
         warning_ingredients << ingredient_name if quantity_leftover + quantity_bought < quantity_used
       end
-      leftover_usage.quantity = stringify_quantity(quantity_used)
+
+      # update leftover if leftover exists
+      if leftover_exists
+        if old_usage_exists
+          leftover.quantity = stringify_quantity(floatify(old_usage_quantity) + quantity_leftover - quantity_used)
+        else
+          leftover.quantity = stringify_quantity(quantity_bought + quantity_leftover - quantity_used)
+        end
+      # create new leftover if leftover doesn't exist
+      else
+        leftover = Leftover.new(user: current_user)
+        leftover.ingredient = ingredient
+        if old_usage_exists
+          leftover.quantity = stringify_quantity(floatify(old_usage_quantity) - quantity_used)          
+        else
+          leftover.quantity = stringify_quantity(quantity_bought - quantity_used)
+        end
+      end
+      leftover.unit = appropriate_unit
+
+      # optimize leftover unit and convert quantity if needed
+      if ['cup', 'tbsp', 'tsp'].include? appropriate_unit
+        converted = cup_tbsp_tsp(floatify(leftover.quantity), appropriate_unit)
+        leftover.unit = converted[:unit]
+        leftover.quantity = stringify_quantity(converted[:quantity])
+      elsif ['kg', 'g'].include? appropriate_unit
+        converted = kg_g(floatify(leftover.quantity), appropriate_unit)
+        leftover.unit = converted[:unit]
+        leftover.quantity = stringify_quantity(converted[:quantity])
+      elsif ['lb', 'oz'].include? appropriate_unit
+        converted = lb_oz(floatify(leftover.quantity), appropriate_unit)
+        leftover.unit = converted[:unit]
+        leftover.quantity = stringify_quantity(converted[:quantity])
+      end
+
+      if leftover.save
+        if ['', '0'].include?(leftover.quantity)
+          leftover.destroy
+        else
+          if leftover_exists
+            RecipeSchema.subscriptions.trigger("leftoverUpdated", {}, leftover)
+          else
+            RecipeSchema.subscriptions.trigger("leftoverAdded", {}, leftover)
+          end
+        end
+      else
+        errors << leftover.errors
+      end
+
+      # create leftover usage
+      leftover_usage = LeftoverUsage.new(user: current_user, ingredient: ingredient, quantity: quantity, unit: unit, myrecipe: recipe)
       if leftover_usage.save
         if leftover_usage.quantity == '0'
           leftover_usage.destroy 
         else
           RecipeSchema.subscriptions.trigger("leftoverUsageAdded", {}, leftover_usage)
-          usage_link = LeftoverUsageMealplanLink.create(mealplan: current_user.mealplan, leftover_usage: leftover_usage)
+          usage_link = LeftoverUsageMealplanLink.new(mealplan: current_user.mealplan, leftover_usage: leftover_usage)
+          usage_link.save
           leftover_usage.update(mealplan: current_user.mealplan, leftover_usage_mealplan_link: usage_link)
         end
       else
         errors << leftover_usage.errors
       end
-      return errors
 
-      if leftover_exists
-        if old_usage_quantity.present?
-          leftover.quantity = stringify_quantity(floatify(old_usage_quantity) + quantity_leftover - quantity_used)
-        else
-          leftover.quantity = stringify_quantity(quantity_bought + quantity_leftover - quantity_used)
-        end
-        leftover.unit = appropriate_unit
-        if leftover.quantity != '0' && ['cup', 'tbsp', 'tsp'].include?(appropriate_unit)
-          converted = cup_tbsp_tsp(floatify(quantity_leftover), appropriate_unit)
-          leftover.unit = converted[:unit]
-          leftover.quantity = stringify_quantity(converted[:quantity])
-        end
-        leftover_usage.quantity = stringify_quantity(quantity_used)
-        leftover_usage.unit = appropriate_unit
-        if leftover_usage.save
-          if leftover_usage.quantity == '0'
-            leftover_usage.destroy 
-          else
-            RecipeSchema.subscriptions.trigger("leftoverUsageAdded", {}, leftover_usage)
-            usage_link = LeftoverUsageMealplanLink.new(mealplan: current_user.mealplan, leftover_usage: leftover_usage)
-            usage_link.save
-            leftover_usage.update(mealplan: current_user.mealplan, leftover_usage_mealplan_link: usage_link)
-          end
-        else
-          errors << leftover_usage.errors
-        end
-        if leftover.save
-          if ['0', ''].include?(leftover.quantity)
-            leftover.destroy
-          else
-            RecipeSchema.subscriptions.trigger("leftoverAdded", {}, leftover)
-          end
-        else
-          errors << leftover.errors
-        end
-      else
-        new_leftover = Leftover.new(user: current_user)
-        new_leftover.ingredient = ingredient
-        if old_usage_quantity.present?
-          new_leftover.quantity = stringify_quantity(floatify(old_usage_quantity) - quantity_used)
-          leftover_usage = LeftoverUsage.new(user: current_user, ingredient: ingredient, quantity: stringify_quantity(quantity_used), unit: appropriate_unit, myrecipe: recipe)
-          if leftover_usage.save
-            if leftover_usage.quantity == '0'
-              leftover_usage.destroy 
-            else
-              RecipeSchema.subscriptions.trigger("leftoverUsageAdded", {}, leftover_usage)
-              usage_link = LeftoverUsageMealplanLink.new(mealplan: current_user.mealplan, leftover_usage: leftover_usage)
-              usage_link.save
-              leftover_usage.update(mealplan: current_user.mealplan, leftover_usage_mealplan_link: usage_link)
-            end
-          else
-            errors << leftover_usage.errors
-          end
-        else
-          new_leftover.quantity = stringify_quantity(quantity_bought - quantity_used)
-        end
-        new_leftover.unit = appropriate_unit
-        if ['cup', 'tbsp', 'tsp'].include? appropriate_unit
-          converted = cup_tbsp_tsp(floatify(new_leftover.quantity), appropriate_unit)
-          new_leftover.unit = converted[:unit]
-          new_leftover.quantity = stringify_quantity(converted[:quantity])
-        end
-        if new_leftover.save
-          if ['', '0'].include?(new_leftover.quantity)
-            new_leftover.destroy
-          else
-            RecipeSchema.subscriptions.trigger("leftoverAdded", {}, leftover)
-          end
-        else
-          errors << new_leftover.errors
-        end
-      end
+      # return any validation errors
       errors
     end
 
@@ -473,16 +478,24 @@ module Mutations
     end
 
     def kg_to_lb (num_in_kg)
-      num_in_kg / 0.453592
+      result = num_in_kg / 0.453592
+      result < 1 ? result.round(2) : result.round(1)
     end
 
     def lb_to_kg (num_in_lb)
-      num_in_lb * 0.453592
+      result = num_in_lb * 0.453592
+      result < 1 ? result.round(2) : result.round(1)
     end
 
     def convert_quantity(name, quantity, unit_input, unit_output)
       return 0 if ['to taste', ''].include? quantity.to_s
       output = floatify(quantity)
+      
+      if unit_input == 'oz'
+        in_kg = output * 0.0283495
+        return unit_output == 'kg' ? in_kg : convert_quantity(name, in_kg, 'kg', unit_output)
+      end
+
       if unit_input == 'cup'
         case unit_output
         when ''
@@ -793,7 +806,7 @@ module Mutations
           end
 
         when 'kg'
-          lb_to_kg(output)
+          output = lb_to_kg(output)
         end        
       end
 
@@ -888,6 +901,42 @@ module Mutations
         end
       end
   
+      converted
+    end
+
+    def kg_g(quantity, unit)
+      converted = {unit: unit, quantity: quantity}
+      if unit == 'kg'
+        if quantity < 1
+          converted[:unit] = 'g'
+          converted[:quantity] = converted[:quantity].round(3) * 1000
+        end
+      end
+  
+      if unit == 'g'
+        if quantity >= 1000
+          converted[:unit] = 'kg'
+          converted[:quantity] /= 1000
+        end
+      end  
+      converted
+    end
+
+    def lb_oz(quantity, unit)
+      converted = {unit: unit, quantity: quantity}
+      if unit == 'lb'
+        if quantity < (1/4)
+          converted[:unit] = 'oz'
+          converted[:quantity] *= 16
+        end
+      end
+  
+      if unit == 'oz'
+        if quantity >= 4
+          converted[:unit] = 'lb'
+          converted[:quantity] /= 16
+        end
+      end  
       converted
     end
   end

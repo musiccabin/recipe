@@ -546,16 +546,24 @@ module Types
     end
 
     def kg_to_lb (num_in_kg)
-      num_in_kg / 0.453592
+      result = num_in_kg / 0.453592
+      result < 1 ? result.round(2) : result.round(1)
     end
 
     def lb_to_kg (num_in_lb)
-      num_in_lb * 0.453592
+      result = num_in_lb * 0.453592
+      result < 1 ? result.round(2) : result.round(1)
     end
 
     def convert_quantity(name, quantity, unit_input, unit_output)
       return 0 if ['to taste', ''].include? quantity.to_s
       output = floatify(quantity)
+
+      if unit_input == 'oz'
+        in_kg = output * 0.0283495
+        return unit_output == 'kg' ? in_kg : convert_quantity(name, in_kg, 'kg', unit_output)
+      end
+      
       if unit_input == 'cup'
         case unit_output
         when ''
@@ -964,12 +972,56 @@ module Types
       converted
     end
 
+    def kg_g(quantity, unit)
+      converted = {unit: unit, quantity: quantity}
+      if unit == 'kg'
+        if quantity < 1
+          converted[:unit] = 'g'
+          converted[:quantity] = converted[:quantity].round(2) * 1000
+        end
+      end
+  
+      if unit == 'g'
+        if quantity >= 1000
+          converted[:unit] = 'kg'
+          converted[:quantity] /= 1000
+        end
+      end  
+      converted
+    end
+
+    def lb_oz(quantity, unit)
+      converted = {unit: unit, quantity: quantity}
+      if unit == 'lb'
+        if quantity < (1/4)
+          converted[:unit] = 'oz'
+          converted[:quantity] *= 16
+        end
+      end
+  
+      if unit == 'oz'
+        if quantity >= 4
+          converted[:unit] = 'lb'
+          converted[:quantity] /= 16
+        end
+      end  
+      converted
+    end
+
     def optimize_unit(list_of_stats)
       list_of_stats.each do |stat|
         if ['cup', 'tbsp', 'tsp'].include? stat[:unit]
           converted = cup_tbsp_tsp(floatify(stat[:quantity]), stat[:unit])
           stat[:quantity] = stringify_quantity(converted[:quantity])
           stat[:unit] = converted[:unit]
+        elsif ['kg', 'g'].include? stat[:unit]
+          converted = kg_g(floatify(stat[:quantity]), stat[:unit])
+          stat[:unit] = converted[:unit]
+          stat[:quantity] = stringify_quantity(converted[:quantity])
+        elsif ['lb', 'oz'].include? stat[:unit]
+          converted = lb_oz(floatify(stat[:quantity]), stat[:unit])
+          stat[:unit] = converted[:unit]
+          stat[:quantity] = stringify_quantity(converted[:quantity])
         end
       end
     end
