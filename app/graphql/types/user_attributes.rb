@@ -2,7 +2,7 @@ module Types
     class UserAttributes < Types::BaseInputObject
       description "Attributes for creating or updating a user"
 
-      argument :id, ID, required: true
+      argument :id, ID, required: false
       argument :first_name, String, required: false
       argument :last_name, String, required: false
       # argument :email, String, required: true
