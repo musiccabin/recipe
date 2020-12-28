@@ -30,5 +30,6 @@ module Types
     field :remove_leftover, mutation: Mutations::RemoveLeftoverMutation
     field :update_user, mutation: Mutations::UpdateUserMutation
     field :create_user, mutation: Mutations::CreateUserMutation
+    field :sign_out, mutation: Mutations::SignOutMutation
   end
 end
