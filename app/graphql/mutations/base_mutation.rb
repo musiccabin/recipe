@@ -404,6 +404,36 @@ module Mutations
       end
     end
 
+    def update_grocery(leftover)
+      grocery_updated = false
+      ingredient_name = leftover.ingredient.name
+      grocery = current_user.groceries.find_by(name: ingredient_name)
+      if grocery&.is_completed == false
+        grocery_updated = true
+        unit_grocery = grocery.unit
+        if unit_grocery == leftover.unit
+          grocery.quantity = stringify_quantity(floatify(grocery.quantity) - floatify(leftover.quantity))
+        else
+          appropriate_unit = appropriate_unit(ingredient_name, unit_grocery)
+          if unit_grocery != appropriate_unit
+            quantity_to_buy = convert_quantity(ingredient_name, floatify(grocery.quantity), unit_grocery, appropriate_unit)
+          else
+            quantity_to_buy = floatify(grocery.quantity)
+          end
+          unit_leftover = leftover.unit
+          if unit_leftover != appropriate_unit
+            quantity_leftover = convert_quantity(ingredient_name, floatify(leftover.quantity), unit_leftover, appropriate_unit)
+          else
+            quantity_leftover = floatify(leftover.quantity)
+          end
+          grocery.quantity = stringify_quantity(quantity_to_buy - quantity_leftover)
+        end
+        grocery.save
+        grocery.destroy if grocery.quantity == '0'
+      end
+      grocery_updated
+    end
+
     def appropriate_unit(name, unit)
       output = unit
   

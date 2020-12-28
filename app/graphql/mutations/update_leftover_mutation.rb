@@ -4,9 +4,11 @@ module Mutations
       argument :attributes, Types::IngredientAttributes, required: true
   
       field :leftover, Types::LeftoverType, null: true
+      field :grocery_updated, Boolean, null: false
       field :errors, Types::ValidationErrorsType, null: true
   
       def resolve(id:, attributes:)
+        grocery_updated = false
         check_authentication!
         leftover = Leftover.find_by(id: id)
         check_leftover_exists!(leftover)
@@ -18,9 +20,9 @@ module Mutations
   
         if leftover.update(ingredient: ingredient, quantity: attributes.quantity, unit: attributes.unit)
           RecipeSchema.subscriptions.trigger("leftoverUpdated", {}, leftover)
-          { leftover: leftover }
+          { leftover: leftover, grocery_updated: update_grocery(leftover) }
         else
-          { errors: leftover.errors }
+          { errors: leftover.errors, grocery_updated: grocery_updated }
         end
       end
     end
