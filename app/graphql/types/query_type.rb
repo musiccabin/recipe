@@ -143,11 +143,35 @@ module Types
       make_stats(usages)
     end
 
+    field :dashboard_ind_stats_last_90_days, Types::IndDashboardStatsType, null: false,
+    description: "Returns top-10 leftover ingredients used in the last 90 days by user"
+    def dashboard_ind_stats_last_90_days
+      authenticate_user!
+      usages = current_user.leftover_usages.select{|usage| usage.created_at >= (Time.now - (24*90).hours)}
+      make_stats(usages)
+    end
+
     field :dashboard_ind_stats_last_6_months, Types::IndDashboardStatsType, null: false,
     description: "Returns top-10 leftover ingredients used in the last 24 hours by user"
     def dashboard_ind_stats_last_6_months
       authenticate_user!
       usages = current_user&.leftover_usages.select{|usage| usage.created_at >= (Time.now - 6.months)}
+      make_stats(usages)
+    end
+
+    field :dashboard_ind_stats_this_year, Types::IndDashboardStatsType, null: false,
+    description: "Returns top-10 leftover ingredients used this year by user"
+    def dashboard_ind_stats_this_year
+      authenticate_user!
+      usages = current_user&.leftover_usages.select{|usage| usage.created_at >= (Time.now.beginning_of_year)}
+      make_stats(usages)
+    end
+
+    field :dashboard_ind_stats_all_history, Types::IndDashboardStatsType, null: false,
+    description: "Returns top-10 leftover ingredients ever used by user"
+    def dashboard_ind_stats_all_history
+      authenticate_user!
+      usages = current_user&.leftover_usages
       make_stats(usages)
     end
 
@@ -193,6 +217,27 @@ module Types
       make_stats_by_province(usages) if usages
     end
 
+    field :dashboard_com_stats_last_90_days_by_city, [Types::ComDashboardStatsType], null: false,
+    description: "Returns top-10 leftover ingredients used in the last 90 days by users from the same city"
+    def dashboard_com_stats_last_90_days_by_city
+      usages = LeftoverUsage.select{|usage| usage.created_at >= (Time.now - (24*90).hours)}
+      make_stats_by_city(usages) if usages
+    end
+
+    field :dashboard_com_stats_last_90_days_by_region, [Types::ComDashboardStatsType], null: false,
+    description: "Returns top-10 leftover ingredients used in the last 30 days by users from the same region"
+    def dashboard_com_stats_last_90_days_by_region
+      usages = LeftoverUsage.select{|usage| usage.created_at >= (Time.now - (24*90).hours)}
+      make_stats_by_region(usages) if usages
+    end
+
+    field :dashboard_com_stats_last_90_days_by_province, [Types::ComDashboardStatsType], null: false,
+    description: "Returns top-10 leftover ingredients used in the last 30 days by users from the same province"
+    def dashboard_com_stats_last_90_days_by_province
+      usages = LeftoverUsage.select{|usage| usage.created_at >= (Time.now - (24*90).hours)}
+      make_stats_by_province(usages) if usages
+    end
+
     field :dashboard_com_stats_last_6_months_by_city, [Types::ComDashboardStatsType], null: false,
     description: "Returns top-10 leftover ingredients used in the last 30 days by users from the same city"
     def dashboard_com_stats_last_6_months_by_city
@@ -213,6 +258,48 @@ module Types
       usages = LeftoverUsage.select{|usage| usage.created_at >= (Time.now - 6.months)}
       make_stats_by_province(usages) if usages
     end
+
+    field :dashboard_com_stats_this_year_by_city, [Types::ComDashboardStatsType], null: false,
+    description: "Returns top-10 leftover ingredients used this year by users from the same city"
+    def dashboard_com_stats_this_year_by_city
+      usages = LeftoverUsage.select{|usage| usage.created_at >= (Time.now.beginning_of_year)}
+      make_stats_by_city(usages) if usages
+    end
+
+    field :dashboard_com_stats_this_year_by_region, [Types::ComDashboardStatsType], null: false,
+    description: "Returns top-10 leftover ingredients used this year by users from the same region"
+    def dashboard_com_stats_this_year_by_region
+      usages = LeftoverUsage.select{|usage| usage.created_at >= (Time.now.beginning_of_year)}
+      make_stats_by_region(usages) if usages
+    end
+
+    field :dashboard_com_stats_this_year_by_province, [Types::ComDashboardStatsType], null: false,
+    description: "Returns top-10 leftover ingredients used this year by users from the same province"
+    def dashboard_com_stats_this_year_by_province
+      usages = LeftoverUsage.select{|usage| usage.created_at >= (Time.now.beginning_of_year)}
+      make_stats_by_province(usages) if usages
+    end
+
+    field :dashboard_com_stats_all_history_by_city, [Types::ComDashboardStatsType], null: false,
+    description: "Returns top-10 leftover ingredients ever used by users from the same city"
+    def dashboard_com_stats_all_history_by_city
+      usages = LeftoverUsage.all
+      make_stats_by_city(usages) if usages
+    end
+
+    field :dashboard_com_stats_all_history_by_region, [Types::ComDashboardStatsType], null: false,
+    description: "Returns top-10 leftover ingredients ever used by users from the same region"
+    def dashboard_com_stats_all_history_by_region
+      usages = LeftoverUsage.all
+      make_stats_by_region(usages) if usages
+    end
+
+    field :dashboard_com_stats_all_history_by_province, [Types::ComDashboardStatsType], null: false,
+    description: "Returns top-10 leftover ingredients ever used by users from the same province"
+    def dashboard_com_stats_all_history_by_province
+      usages = LeftoverUsage.all
+      make_stats_by_province(usages) if usages
+    end    
     
     field :groceries, [Types::GroceryType], null: true,
     description: "Returns user's grocery items"
