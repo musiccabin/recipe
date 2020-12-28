@@ -10,7 +10,7 @@ module Mutations
       argument :auth_provider, AuthProviderSignupData, required: false
 
       field :user, Types::UserType, null: true
-      field :errors, [Types::ValidationErrorsType], null: true
+      field :errors, Types::ValidationErrorsType, null: true
   
       def resolve(attributes: nil, auth_provider: nil)
         user = User.create!(attributes.to_h.merge({
