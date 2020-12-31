@@ -91,6 +91,15 @@ module Types
       # byebug
       recipe_info(id: id)&.myrecipeingredientlinks
     end
+
+    field :ingredient_usages, [Types::LeftoverUsageType], null: true,
+    description: "Returns a list of recipe's existing ingredient usages" do
+      argument :id, ID, required: true
+    end
+    def ingredient_usages(id:)
+      recipe = recipe_info(id: id)
+      mealplan.leftover_usages.where(myrecipe: recipe)
+    end
     
     field :leftovers, [Types::LeftoverType], null: true,
       description: "Returns user's leftovers"
