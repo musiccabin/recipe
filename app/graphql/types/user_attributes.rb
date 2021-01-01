@@ -14,5 +14,6 @@ module Types
       argument :city, String, required: false
       argument :province, String, required: false
       argument :region, String, required: false
+      argument :postal, String, required: false
     end
   end

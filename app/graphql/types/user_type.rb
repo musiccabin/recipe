@@ -15,5 +15,6 @@ module Types
     field :city, String, null: true
     field :province, String, null: true
     field :region, String, null: true
+    field :postal, String, null: true
   end
 end
