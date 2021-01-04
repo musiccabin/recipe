@@ -393,12 +393,18 @@ module Types
     end
 
     #sort recipes like so:
-    #1. over 50% use on at least 3 leftover ingredients
-    #2. over 5 leftover ingredients used (even if <50%)
-    #3. over 50% use on at least 2 leftover ingredients
-    #4. over 3 leftover ingredients used (even if <50%)
-    #5. over 50% use on at least 1 leftover ingredient
-    #6. recipes that include any leftover ingredients
+    #1. over 50% use on 3+ leftover ingredients && 5+ other ingredients used (even if <50%)
+    #2. over 50% use on 3+ leftover ingredients && 1+ other ingredients used (even if <50%)
+    #3. over 50% use on 2+ leftover ingredients && 5+ other ingredients used (even if <50%)
+    #4. over 50% use on 2+ leftover ingredients && 1+ other ingredients used (even if <50%)
+    #5. over 50% use on 1+ leftover ingredients && 5+ other ingredients used (even if <50%)
+    #6. over 50% use on 3+ leftover ingredients
+    #7. over 50% use on 2+ leftover ingredients
+    #8. over 50% use on 1+ leftover ingredients && 1+ other ingredients used (even if <50%)
+    #9. 5+ leftover ingredients used (even if <50%)
+    #10. over 50% use on 1+ leftover ingredients
+    #11. 3+ leftover ingredients used (even if <50%)
+    #12. 1+ leftover ingredients used (even if <50%)
     def use_up_leftovers(leftovers, result_rstrn)
       sorted_results = []
       stats_reg = {}
@@ -407,17 +413,18 @@ module Types
       stats_50.default = 0
       #if mealplan already uses up a leftover ingredient, don't recommend recipes for this ingredient anymore.
       #if mealplan uses a portion of a leftover ingredient, update recommendation to search for the remaining quantity.
-      leftovers.each do |l|
-        if current_user&.mealplan&.myrecipes.any?
-          current_user.mealplan.myrecipes.each do |mealplan_recipe|
-            mealplan_recipe.ingredients.each do |i|
+      links = current_user&.mealplan&.myrecipemealplanlinks
+      if links.any?
+        leftovers.each do |leftover|
+          links.each do |link|
+            link.ingredients.each do |i|
               next if i != l.ingredient
-              quantity_in_recipe = floatify(proper_recipe_quantity(i, mealplan_recipe, l))
-              l_quantity = floatify(l.quantity)
-              if l_quantity - quantity_in_recipe > 0
-                l.quantity = l_quantity - quantity_in_recipe
+              updated_leftover = updated_leftover(i, l.myrecipe, leftover)
+              if updated_leftover.present?
+                leftover = updated_leftover
               else
-                leftovers.delete(l)
+                leftovers.delete(leftover)
+                break
               end
             end
           end
@@ -427,47 +434,168 @@ module Types
       result_rstrn.each do |r|
         leftovers.each do |leftover|
           ingredient = leftover.ingredient
-          next if r.myrecipeingredientlinks.find_by(ingredient: ingredient) == nil
+          ingredient_link = r.myrecipeingredientlinks.find_by(ingredient: ingredient)
+          next if ingredient_link == nil
           #compare quantities
-          quantity_leftover = leftover.quantity
-          quantity_recipe = proper_recipe_quantity(ingredient, r, leftover)
+          quantity_leftover = floatify(leftover.quantity)
+          quantity_recipe = floatify(ingredient_link.quantity)
+          unit_leftover = leftover.unit
+          unit_recipe = ingredient_link.unit
+          ingredient_name = ingredient.name
+          if unit_leftover != unit_recipe
+            appropriate_unit = appropriate_unit(ingredient.name, unit_leftover)
+            if appropriate_unit != unit_leftover
+              quantity_leftover = convert_quantity(ingredient_name, quantity_leftover, unit_leftover, appropriate_unit)
+              unit_leftover = appropriate_unit
+            end
+            if appropriate_unit != unit_recipe
+              quantity_recipe = convert_quantity(ingredient_name, quantity_recipe, unit_recipe, appropriate_unit)
+              unit_recipe = appropriate_unit
+            end
+          end
           if above_50_percent(quantity_recipe, quantity_leftover)
             stats_50[r] += 1
             break if stats_50[r] >= 3
           else
             stats_reg[r] += 1
-            break if stats_reg[r] >= 5
+            # break if stats_reg[r] >= 5
           end
         end
       end
-      stats_reg = stats_reg.delete_if {|recipe| stats_50.include? recipe}
-      sorted_results = push_recipe(stats_50, 3, sorted_results)
-      sorted_results = push_recipe(stats_reg, 5, sorted_results)
-      sorted_results = push_recipe(stats_50, 2, sorted_results)
-      sorted_results = push_recipe(stats_reg, 4, sorted_results)
-      sorted_results = push_recipe(stats_reg, 3, sorted_results)
-      sorted_results = push_recipe(stats_50, 1, sorted_results)
-      sorted_results = push_recipe(stats_reg, 2, sorted_results)
-      sorted_results = push_recipe(stats_reg, 1, sorted_results)
+      # stats_reg = stats_reg.delete_if {|recipe| stats_50.include? recipe}
+      stats_50 = stats_50.sort_by{|k,v| -v}.to_h
+      stats_reg = stats_reg.sort_by{|k,v| -v}.to_h
+      push_results = push_recipe(stats_50, stats_reg, 3, 5, sorted_results)
+
+      stats_50 = push_results[0]
+      stats_reg = push_results[1]
+      sorted_results = push_results[2]
+      push_results = push_recipe(stats_50, stats_reg, 3, 1, sorted_results)
+
+      stats_50 = push_results[0]
+      stats_reg = push_results[1]
+      sorted_results = push_results[2]
+      push_results = push_recipe(stats_50, stats_reg, 2, 5, sorted_results)
+
+      stats_50 = push_results[0]
+      stats_reg = push_results[1]
+      sorted_results = push_results[2]
+      push_results = push_recipe(stats_50, stats_reg, 2, 1, sorted_results)
+
+      stats_50 = push_results[0]
+      stats_reg = push_results[1]
+      sorted_results = push_results[2]
+      push_results = push_recipe(stats_50, stats_reg, 1, 5, sorted_results)
+
+      stats_50 = push_results[0]
+      stats_reg = push_results[1]
+      sorted_results = push_results[2]
+      push_results = push_recipe(stats_50, stats_reg, 3, nil, sorted_results)
+
+      stats_50 = push_results[0]
+      stats_reg = push_results[1]
+      sorted_results = push_results[2]
+      push_results = push_recipe(stats_50, stats_reg, 2, nil, sorted_results)
+
+      stats_50 = push_results[0]
+      stats_reg = push_results[1]
+      sorted_results = push_results[2]
+      push_results = push_recipe(stats_50, stats_reg, 1, 1, sorted_results)
+
+      stats_50 = push_results[0]
+      stats_reg = push_results[1]
+      sorted_results = push_results[2]
+      push_results = push_recipe(stats_50, stats_reg, nil, 5, sorted_results)
+
+      stats_50 = push_results[0]
+      stats_reg = push_results[1]
+      sorted_results = push_results[2]
+      push_results = push_recipe(stats_50, stats_reg, 1, nil, sorted_results)
+
+
+      stats_50 = push_results[0]
+      stats_reg = push_results[1]
+      sorted_results = push_results[2]
+      push_results = push_recipe(stats_50, stats_reg, nil, 3, sorted_results)
+
+      stats_50 = push_results[0]
+      stats_reg = push_results[1]
+      sorted_results = push_results[2]
+      push_results = push_recipe(stats_50, stats_reg, nil, 1, sorted_results)
+
+      sorted_results = push_results[2]
+
+      # sorted_results = push_recipe(stats_50, 3, sorted_results)
+      # stats_50.delete_if {|recipe| sorted_results.include? recipe}
+
+      # sorted_results = push_recipe(stats_reg, 5, sorted_results)
+      # stats_reg.delete_if {|recipe| sorted_results.include? recipe}
+
+      # sorted_results = push_recipe(stats_50, 2, sorted_results)
+      # stats_50.delete_if {|recipe| sorted_results.include? recipe}
+
+      # sorted_results = push_recipe(stats_reg, 3, sorted_results)
+      # stats_reg.delete_if {|recipe| sorted_results.include? recipe}
+
+      # sorted_results = push_recipe(stats_50, 1, sorted_results)
+      # stats_50.delete_if {|recipe| sorted_results.include? recipe}
+
+      # sorted_results = push_recipe(stats_reg, 1, sorted_results)
+      # stats_reg.delete_if {|recipe| sorted_results.include? recipe}
     end
 
-    def proper_recipe_quantity(ingredient, recipe, leftover)
+    def updated_leftover(ingredient, recipe, leftover)
       link = recipe.myrecipeingredientlinks.find_by(ingredient: ingredient)
       unit_recipe = link.unit
       unit_leftover = leftover.unit.to_s
       if unit_recipe == unit_leftover
-        floatify(link.quantity)
+        leftover.quantity = floatify(link.quantity)
       else
-        convert_quantity(ingredient, link.quantity, unit_recipe, unit_leftover)
+        ingredient_name = ingredient.name
+        appropriate_unit = appropriate_unit(ingredient_name, unit_leftover)
+        quantity_leftover = floatify(leftover.quantity)
+        if unit_leftover == appropriate_unit
+          quantity_leftover -= convert_quantity(ingredient_name, link.quantity, unit_recipe, appropriate_unit)
+        else
+          quantity_leftover = convert_quantity(ingredient, quantity_leftover, unit_leftover, appropriate_unit)
+          quantity_recipe = convert_quantity(ingredient, link.quantity, unit_recipe, appropriate_unit)
+          quantity_leftover -= quantity_recipe
+        end
+        if quantity_leftover <= 0
+          leftover = nil
+        else
+          leftover.quantity = quantity_leftover
+        end
       end
+      leftover
     end
 
-    def push_recipe(stats,val,sorted_results)
-      if stats.has_value?(val)
-        selected = stats.select {|k,v| v == val}
-        sorted_results += selected.keys
-      end
-      sorted_results
+    def push_recipe(stats_50, stats_reg, count_50, count_reg, sorted_results)
+      # byebug
+      if count_50 && count_reg
+        stats_50.each do |recipe, count|
+          if count && count >= count_50 && stats_reg[recipe] && stats_reg[recipe] >= count_reg
+            sorted_results << recipe
+            stats_50.delete(recipe)
+            stats_reg.delete(recipe)
+          end
+        end
+      elsif count_50
+        stats_50.each do |recipe, count|
+          if count && count >= count_50
+            sorted_results << recipe
+            stats_50.delete(recipe)
+          end
+        end
+      else
+        stats_reg.each do |recipe, count|
+          if count && count >= count_reg
+            sorted_results << recipe
+            stats_reg.delete(recipe)
+          end
+        end
+      end                
+      [stats_50, stats_reg, sorted_results]
     end
 
     def floatify(quantity)
@@ -494,7 +622,7 @@ module Types
         return false
       elsif quantity_leftover.to_s == ''
         return true
-      elsif floatify(quantity_recipe) >= 0.5 * floatify(quantity_leftover)
+      elsif quantity_recipe <= quantity_leftover && quantity_recipe >= 0.5 * quantity_leftover
         return true
       else
         return false
