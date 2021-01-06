@@ -17,7 +17,7 @@ module Mutations
   
         if leftover.save
           RecipeSchema.subscriptions.trigger("leftoverAdded", {}, leftover)
-          { leftover: leftover, grocery_updated: update_grocery(leftover) }
+          { leftover: leftover, grocery_updated: update_grocery(leftover, false, nil, nil) }
         else
           { errors: leftover.errors, grocery_updated: grocery_updated }
         end

@@ -8,7 +8,10 @@ module Mutations
         check_authentication!
 
         completion = current_user.completions&.find_by(myrecipe: recipe_id)
-        return { status: 'recipe is previously completed. completion not removed.' } if completion&.previously_completed
+        if completion&.previously_completed
+          current_user.mealplan.myrecipemealplanlinks.find_by(myrecipe: recipe).update(completed: false)
+          return { status: 'recipe is previously completed. completion removed from mealplan.' } 
+        end
         if completion.present?
             authenticate_item_owner!(completion)
             completion.destroy

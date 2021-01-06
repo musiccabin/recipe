@@ -13,7 +13,10 @@ module Mutations
         check_recipe_exists!(recipe)
   
         completion_exists = current_user.completions&.find_by(myrecipe: recipe)
-        return { status: 'recipe has been completed before.' } if completion_exists
+        if completion_exists
+          current_user.mealplan.myrecipemealplanlinks.find_by(myrecipe: recipe).update(completed: true)
+          return { status: 'recipe has been completed before.' }
+        end
         completion = Completion.new(myrecipe: recipe, user: current_user)
         if completion.save
           RecipeSchema.subscriptions.trigger("completionAdded", {}, completion)

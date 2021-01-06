@@ -11,6 +11,8 @@ module Mutations
         grocery_updated = false
         check_authentication!
         leftover = Leftover.find_by(id: id)
+        old_quantity = leftover.quantity
+        old_unit = leftover.unit
         check_leftover_exists!(leftover)
 
         ingredient = Ingredient.find_by(name: attributes.ingredient_name)
@@ -20,7 +22,7 @@ module Mutations
   
         if leftover.update(ingredient: ingredient, quantity: attributes.quantity, unit: attributes.unit)
           RecipeSchema.subscriptions.trigger("leftoverUpdated", {}, leftover)
-          { leftover: leftover, grocery_updated: update_grocery(leftover) }
+          { leftover: leftover, grocery_updated: update_grocery(leftover, false, old_quantity, old_unit) }
         else
           { errors: leftover.errors, grocery_updated: grocery_updated }
         end

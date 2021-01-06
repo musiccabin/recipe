@@ -83,14 +83,15 @@ module Mutations
         end
       end
   
-      # subtract_leftovers = []
+      # subtract_leftovers
       added_up.each do |stats|
+        byebug
         ingredient = Ingredient.find_by(name: stats[:name])
         leftover = current_user.leftovers&.find_by(ingredient: ingredient)
         if leftover
           ingredient_name = ingredient.name
           stats[:quantity] -= convert_quantity(ingredient_name, leftover.quantity, leftover.unit, stats[:unit]) unless stats[:quantity].to_s == '' && is_seasoning?(ingredient_name)
-          added_up.delete(stats) if stats[:quantity] <= 0
+          # added_up.delete(stats) if stats[:quantity] <= 0
         end
       end
   
@@ -404,16 +405,35 @@ module Mutations
       end
     end
 
-    def update_grocery(leftover)
+    def update_grocery(leftover, remove_leftover, old_quantity, old_unit)
       grocery_updated = false
-      ingredient_name = leftover.ingredient.name
+      ingredient = leftover.ingredient
+      ingredient_name = ingredient.name
       grocery = current_user.groceries.find_by(name: ingredient_name)
+
+      # corresponding grocery item doesn't exist && leftover being removed:
+      # byebug
+      if grocery.nil? && remove_leftover
+        links = current_user.mealplan.myrecipemealplanlinks.where(completed: false)
+        links.each do |link|
+          link.myrecipe.myrecipeingredientlinks.each do |ingredient_link|
+            if ingredient_link.ingredient == ingredient
+              grocery_updated = true
+              break
+            end
+          end
+        end
+        # byebug
+        Grocery.create(user: current_user, name: ingredient_name, quantity: leftover.quantity, unit: leftover.unit) if grocery_updated
+        return grocery_updated
+      end
+
+      # corresponding grocery item exists && hasn't been purchased yet:
       if grocery&.is_completed == false
         grocery_updated = true
         unit_grocery = grocery.unit
-        if unit_grocery == leftover.unit
-          grocery.quantity = stringify_quantity(floatify(grocery.quantity) - floatify(leftover.quantity))
-        else
+        appropriate_unit = nil
+        if unit_grocery != leftover.unit
           appropriate_unit = appropriate_unit(ingredient_name, unit_grocery)
           if unit_grocery != appropriate_unit
             quantity_to_buy = convert_quantity(ingredient_name, floatify(grocery.quantity), unit_grocery, appropriate_unit)
@@ -425,9 +445,18 @@ module Mutations
             quantity_leftover = convert_quantity(ingredient_name, floatify(leftover.quantity), unit_leftover, appropriate_unit)
           else
             quantity_leftover = floatify(leftover.quantity)
-          end
-          grocery.quantity = stringify_quantity(quantity_to_buy - quantity_leftover)
+          end         
         end
+        if unit_grocery != old_unit
+          old_quantity = convert_quantity(ingredient_name, floatify(old_quantity), old_unit, appropriate_unit)
+        end
+        if remove_leftover
+          grocery.quantity = stringify_quantity(quantity_to_buy + quantity_leftover)
+        elsif old_quantity && old_unit
+          grocery.quantity = stringify_quantity(quantity_to_buy + old_quantity - quantity_leftover)
+        else
+          grocery.quantity = stringify_quantity(quantity_to_buy - quantity_leftover)
+        end 
         grocery.save
         grocery.destroy if grocery.quantity == '0'
       end
