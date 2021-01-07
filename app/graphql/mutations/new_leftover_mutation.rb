@@ -11,8 +11,7 @@ module Mutations
         check_authentication!
 
         ingredient_name = attributes.ingredient_name
-        ingredient = Ingredient.find_by(name: ingredient_name)
-        check_ingredient_exists!(ingredient)
+        ingredient = Ingredient.find_or_initialize_by(name: ingredient_name)
         leftover = Leftover.new(ingredient: ingredient, quantity: attributes.quantity, unit: attributes.unit, user: current_user)
   
         if leftover.save
