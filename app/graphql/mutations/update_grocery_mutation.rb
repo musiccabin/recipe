@@ -12,7 +12,7 @@ module Mutations
         check_grocery_exists!(grocery)  
         authenticate_item_owner!(grocery)
   
-        if grocery.update(name: attributes.ingredient_name, quantity: attributes.quantity, unit: attributes.unit)
+        if grocery.update(quantity: attributes.quantity, unit: attributes.unit)
           RecipeSchema.subscriptions.trigger("groceryUpdated", {}, grocery)
           { grocery: grocery }
         else

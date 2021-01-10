@@ -4,8 +4,9 @@ class Leftover < ApplicationRecord
 
   # validate :accepted_expiry_date
   validate :non_negative_quantity
-  validate :no_ice_cube
+  validate :accepted_ingredients
   validates :ingredient, uniqueness: {scope: :user}
+
   
   private
   # def accepted_expiry_date
@@ -20,9 +21,9 @@ class Leftover < ApplicationRecord
   #   end
   # end
 
-  def no_ice_cube
-    if ingredient.name == 'ice cube'
-      self.errors.add(:ingredient,'error: we do not track ice cubes.')
+  def accepted_ingredients
+    if ['ice cube', 'water'].include? ingredient.name
+      self.errors.add(:ingredient,'we do not track leftovers for this ingredient.')
     end
   end
 

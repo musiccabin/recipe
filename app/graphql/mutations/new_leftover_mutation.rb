@@ -10,8 +10,9 @@ module Mutations
         grocery_updated = false
         check_authentication!
 
-        ingredient_name = attributes.ingredient_name
-        ingredient = Ingredient.find_or_initialize_by(name: ingredient_name)
+        # byebug
+        ingredient = Ingredient.find_or_initialize_by(name: attributes.ingredient_name)
+        ingredient.update(category: attributes.category) unless ingredient.category.present?
         leftover = Leftover.new(ingredient: ingredient, quantity: attributes.quantity, unit: attributes.unit, user: current_user)
   
         if leftover.save

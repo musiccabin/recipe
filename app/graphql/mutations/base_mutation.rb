@@ -382,8 +382,8 @@ module Mutations
         errors << leftover_usage.errors
       end
 
-      # return any validation errors
-      errors
+      # return any validation errors and warning ingredients
+      { errors: errors, warning_ingredients: warning_ingredients }
     end
 
     def add_ingredients_to_recipe(recipe, ingredients)

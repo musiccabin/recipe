@@ -20,7 +20,7 @@ module Mutations
   
         authenticate_item_owner!(leftover)
   
-        if leftover.update(ingredient: ingredient, quantity: attributes.quantity, unit: attributes.unit)
+        if leftover.update(quantity: attributes.quantity, unit: attributes.unit)
           RecipeSchema.subscriptions.trigger("leftoverUpdated", {}, leftover)
           { leftover: leftover, grocery_updated: update_grocery(leftover, false, old_quantity, old_unit) }
         else

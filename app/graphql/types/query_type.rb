@@ -100,6 +100,15 @@ module Types
       recipe = recipe_info(id: id)
       mealplan.leftover_usages.where(myrecipe: recipe)
     end
+
+    field :ingredient_category, String, null: true,
+    description: "Returns the category of an ingredient" do
+      argument :name, String, required: true
+    end
+    def ingredient_category(name:)
+      ingredient = Ingredient.find_by(name: name)
+      ingredient ? ingredient.category : '' 
+    end    
     
     field :leftovers, [Types::LeftoverType], null: true,
       description: "Returns user's leftovers"
@@ -134,6 +143,12 @@ module Types
         end
       end
       fav_recipes
+    end
+        
+    field :groceries, [Types::GroceryType], null: true,
+    description: "Returns user's grocery items"
+    def groceries
+      current_user.groceries
     end
 
     field :dashboard_ind_stats_last_week, Types::IndDashboardStatsType, null: false,
@@ -309,12 +324,6 @@ module Types
       usages = LeftoverUsage.all
       make_stats_by_province(usages) if usages
     end    
-    
-    field :groceries, [Types::GroceryType], null: true,
-    description: "Returns user's grocery items"
-    def groceries
-      current_user.groceries
-    end
 
     field :all_dietary_restrictions, [Types::DietaryrestrictionType], null: true,
     description: "Returns all dietary restrictions"
