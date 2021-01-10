@@ -21,10 +21,8 @@ module Mutations
           ingredient = Ingredient.find_or_initialize_by(name: a.ingredient_name)
           ingredient.update(category: a.category) unless ingredient.category.present?          
           # leftover_usage.ingredient = ingredient
-          quantity = floatify(a.quantity)
-          unit = a.unit
           old_usage = current_user.mealplan.leftover_usages.find_by(ingredient: ingredient, myrecipe: recipe)
-          all_errors = add_leftover_usage(recipe, ingredient, quantity, unit, old_usage&.quantity, old_usage&.unit, [], warning_ingredients)
+          all_errors = add_leftover_usage(recipe, ingredient, a.quantity, a.unit, old_usage&.quantity, old_usage&.unit, [], warning_ingredients)
           errors += all_errors[:errors]
           warning_ingredients += all_errors[:warning_ingredients]
           old_usage.destroy if old_usage.present?
