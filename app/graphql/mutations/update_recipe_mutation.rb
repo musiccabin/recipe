@@ -4,7 +4,7 @@ module Mutations
     argument :attributes, Types::RecipeAttributes, required: true
     argument :ingredients, [Types::IngredientAttributes], required: false
 
-    field :myrecipe, Types::MyrecipeType, null: true
+    field :recipe, Types::MyrecipeType, null: true
     field :errors, Types::ValidationErrorsType, null: true
 
     def resolve(attributes:, id:, ingredients: nil)
@@ -12,12 +12,12 @@ module Mutations
 
       recipe = Myrecipe.find_by(id: id)
       check_recipe_exists!(recipe)
-      authenticate_recipe_owner!(recipe)
+      authenticate_item_owner!(recipe)
 
       if recipe.update(attributes.to_h)
-        add_ingredients_to_recipe(myrecipe, ingredients) if ingredients
-        RecipeSchema.subscriptions.trigger("recipeUpdated", {}, myrecipe)
-        { myrecipe: recipe }
+        add_ingredients_to_recipe(recipe, ingredients) if ingredients
+        RecipeSchema.subscriptions.trigger("recipeUpdated", {}, recipe)
+        { recipe: recipe }
       else
         { errors: recipe.errors }
       end

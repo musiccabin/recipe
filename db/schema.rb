@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_01_06_054517) do
+ActiveRecord::Schema.define(version: 2021_01_10_231950) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -184,6 +184,7 @@ ActiveRecord::Schema.define(version: 2021_01_06_054517) do
     t.string "avatar_content_type"
     t.bigint "avatar_file_size"
     t.datetime "avatar_updated_at"
+    t.string "imageURL"
     t.index ["myrecipeingredientlink_id"], name: "index_myrecipes_on_myrecipeingredientlink_id", unique: true
     t.index ["title"], name: "index_myrecipes_on_title"
     t.index ["user_id"], name: "index_myrecipes_on_user_id"

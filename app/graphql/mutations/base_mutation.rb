@@ -393,6 +393,7 @@ module Mutations
                 "Ingredient must have a quantity. Please enter 'to taste' for seasoning."
         end
         ingredient = Ingredient.find_or_initialize_by(name: i.ingredient_name)
+        ingredient.update(category: i.category) unless ingredient.category.present?
         existing_link = recipe.myrecipeingredientlinks.find_by(ingredient: ingredient)
         if existing_link
           return existing_link.errors.full_messages unless existing_link.update(quantity: i.quantity, unit: i.unit)
