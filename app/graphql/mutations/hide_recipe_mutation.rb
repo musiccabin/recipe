@@ -9,7 +9,7 @@ module Mutations
 
         recipe = Myrecipe.find_by(id: id)
         check_recipe_exists!(recipe)        
-        authenticate_recipe_owner!(recipe)
+        authenticate_item_owner!(recipe)
 
         recipe.update(is_hidden: true)
         RecipeSchema.subscriptions.trigger("recipeIsHidden", {}, recipe)
