@@ -20,9 +20,10 @@ class Myrecipe < ApplicationRecord
 
     validates :title, presence: true, uniqueness: true
     validates :cooking_time, presence: true
+    validates :instructions, presence: true
     validate :accepted_cooking_time
     validate :is_valid_URL
-    validates :instructions, presence: true
+    validate :has_ingredients
 
     before_validation :unique_tags
     before_validation :unique_restrictions
@@ -83,6 +84,10 @@ class Myrecipe < ApplicationRecord
         if videoURL.present?
             self.errors.add(:videoURL,'we think the URL is not valid.') unless open(self&.videoURL).status == ["200", "OK"]
         end
+    end
+
+    def has_ingredients        
+        self.errors.add(:ingredients, 'cannot publish recipe without ingredients!') if is_hidden == false && ingredients.empty?
     end
 
     def unique_tags
