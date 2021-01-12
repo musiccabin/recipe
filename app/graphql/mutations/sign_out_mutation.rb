@@ -5,7 +5,7 @@ module Mutations
     def resolve
       return { status: "no user is signed in" } unless current_user
 
-      context[:session][:token] = nil
+      context[:session][:current_user] = nil
       { status: 'user signed out!' }
     end
   end
