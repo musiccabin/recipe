@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 11.4
--- Dumped by pg_dump version 11.4
+-- Dumped from database version 13.1
+-- Dumped by pg_dump version 13.1
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -18,7 +18,7 @@ SET row_security = off;
 
 SET default_tablespace = '';
 
-SET default_with_oids = false;
+SET default_table_access_method = heap;
 
 --
 -- Name: ar_internal_metadata; Type: TABLE; Schema: public; Owner: susannahsun
@@ -535,7 +535,8 @@ CREATE TABLE public.myrecipemealplanlinks (
     mealplan_id bigint,
     myrecipe_id bigint,
     created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
+    updated_at timestamp without time zone NOT NULL,
+    completed boolean DEFAULT false
 );
 
 
@@ -581,7 +582,8 @@ CREATE TABLE public.myrecipes (
     avatar_file_name character varying,
     avatar_content_type character varying,
     avatar_file_size bigint,
-    avatar_updated_at timestamp without time zone
+    avatar_updated_at timestamp without time zone,
+    "imageURL" character varying
 );
 
 
@@ -783,7 +785,8 @@ CREATE TABLE public.users (
     tags integer[] DEFAULT '{}'::integer[],
     city character varying,
     province character varying,
-    region character varying
+    region character varying,
+    postal character varying
 );
 
 
@@ -1007,17 +1010,17 @@ environment	development	2019-08-09 04:10:33.283391	2019-08-09 04:10:33.283391
 --
 
 COPY public.completions (id, user_id, myrecipe_id, created_at, updated_at, previously_completed) FROM stdin;
-6	1	1	2019-08-27 22:42:09.683301	2019-08-27 22:42:09.683301	f
 7	4	5	2019-08-28 00:02:37.654105	2019-08-28 00:02:37.654105	f
 8	3	1	2019-08-28 18:39:35.106828	2019-08-28 18:39:35.106828	f
 11	1	9	2019-10-06 21:09:49.429169	2019-10-06 21:09:49.429169	f
 12	1	15	2019-10-12 18:11:13.56302	2019-10-12 18:11:13.56302	f
 97	1	2	2020-10-22 22:24:18.253574	2020-10-22 22:24:18.253574	f
-104	1	8	2020-12-01 03:43:53.803901	2020-12-01 03:43:53.803901	f
-106	5	2	2020-12-03 04:22:35.843969	2020-12-03 04:22:57.043599	t
+106	5	2	2020-12-03 04:22:35.843969	2020-12-03 04:22:57.043599	f
 108	5	1	2020-12-03 04:25:46.528352	2020-12-03 04:25:46.528352	f
-109	1	18	2020-12-08 23:38:14.625877	2020-12-08 23:38:14.625877	f
 110	1	16	2020-12-09 01:05:17.725042	2020-12-09 01:05:17.725042	f
+112	1	8	2021-01-06 02:20:36.298302	2021-01-06 02:20:36.298302	f
+6	1	1	2019-08-27 22:42:09.683301	2021-01-06 02:22:55.124735	t
+111	1	18	2021-01-06 02:19:56.211361	2021-01-06 06:49:48.87289	t
 \.
 
 
@@ -1068,6 +1071,8 @@ COPY public.dietaryrestrictionlinks (id, myrecipe_id, dietaryrestriction_id, cre
 32	22	3	2020-10-16 22:59:11.512813	2020-10-16 22:59:11.512813
 33	22	4	2020-10-16 22:59:11.516997	2020-10-16 22:59:11.516997
 34	23	4	2020-10-17 03:13:32.011004	2020-10-17 03:13:32.011004
+37	24	3	2021-01-10 23:39:41.676363	2021-01-10 23:39:41.676363
+38	24	4	2021-01-10 23:39:41.679089	2021-01-10 23:39:41.679089
 \.
 
 
@@ -1132,15 +1137,26 @@ COPY public.groceries (id, name, quantity, unit, is_completed, user_id, created_
 1698	black pepper			f	3	2019-08-30 02:05:50.196375	2019-08-30 02:05:50.196375	f	\N
 1699	rice vinegar	1/2	cup	f	3	2019-08-30 02:05:50.198285	2019-08-30 02:05:50.198285	f	\N
 3642	sunscreen	2	\N	t	5	2020-11-16 06:20:28.952272	2020-12-28 01:44:35.834746	t	\N
-7478	olive oil	1/3	cup	t	5	2020-12-27 05:27:30.511865	2020-12-28 01:44:35.841183	f	\N
-7479	garlic	4	clove	t	5	2020-12-27 05:27:30.51447	2020-12-28 01:46:21.470864	f	\N
-7480	chicken breast	10		t	5	2020-12-27 05:27:30.517611	2020-12-28 01:46:21.475659	f	\N
-7482	onion	1		t	5	2020-12-27 05:27:30.523564	2020-12-28 01:47:59.570318	f	\N
-7486	parmesan cheese	1/4	cup	f	5	2020-12-27 05:27:30.535025	2020-12-28 02:08:06.212037	f	\N
+7888	white sugar	3/4	cup	f	1	2021-01-06 06:52:58.998284	2021-01-06 06:52:58.998284	f	\N
+7889	rice vinegar	1/2	cup	f	1	2021-01-06 06:52:59.142082	2021-01-06 06:52:59.142082	f	\N
+7890	jalapeno	2		f	1	2021-01-06 06:52:59.293647	2021-01-06 06:52:59.293647	f	\N
+7891	cilantro	1/4	bunch	f	1	2021-01-06 06:52:59.46342	2021-01-06 06:52:59.46342	f	\N
+7892	peanut	1/2	cup	f	1	2021-01-06 06:52:59.614665	2021-01-06 06:52:59.614665	f	\N
+7893	white rice	3	cup	f	1	2021-01-06 06:52:59.784323	2021-01-06 06:52:59.784323	f	\N
 1700	jalapeno	2		f	3	2019-08-30 02:05:50.200191	2019-08-30 02:05:50.200191	f	\N
+7894	milk	2	cup	f	1	2021-01-06 06:52:59.976624	2021-01-06 06:52:59.976624	f	\N
 1701	cilantro	1/4	cup	f	3	2019-08-30 02:05:50.202257	2019-08-30 02:05:50.202257	f	\N
 1702	peanut	1/2	cup	f	3	2019-08-30 02:05:50.20414	2019-08-30 02:05:50.20414	f	\N
+7895	egg	1		f	1	2021-01-06 06:53:00.150325	2021-01-06 06:53:00.150325	f	\N
 1703	apple	6		f	3	2019-08-30 02:06:25.642633	2019-08-30 02:06:33.341341	f	\N
+7899	cucumber	3		f	1	2021-01-06 06:54:14.142476	2021-01-06 06:54:14.142476	f	\N
+7900	cat litter	22	lb	f	5	2021-01-10 22:20:21.339768	2021-01-10 22:32:23.185261	t	other
+7910	ground oat	1	cup	f	5	2021-01-10 23:41:16.651978	2021-01-10 23:41:16.651978	f	\N
+7911	unsweetened cocoa powder	1/3	cup	f	5	2021-01-10 23:41:16.655796	2021-01-10 23:41:16.655796	f	\N
+7912	baking soda	1	tsp	f	5	2021-01-10 23:41:16.659698	2021-01-10 23:41:16.659698	f	\N
+7913	cinnamon	1	tsp	f	5	2021-01-10 23:41:16.664814	2021-01-10 23:41:16.664814	f	\N
+7914	salt	1/4	tsp	f	5	2021-01-10 23:41:16.668138	2021-01-10 23:41:16.668138	f	\N
+7915	unsweetened applesauce	1/2	cup	f	5	2021-01-10 23:41:16.671376	2021-01-10 23:41:16.671376	f	\N
 1114	cucumber	4		f	4	2019-08-28 00:01:28.595771	2019-08-28 00:01:28.595771	f	\N
 1115	salt			f	4	2019-08-28 00:01:28.597974	2019-08-28 00:01:28.597974	f	\N
 1116	white sugar	3/4	cup	f	4	2019-08-28 00:01:28.60012	2019-08-28 00:01:28.60012	f	\N
@@ -1154,39 +1170,15 @@ COPY public.groceries (id, name, quantity, unit, is_completed, user_id, created_
 1124	firm tofu	1/4	cup	f	4	2019-08-28 00:01:28.616755	2019-08-28 00:01:28.616755	f	\N
 1125	basil	2	tbsp	f	4	2019-08-28 00:01:28.618846	2019-08-28 00:01:28.618846	f	\N
 1126	balsamic vinaigrette	1/4	cup	f	4	2019-08-28 00:01:28.620977	2019-08-28 00:01:28.620977	f	\N
-7485	green onion	4		f	5	2020-12-27 05:27:30.531652	2020-12-27 05:27:30.531652	f	\N
-7487	banana	1		f	5	2020-12-27 05:27:30.537991	2020-12-27 05:27:30.537991	f	\N
-7488	almond milk	1/3	cup	f	5	2020-12-27 05:27:30.540838	2020-12-27 05:27:30.540838	f	\N
+7916	maple syrup	1/4	cup	f	5	2021-01-10 23:41:16.674229	2021-01-10 23:41:16.674229	f	\N
+7917	ground flaxseed	1	tbsp	f	5	2021-01-10 23:41:16.679114	2021-01-10 23:41:16.679114	f	\N
+7918	vanilla extract	1	tsp	f	5	2021-01-10 23:41:16.683142	2021-01-10 23:41:16.683142	f	\N
+7919	green onion	1		f	5	2021-01-10 23:41:16.686243	2021-01-10 23:41:16.686243	f	\N
+7920	chocolate	3	bar	f	5	2021-01-10 23:41:16.689574	2021-01-10 23:41:16.689574	f	\N
 1127	black pepper			f	4	2019-08-28 00:01:28.622864	2019-08-28 00:01:28.622864	f	\N
 1128	white rice	3	cup	f	4	2019-08-28 00:01:28.624732	2019-08-28 00:01:28.624732	f	\N
 1129	milk	2	cup	f	4	2019-08-28 00:01:28.626682	2019-08-28 00:01:28.626682	f	\N
 1130	apple	2		f	4	2019-08-28 00:01:55.577308	2019-08-28 00:01:55.577308	f	\N
-7489	avocado	3/4		f	5	2020-12-27 05:27:30.543332	2020-12-27 05:27:30.543332	f	\N
-7490	honey	1	cup	f	5	2020-12-27 05:27:30.545794	2020-12-27 05:27:30.545794	f	\N
-7491	lemon juice	1	tbsp	f	5	2020-12-27 05:27:30.548249	2020-12-27 05:27:30.548249	f	\N
-7492	vanilla extract	1 1/2	tsp	f	5	2020-12-27 05:27:30.551126	2020-12-27 05:27:30.551126	f	\N
-7493	red chili pepper	1		f	5	2020-12-27 05:27:30.553822	2020-12-27 05:27:30.553822	f	\N
-7494	red wine vinegar	1/4	cup	f	5	2020-12-27 05:27:30.556752	2020-12-27 05:27:30.556752	f	\N
-7495	red onion	2 3/4		f	5	2020-12-27 05:27:30.55924	2020-12-27 05:27:30.55924	f	\N
-7499	oregano	1/4	tsp	f	5	2020-12-27 05:27:30.573061	2020-12-27 05:27:30.573061	f	\N
-7500	rice vinegar	1/2	cup	f	5	2020-12-27 05:27:30.575883	2020-12-27 05:27:30.575883	f	\N
-7501	jalapeno	2		f	5	2020-12-27 05:27:30.578485	2020-12-27 05:27:30.578485	f	\N
-7502	cilantro	1/4	bunch	f	5	2020-12-27 05:27:30.581013	2020-12-27 05:27:30.581013	f	\N
-7503	peanut	1/2	cup	f	5	2020-12-27 05:27:30.583854	2020-12-27 05:27:30.583854	f	\N
-7504	whipping cream	1	cup	f	5	2020-12-27 05:27:30.586522	2020-12-27 05:27:30.586522	f	\N
-7505	parsley	1/2	cup	f	5	2020-12-27 05:27:30.589432	2020-12-27 05:27:30.589432	f	\N
-7506	thyme	1/2	tsp	f	5	2020-12-27 05:27:30.592061	2020-12-27 05:27:30.592061	f	\N
-7507	mustard	1/2	cup	f	5	2020-12-27 05:27:30.594625	2020-12-27 05:27:30.594625	f	\N
-7509	mozzarella cheese	113	g	f	5	2020-12-27 05:27:30.623485	2020-12-27 05:27:30.623485	f	\N
-7510	white rice	3	cup	f	5	2020-12-27 05:27:30.627598	2020-12-27 05:27:30.627598	f	\N
-7511	milk	2	cup	f	5	2020-12-27 05:27:30.630714	2020-12-27 05:27:30.630714	f	\N
-7512	egg	1		f	5	2020-12-27 05:27:30.633857	2020-12-27 05:27:30.633857	f	\N
-7513	raisin	100	g	f	5	2020-12-27 05:27:30.636523	2020-12-27 05:27:30.636523	f	\N
-7514	tomato	1		f	5	2020-12-27 05:27:30.639535	2020-12-27 05:27:30.639535	f	\N
-7515	kidney bean	20	g	f	5	2020-12-27 05:27:30.642291	2020-12-27 05:27:30.642291	f	\N
-7516	firm tofu	1/4	cup	f	5	2020-12-27 05:27:30.644858	2020-12-27 05:27:30.644858	f	\N
-7517	balsamic vinaigrette	1/4	cup	f	5	2020-12-27 05:27:30.64735	2020-12-27 05:27:30.64735	f	\N
-7483	chicken bouillon	3	cube	f	5	2020-12-27 05:27:30.526083	2020-12-28 01:32:39.058913	f	\N
 \.
 
 
@@ -1305,6 +1297,11 @@ COPY public.ingredients (id, name, created_at, updated_at, myrecipeingredientlin
 111	asparagus	2020-11-30 01:57:37.118673	2020-11-30 01:57:37.118673	\N	produce
 102	chicken wing	2020-10-17 03:14:29.917691	2020-12-05 06:24:17.605256	\N	meat
 41	kidney bean	2019-08-20 21:35:47.516321	2020-12-07 20:02:08.244626	\N	other
+112	snow pea	2021-01-10 21:59:17.174296	2021-01-10 21:59:17.174296	\N	produce
+113	bison	2021-01-10 22:15:10.359437	2021-01-10 22:15:10.359437	\N	meat
+114	stevia	2021-01-10 22:46:51.007299	2021-01-10 22:46:51.007299	\N	other
+115	chocolate	2021-01-10 23:39:58.58874	2021-01-10 23:39:58.58874	\N	other
+116	bamboo shoot	2021-01-16 19:21:18.320288	2021-01-16 19:21:18.320288	\N	other
 \.
 
 
@@ -1313,41 +1310,16 @@ COPY public.ingredients (id, name, created_at, updated_at, myrecipeingredientlin
 --
 
 COPY public.leftover_usage_mealplan_links (id, leftover_usage_id, mealplan_id, created_at, updated_at) FROM stdin;
-77	152	4	2020-12-01 04:54:38.150751	2020-12-01 04:54:38.150751
-78	153	4	2020-12-01 04:54:38.168809	2020-12-01 04:54:38.168809
-79	154	4	2020-12-01 04:54:38.205956	2020-12-01 04:54:38.205956
-102	177	4	2020-12-07 08:06:41.717216	2020-12-07 08:06:41.717216
-103	178	4	2020-12-07 08:06:41.726984	2020-12-07 08:06:41.726984
-104	179	4	2020-12-07 08:06:41.73511	2020-12-07 08:06:41.73511
-105	180	4	2020-12-07 08:06:41.745011	2020-12-07 08:06:41.745011
-106	181	4	2020-12-07 08:06:41.753552	2020-12-07 08:06:41.753552
-107	182	4	2020-12-07 08:06:41.762476	2020-12-07 08:06:41.762476
-108	183	4	2020-12-07 08:06:41.770788	2020-12-07 08:06:41.770788
-114	\N	1	2020-12-09 01:06:46.759038	2020-12-09 01:06:46.759038
-115	\N	1	2020-12-09 01:06:46.774003	2020-12-09 01:06:46.774003
-41	114	4	2020-11-17 23:54:32.178458	2020-11-17 23:54:32.178458
-42	115	4	2020-11-17 23:54:34.553261	2020-11-17 23:54:34.553261
-43	116	4	2020-11-17 23:54:36.423367	2020-11-17 23:54:36.423367
-44	117	4	2020-11-17 23:54:42.447195	2020-11-17 23:54:42.447195
-45	118	4	2020-11-17 23:54:44.381643	2020-11-17 23:54:44.381643
-46	119	4	2020-11-17 23:54:46.368898	2020-11-17 23:54:46.368898
-47	120	4	2020-11-17 23:54:48.256643	2020-11-17 23:54:48.256643
-49	122	4	2020-11-24 03:22:42.486822	2020-11-24 03:22:42.486822
-50	123	4	2020-11-24 05:31:04.193939	2020-11-24 05:31:04.193939
-51	124	4	2020-11-24 05:31:04.225326	2020-11-24 05:31:04.225326
-52	125	4	2020-11-24 05:33:38.935002	2020-11-24 05:33:38.935002
-53	126	4	2020-11-24 05:33:48.069701	2020-11-24 05:33:48.069701
-249	338	4	2020-12-27 05:27:35.120503	2020-12-27 05:27:35.120503
-250	339	4	2020-12-27 05:27:35.131334	2020-12-27 05:27:35.131334
-251	340	4	2020-12-27 05:27:35.142647	2020-12-27 05:27:35.142647
-252	341	4	2020-12-27 05:27:35.154051	2020-12-27 05:27:35.154051
-253	342	4	2020-12-27 05:27:35.165951	2020-12-27 05:27:35.165951
-254	343	4	2020-12-27 05:27:35.176738	2020-12-27 05:27:35.176738
-255	344	4	2020-12-27 05:27:35.189116	2020-12-27 05:27:35.189116
-256	345	4	2020-12-27 05:27:35.199367	2020-12-27 05:27:35.199367
-257	346	4	2020-12-27 05:27:35.210871	2020-12-27 05:27:35.210871
-258	347	4	2020-12-27 05:27:35.223221	2020-12-27 05:27:35.223221
-259	348	4	2020-12-27 05:27:35.234306	2020-12-27 05:27:35.234306
+260	349	1	2021-01-06 04:59:27.733366	2021-01-06 04:59:27.733366
+261	350	1	2021-01-06 04:59:27.752163	2021-01-06 04:59:27.752163
+262	351	1	2021-01-06 04:59:27.764832	2021-01-06 04:59:27.764832
+263	352	1	2021-01-06 04:59:27.777195	2021-01-06 04:59:27.777195
+264	353	1	2021-01-06 04:59:27.789337	2021-01-06 04:59:27.789337
+265	354	1	2021-01-06 04:59:27.800418	2021-01-06 04:59:27.800418
+266	355	1	2021-01-06 04:59:27.811555	2021-01-06 04:59:27.811555
+267	356	1	2021-01-06 04:59:27.823323	2021-01-06 04:59:27.823323
+280	369	4	2021-01-10 23:14:19.036627	2021-01-10 23:14:19.036627
+281	370	4	2021-01-10 23:14:19.055329	2021-01-10 23:14:19.055329
 \.
 
 
@@ -1494,6 +1466,16 @@ COPY public.leftover_usages (id, quantity, unit, created_at, updated_at, user_id
 346	to taste		2020-12-27 05:27:35.20912	2020-12-27 05:27:35.20912	5	25	4	\N	\N
 347	to taste		2020-12-27 05:27:35.220439	2020-12-27 05:27:35.220439	5	37	4	\N	\N
 348	1	pkg	2020-12-27 05:27:35.232216	2020-12-27 05:27:35.232216	5	15	4	\N	\N
+349	3	cup	2021-01-06 04:59:27.717677	2021-01-06 04:59:27.717677	1	1	1	\N	\N
+350	2	cup	2021-01-06 04:59:27.750278	2021-01-06 04:59:27.750278	1	3	1	\N	\N
+351	1/3	cup	2021-01-06 04:59:27.762911	2021-01-06 04:59:27.762911	1	4	1	\N	\N
+352	1/4	tsp	2021-01-06 04:59:27.774939	2021-01-06 04:59:27.774939	1	25	1	\N	\N
+353	1		2021-01-06 04:59:27.787247	2021-01-06 04:59:27.787247	1	14	1	\N	\N
+354	2/3	cup	2021-01-06 04:59:27.798544	2021-01-06 04:59:27.798544	1	59	1	\N	\N
+355	1	tbsp	2021-01-06 04:59:27.809698	2021-01-06 04:59:27.809698	1	32	1	\N	\N
+356	1/2	tsp	2021-01-06 04:59:27.821116	2021-01-06 04:59:27.821116	1	54	1	\N	\N
+369	1	cup	2021-01-10 23:14:19.029304	2021-01-10 23:14:19.029304	5	79	19	\N	\N
+370	1	tbsp	2021-01-10 23:14:19.053289	2021-01-10 23:14:19.053289	5	114	19	\N	\N
 \.
 
 
@@ -1504,8 +1486,6 @@ COPY public.leftover_usages (id, quantity, unit, created_at, updated_at, user_id
 COPY public.leftovers (id, ingredient_id, user_id, quantity, unit, expiry_date, created_at, updated_at) FROM stdin;
 246	61	1	3			2020-12-09 01:06:46.563508	2020-12-09 01:06:46.563508
 46	3	3		\N	08-29	2019-08-30 02:05:15.707007	2019-08-30 02:05:15.707007
-201	48	5	10 1/2	cup	\N	2020-11-24 05:33:38.89691	2020-11-24 05:33:38.89691
-266	16	5	331 2/3	kg	\N	2020-12-21 02:48:47.352984	2020-12-27 05:27:35.114577
 267	20	5	6	clove	\N	2020-12-21 02:48:47.361282	2020-12-27 05:27:35.138054
 270	11	5	1/3	cup	\N	2020-12-21 02:48:47.388128	2020-12-27 05:27:35.172411
 190	12	5	8	strip	\N	2020-11-24 02:57:06.528265	2020-11-24 05:33:48.075078
@@ -1514,22 +1494,25 @@ COPY public.leftovers (id, ingredient_id, user_id, quantity, unit, expiry_date, 
 291	5	5	6		\N	2020-12-28 01:35:09.437967	2020-12-28 01:35:09.437967
 292	24	5	3	\N	\N	2020-12-28 01:49:53.564557	2020-12-28 01:49:53.564557
 278	15	5	3	pkg	\N	2020-12-27 04:45:52.155986	2020-12-28 02:03:12.672445
-48	5	1	3			2019-10-26 20:00:04.333741	2020-10-08 03:45:30.064143
 212	51	1	1	cup		2020-12-01 03:15:18.538891	2020-12-01 03:15:18.538891
 275	36	5	1/2	cup	\N	2020-12-27 04:45:52.127547	2020-12-28 02:08:06.207704
 24	41	3		\N		2019-08-27 18:11:45.361035	2019-08-27 18:11:45.361035
+297	59	1	100	kg	\N	2021-01-06 04:59:27.795815	2021-01-06 04:59:27.795815
 213	28	1	3/4	cup		2020-12-01 03:15:19.960246	2020-12-01 03:15:19.960246
+298	32	1	14	kg	\N	2021-01-06 04:59:27.806937	2021-01-06 04:59:27.806937
 29	5	2	3	\N		2019-08-27 21:01:46.961752	2019-08-27 21:01:46.961752
-215	54	1	1 1/2	tsp		2020-12-01 03:15:21.447385	2020-12-01 03:15:21.447385
+215	54	1	1	tsp		2020-12-01 03:15:21.447385	2021-01-06 04:59:27.818109
 268	33	5	2	cup	\N	2020-12-21 02:48:47.370082	2020-12-21 04:02:52.58144
 34	5	4	3	\N		2019-08-27 23:56:13.854921	2019-08-27 23:56:13.854921
 35	41	4		\N		2019-08-27 23:56:50.467328	2019-08-27 23:56:50.467328
 23	5	3	3			2019-08-27 18:11:34.477209	2019-08-28 18:14:32.61893
 172	4	5	1	cup	\N	2020-11-17 02:34:58.231278	2020-11-17 23:54:36.695298
+302	113	5	1	kg	\N	2021-01-10 22:15:10.375149	2021-01-10 22:16:33.578689
+303	79	5	1/4	cup	\N	2021-01-10 22:46:50.970851	2021-01-10 22:46:50.970851
 211	52	1	2			2020-12-01 02:25:53.757336	2020-12-01 03:43:53.858022
-274	32	5	130	kg	\N	2020-12-27 04:45:52.06296	2020-12-27 04:45:52.06296
+201	48	5	10	cup	\N	2020-11-24 05:33:38.89691	2021-01-14 01:26:54.055185
+311	116	5	1		\N	2021-01-16 19:21:18.487702	2021-01-16 19:21:18.487702
 230	75	1	1/2	cup		2020-12-08 23:40:53.432155	2020-12-08 23:40:53.432155
-231	3	1	2	cup		2020-12-09 01:02:40.111762	2020-12-09 01:02:51.93872
 \.
 
 
@@ -1551,6 +1534,8 @@ COPY public.mealplans (id, user_id, created_at, updated_at, leftover_usage_mealp
 3	4	2019-08-27 23:53:35.94321	2019-08-27 23:53:35.94321	\N
 4	5	2020-11-15 00:03:41.971016	2020-11-15 00:03:41.971016	\N
 7	19	2020-12-27 23:05:55.613571	2020-12-27 23:05:55.613571	\N
+8	20	2021-01-08 06:00:10.424624	2021-01-08 06:00:10.424624	\N
+9	21	2021-01-13 05:52:46.511314	2021-01-13 05:52:46.511314	\N
 \.
 
 
@@ -1716,6 +1701,8 @@ COPY public.myrecipeingredientlinks (id, myrecipe_id, ingredient_id, quantity, u
 16	2	7	1		2019-08-20 19:03:44.109289	2020-10-21 23:15:09.508433	\N
 24	2	12	8	strip	2019-08-20 19:27:43.262581	2020-10-21 23:27:59.067273	\N
 174	23	105	6		2020-10-17 03:15:35.15946	2020-12-06 18:33:52.861812	\N
+183	24	21	1	bunch	2021-01-10 23:39:58.579411	2021-01-10 23:39:58.579411	\N
+184	24	115	3	bar	2021-01-10 23:39:58.593152	2021-01-10 23:39:58.593152	\N
 \.
 
 
@@ -1723,22 +1710,18 @@ COPY public.myrecipeingredientlinks (id, myrecipe_id, ingredient_id, quantity, u
 -- Data for Name: myrecipemealplanlinks; Type: TABLE DATA; Schema: public; Owner: susannahsun
 --
 
-COPY public.myrecipemealplanlinks (id, mealplan_id, myrecipe_id, created_at, updated_at) FROM stdin;
-124	4	7	2020-11-24 05:28:26.655317	2020-11-24 05:28:26.655317
-125	4	8	2020-11-24 05:28:35.604328	2020-11-24 05:28:35.604328
-126	4	9	2020-11-24 05:28:38.099141	2020-11-24 05:28:38.099141
-31	2	1	2019-08-27 21:08:25.496273	2019-08-27 21:08:25.496273
-154	4	5	2020-12-07 08:06:21.871597	2020-12-07 08:06:21.871597
-33	3	5	2019-08-27 23:57:38.819343	2019-08-27 23:57:38.819343
-34	3	6	2019-08-27 23:57:44.637232	2019-08-27 23:57:44.637232
-36	3	1	2019-08-27 23:58:03.331674	2019-08-27 23:58:03.331674
-38	2	2	2019-08-28 18:19:55.892351	2019-08-28 18:19:55.892351
-42	2	6	2019-08-28 19:13:07.737409	2019-08-28 19:13:07.737409
-49	2	5	2019-08-30 02:05:50.094415	2019-08-30 02:05:50.094415
-167	4	4	2020-12-27 05:27:30.390172	2020-12-27 05:27:30.390172
-111	4	3	2020-11-17 23:37:44.722017	2020-11-17 23:37:44.722017
-113	4	1	2020-11-17 23:52:01.882826	2020-11-17 23:52:01.882826
-116	4	6	2020-11-24 03:21:16.593839	2020-11-24 03:21:16.593839
+COPY public.myrecipemealplanlinks (id, mealplan_id, myrecipe_id, created_at, updated_at, completed) FROM stdin;
+180	1	5	2021-01-06 06:52:29.704533	2021-01-06 06:52:29.704533	f
+181	4	19	2021-01-10 22:43:48.607843	2021-01-10 22:43:48.607843	f
+182	4	24	2021-01-10 23:41:16.588626	2021-01-10 23:41:16.588626	f
+31	2	1	2019-08-27 21:08:25.496273	2019-08-27 21:08:25.496273	f
+33	3	5	2019-08-27 23:57:38.819343	2019-08-27 23:57:38.819343	f
+34	3	6	2019-08-27 23:57:44.637232	2019-08-27 23:57:44.637232	f
+36	3	1	2019-08-27 23:58:03.331674	2019-08-27 23:58:03.331674	f
+38	2	2	2019-08-28 18:19:55.892351	2019-08-28 18:19:55.892351	f
+42	2	6	2019-08-28 19:13:07.737409	2019-08-28 19:13:07.737409	f
+49	2	5	2019-08-30 02:05:50.094415	2019-08-30 02:05:50.094415	f
+170	1	1	2021-01-06 02:23:04.164614	2021-01-06 02:23:04.164614	f
 \.
 
 
@@ -1746,25 +1729,26 @@ COPY public.myrecipemealplanlinks (id, mealplan_id, myrecipe_id, created_at, upd
 -- Data for Name: myrecipes; Type: TABLE DATA; Schema: public; Owner: susannahsun
 --
 
-COPY public.myrecipes (id, title, cooking_time_in_min, "videoURL", instructions, created_at, updated_at, myrecipeingredientlink_id, is_hidden, cooking_time, user_id, avatar_file_name, avatar_content_type, avatar_file_size, avatar_updated_at) FROM stdin;
-7	Creamy Chicken on Linguine	35		In a large saute pan, heat oil, butter and garlic over medium heat. Add chicken and cook until juices run clear. Remove chicken from pan let cool and slice diagonally into long strips. Reserve oil in pan.\r\n\r\nMeanwhile, cook pasta according to directions on package. Drain.\r\n\r\nReheat oil in pan, add onion and saute, stirring often, until onion is soft but still white. Add bullion cube and water; bring to a boil and simmer uncovered for approximately 10 minutes. Stir in cream, milk, green onions and Parmesan cheese.\r\n\r\nPlace pasta in a bowl, layer chicken slices in a decorative pattern over pasta, pour sauce over top of chicken and around pasta. Garnish with parsley or any herbs you desire. Serve immediately.	2019-08-20 21:43:11.525731	2019-08-22 04:51:15.597267	\N	f	35m	1	creamy-chicken-on-linguine.jpeg	image/jpeg	46506	2019-08-22 04:51:15.337717
-1	Creamy Rice Pudding	45		Bring 1 1/2 cups water to a boil in a saucepan; stir rice into boiling water. Reduce heat to low, cover, and simmer for 20 minutes.\r\n\r\nIn a clean saucepan, combine 1 1/2 cups cooked rice, 1 1/2 cups milk, sugar and salt. Cook over medium heat until thick and creamy, 15 to 20 minutes. Stir in remaining 1/2 cup milk, beaten egg, and raisins; cook 2 minutes more, stirring constantly. Remove from heat and stir in butter and vanilla.	2019-08-12 22:59:02.913151	2020-11-24 20:53:51.891516	\N	f	45m	1	creamy_rice_pudding.jpg	image/jpeg	86846	2019-08-22 04:22:41.113973
-8	Avocado Strawberry Layered Smoothie	5		In a blender, combine all the ingredients for the strawberry smoothie and blend until smooth.\r\n\r\nPour evenly into glasses, filling each half way, and place them in the freezer.\r\n\r\nRinse out the blender. Place the remaining ingredients in the blender and blend until smooth. \r\n\r\nUse a spoon to gently transfer the avocado smoothie on top of the strawberry smoothie.	2019-08-22 22:12:08.072433	2019-08-23 00:05:41.965473	\N	f	5m	1	avocado-strawberry-layered-smoothie.jpg	image/jpeg	23908	2019-08-22 22:12:07.765571
-4	Shrimp Linguine	30		Cook pasta until al dente according to package directions.\r\n\r\nWhile linguine is cooking, melt butter or margarine in a large skillet. Add garlic, and saute briefly to release flavor. Add cream; heat just to boiling, stirring frequently. Lower heat, and stir in shrimp, parsley, basil, and thyme. Continue cooking until shrimp are just heated through. Do not overcook shrimp! Remove sauce from heat.\r\n\r\nDrain the pasta, and toss lightly with the sauce. Toss again with cheese, and salt and pepper to taste. Serve immediately.	2019-08-20 21:20:25.614441	2019-08-22 04:43:49.448635	\N	f	30m	1	shrimp_linguine.webp	image/webp	45402	2019-08-22 04:43:49.082822
-3	Easy Honey Mustard Mozzarella Chicken	50		Preheat oven to 375 degrees F (190 degrees C).\r\n\r\nPlace the chicken breast halves in a baking dish, and drizzle evenly with honey and mustard. Sprinkle with lemon pepper.\r\n\r\nBake chicken 25 minutes in the preheated oven. Top each breast half with 2 bacon slice halves, and sprinkle evenly with cheese. Continue baking 10 minutes, or until chicken juices run clear, bacon is crisp, and cheese is bubbly.	2019-08-20 21:04:40.941393	2019-08-22 04:45:24.00021	\N	f	50m	1	easy-honey-mustard-mozzarella-chicken.jpg	image/jpeg	925483	2019-08-22 04:45:23.126349
-9	Cucumber and Charred Onion Salad	25		Prepare grill for medium-high heat. Combine chile and 2 Tbsp. vinegar in a small bowl; set aside.\r\n\r\nPlace onions on a rimmed baking sheet and drizzle with 2 Tbsp. oil; season with salt and pepper. Turn to coat. Grill onions directly on grate until lightly charred and softened, about 2 minutes per side. Transfer to a large bowl and toss with remaining 2 Tbsp. vinegar; let cool.\r\n\r\nCoarsely chop ½ cup grilled onion and return to bowl. Add chile and soaking liquid, cucumber, dried oregano, and 2 Tbsp. oil and toss to combine; season with salt and pepper. Serve drizzled with more oil.\r\n\r\n\r\n	2019-08-23 01:47:54.706134	2019-08-23 01:55:13.944137	\N	f	25m	1	cucumber-and-charred-onion-salad.jpg	image/jpeg	1144614	2019-08-23 01:47:53.656365
-5	Thai Cucumber Salad	45		Toss the cucumbers with the salt in a colander, and leave in the sink to drain for 30 minutes. Rinse with cold water, then drain and pat dry with paper towels.\r\n\r\nWhisk together the sugar and vinegar in a mixing bowl until the sugar has dissolved. Add the cucumbers, jalapeno peppers, and cilantro; toss to combine. Sprinkle chopped peanuts on top before serving.	2019-08-20 21:27:06.084315	2019-08-22 04:47:05.898066	\N	f	45m	1	thai_cucumber_salad.jpg	image/jpeg	28984	2019-08-22 04:47:05.661484
-15	Dapan Chicken	60		Dice chicken, potatoes, green peppers and onions.\r\n\r\nBoil water in pot. After it is boiling, put 2 slices of ginger, some cooking wine, 2 pieces of Sichuan pepper, and chicken. Take everything out after 1 minute.	2019-10-06 21:57:29.51897	2019-10-06 22:27:54.383264	\N	f	1h	1	dapan_chicken.jpg	image/jpeg	79462	2019-10-06 21:57:29.176808
-6	Cucumber and Tomato Salad	15		In a large bowl, combine the tomato, cucumber, red onion, kidney beans, tofu, and basil. Just before serving, toss with balsamic vinaigrette salad dressing, and season with salt and pepper.	2019-08-20 21:34:51.342391	2019-08-28 16:38:22.467659	\N	f	15m	1	cucumber_and_tomato_salad.jpg	image/jpeg	149603	2019-08-28 16:38:22.097983
-2	Cajun Corn and Bacon Maque Choux	65		Cut corn off the cobs by thinly slicing across the tops of the kernels; place in a medium bowl. Cut across the kernels again to release milk from the corn, add milk to bowl. Set aside.\r\n\r\nHeat the oil in a large skillet over medium-high heat. Add onion and green pepper, cook until onion is transparent, about 5 to 8 minutes. Combine corn, tomatoes, and milk with the onion mixture. Reduce heat to medium low, and cook 20 minutes longer, stirring frequently to prevent sticking. Do not boil. Season with salt and cayenne pepper. Lower heat, cover skillet, and cook 5 to 10 minutes longer. Stir in green onions and bacon. Remove from heat and serve.	2019-08-20 18:38:44.869257	2020-11-24 20:55:38.884698	\N	f	1h5m	1	Cajun_Corn_and_Bacon_Maque_Choux.webp	image/webp	34262	2019-08-22 04:42:22.288684
-16	Baked Spicy Cajun Chicken with Creamed Corn & Green Beans	35		Preheat oven to 230°C (450°F). Line a large baking sheet with aluminum foil.\r\n\r\nCombine flour and spices in a large bowl.\r\n\r\nCoat chicken with oil. Add drumsticks one by one to the bowl with the spices, rolling and pressing to adhere on all sides. Place chicken on the baking sheet.\r\n\r\nPlace baking sheet in the oven and bake, turning once, until cooked through, 20-25 minutes.\r\n\r\nMeanwhile, heat a medium saucepan over medium heat.\r\n\r\nAdd corn to the colander and rinse under hot water for several minutes to defrost. Set aside to drain.\r\n\r\nOnce the pan is hot, add butter and swirl to coat the bottom.\r\n\r\n\r\nAdd flour and whisk until smooth. Slowly add cream, whisking to make sure no lumps form. Stir in corn, salt, and pepper. Cover pan; remove from heat and set aside.\r\n\r\nWash green beans and trim ends.\r\n\r\nHeat a large skillet over medium-high heat.\r\n\r\nOnce the skillet is hot, add butter and swirl to coat the bottom.\r\n\r\n\r\nAdd green beans to the skillet and season with salt and pepper. Cook, tossing frequently, until bright green and tender-crisp, 4-5 minutes. Remove from the heat.\r\n\r\nTo serve, divide the chicken, creamed corn, and green beans between plates. Enjoy!	2020-10-05 22:49:37.296007	2020-10-05 23:14:08.008613	\N	f	35m	1	Baked_Spicy_Cajun_Chicken_with_Creamed_Corn___Green_Beans.jpeg	image/jpeg	117335	2020-10-05 22:49:36.903385
-17	Shrimp, Avocado & Grapefruit Salad	35		If using frozen shrimp, place in a medium bowl, cover with water, and set aside to thaw. If using fresh shrimp, skip this step.\r\n\r\nWash and dry the lettuce. Tear into smaller pieces.\r\n\r\nWash and quarter grapefruit. Peel and slice 6 of the quarters into wedges (save 2 for the dressing). Halve and pit avocado; thinly slice flesh while still in skin and scoop out (save a quarter of the avocado for the dressing).\r\n\r\nWash and juice the lime and remaining grapefruit wedge into a small bowl; add saved avocado and mash thoroughly. Add honey, salt, and pepper; whisk to combine and set aside.\r\n\r\nHeat a skillet over medium-high heat.\r\n\r\nPeel and mince garlic.\r\n\r\nDrain and rinse shrimp under cold water until there are no more ice chunks. Place on paper towels and pat dry. If using fresh shrimp, skip this step.\r\n\r\nCoat bottom of skillet with oil. Add garlic and cook until fragrant, 15-30 seconds. Add shrimp and cook until opaque, 2-3 minutes.\r\n\r\nTo serve, arrange lettuce on a plate and top with avocado, grapefruit, and shrimp. Drizzle with dressing and enjoy!	2020-10-05 23:07:51.800865	2020-10-05 23:14:49.852183	\N	f	35m	1	Shrimp__Avocado___Grapefruit_Salad.jpg	image/jpeg	131586	2020-10-05 23:07:51.472848
-18	Fruit Medley Breakfast Smoothie	5		Combine the almond milk, banana, frozen fruit, coconut oil, chia seeds, and powdered ginger in a blender and purée until smooth. Pour into a glass and serve immediately.	2020-10-05 23:24:56.285395	2020-10-05 23:27:21.085541	\N	f	5m	1	Fruit_Medley_Breakfast_Smoothie.jpeg	image/jpeg	120910	2020-10-05 23:24:55.717474
-20	Freezer Friendly Breakfast Sandwich	50		Video by Clean & Delicious: https://www.youtube.com/watch?v=mBOe542Re0A&list=PLz7PEqpfmQPyVXtk9_UO9ltVujBagU1Bc&index=4&t=220s\r\n\r\nPreheat the oven to 350ºF.  Spray an 9x11 casserole dish with cooking spray or coat with butter or coconut oil.\r\n\r\nHeat olive oil in a large non-stick sauté pan, add onion along with pinch of salt.  Sauté' until onions are translucent.  Add in peppers and garlic and cook for another two minutes.\r\n\r\nAdd in chopped spinach with a bit more salt and pepper, stir and cook until spinach has wilted down.  Shut off heat and let veggies cool a bit.\r\n\r\nIn a large bowl, whisk together the eggs and then slowly stir the cooled veggie mixture into the eggs.\r\n\r\nPour the egg and vegetable mixture into baking dish and bake for about 30 minutes, or until the center is set and the outer edges are slightly browned. Allow the eggs to cool, then slice into six pieces.\r\n\r\nBuild the sandwiches by adding one piece of the baked eggs and one slice of cheese to each English muffin.  Wrap each sandwich in plastic wrap and place into the freezer for up to 3 months.\r\n\r\n**To reheat, you have a couple of options. Remove from freezer the night before and leave in fridge overnight to defrost.  Then when ready to eat place on microwave safe plate and heat for a minute or so or until heated through. The other option is to remove from freezer an leave on counter for 20-30  minutes before removing plastic wrap and heating in microwave until warmed through.	2020-10-16 16:46:47.466439	2020-10-16 16:54:50.166618	\N	f	50m	1	Freezer_Friendly_Breakfast_Sandwich.png	image/png	4237465	2020-10-16 16:46:45.317204
-21	Chili Lime Baked Shrimp Cups	45		Video by Inspired Taste: https://www.youtube.com/watch?v=tx1yTwRL5N0\r\n\r\nHeat oven to 350 degrees F.\r\n\r\nLightly brush wonton wrappers on both sides with olive oil. Lightly season one side with salt.\r\n\r\nUsing a mini muffin pan, press the wonton wrappers down into the cups, laying back the corners and pressing the bottoms down to make a defined cup. Bake until lightly browned, 8 to 10 minutes. Transfer to a rack and let cool.\r\n\r\nCOOK SHRIMP\r\nUsing a microplane, zest the lime. Set the lime aside for serving. Add the lime zest to the shrimp along with the olive oil, chili powder, salt, and pepper. Toss then arrange on a baking sheet in one layer. Bake until the shrimp are opaque throughout, 8 to 12 minutes.\r\n\r\nMAKE LIME SOUR CREAM\r\nIn a small bowl, stir the sour cream, lime juice and a pinch of salt together.\r\n\r\nTO FINISH\r\nFill the cooled wonton cups with a few leaves of arugula, a small dollop of lime sour cream, and a chili-lime shrimp. Serve with lime wedges for spritzing on top.	2020-10-16 17:06:31.737127	2020-10-16 21:48:37.063716	\N	f	45m	1	Chili_Lime_Baked_Shrimp_Cups.jpg	image/jpeg	90082	2020-10-16 17:06:30.880854
-19	Zucchini Brownie	45		Video by How To Cook Smarter: https://www.youtube.com/watch?v=4TbnMyrCTIo&list=PLz7PEqpfmQPzy4yV1ZYi7Dhd2nCHnI3e4&index=4&t=64s\r\n\r\nIn a bowl, combine the dry ingredients, ground oats, cocoa powder, baking soda, ground cinnamon and salt.\r\n\r\nIn another bowl, add the applesauce, maple syrup, flex egg (mix ground flaxseed with 3 tbsp of water) and vanilla extract. Whisk well until combined.\r\n\r\nGently fold in the grated zucchini, until you get a nice and thick batter. Let it sit for 5 minutes.\r\n\r\nLine 8 by 8 inch baking pan with parchment paper. Pour the batter, smooth the top and bake at 350F (180C) degrees for 30 minutes.\r\n\r\nLet it cool completely in a baking pan, transfer to a cutting board and cut in 9 equal pieces.\r\n\r\nDrizzle with melted dark chocolate on top or serve with your favourite ice cream.\r\n\r\nEnjoy!	2020-10-16 16:02:47.08031	2020-10-16 16:55:20.497849	\N	f	45m	1	Zucchini_Brownies.png	image/png	5067460	2020-10-16 16:02:44.256484
-22	Philly Steak Skewers	40		Video by The Domestic Geek: https://www.youtube.com/watch?v=vHSmOI7Z_5M\r\n\r\nToss the cubed steak with the oil, minced garlic, Worcestershire sauce and horseradish. Allow it to sit in the refrigerator for at least 30 minutes.\r\n\r\nBuild the skewers by alternating between the steak, mushrooms, cut-up green pepper and red onion. \r\n\r\nPreheat the grill to medium-high heat. Grill the skewers on all sides until golden and the beef is cooked to your liking, 3 to 4 minutes per side. Once cooked, brush the skewers with the steak sauce and cook for another minute.	2020-10-16 22:59:11.508674	2020-10-16 23:04:05.298075	\N	f	40m	1	Philly_Steak_Skewers.png	image/png	6242379	2020-10-16 22:59:09.116679
-23	Shoyu Ramen	255	https://www.youtube.com/watch?v=DC101DeDMEQ	(Video by Marion's Kitchen)\r\n\r\nPreheat the oven to 200°C/390°F.\r\n\r\nCut the chicken wings through their joints into smaller pieces. Spread the wings and carrots out in a large roasting tin and cook for 45-60 minutes in the oven or until golden brown.\r\n\r\nTransfer the roasting tin to your stovetop. Turn the heat to high and when the roasting juices in the tin start to bubble, add in 2 cups of water. Use a wooden spoon to scrape up all the browned bits from the bottom of the pan. Then transfer all the chicken, carrots and the liquid into a large stock pot.\r\n\r\nPlace the stock pot over a high heat and add the kombu, shitake, 6 green onions, garlic (sliced into two halves), ginger (4 long slices) and half of the soy sauce. Top up with 10 cups of water. Bring the stock to a simmer then reduce the heat to low and simmer gently for 3 hours, skimming the surface every so often.\r\n\r\nIn the meantime, make the tare by mixing the remaining soy sauce and all the mirin in a small bowl.\r\n\r\nRemove and reserve the shitake mushrooms. Remove and discard the chicken and aromatics. Strain the broth through a fine mesh sieve. Pour the broth into a clean saucepan. Taste and season with the tare according to your tastes (I added almost all of the tare to mine, but it will depend on the saltiness of your soy sauce and how much your broth reduced).\r\n\r\nTo serve, place noodles in serving bowls. Ladle over the soup broth. Top with chashu pork (or your choice of topping). Slice the reserved shitake mushrooms (discard the stems). Add the mushroom slices to the bowl. Add half a medium-soft-boiled egg and sprinkle over the green onions.\r\n\r\n \r\n\r\n*NOTES:\r\n\r\nKombu is a firm dried seaweed that you can buy from any Asian or Japanese grocery store.\r\n\r\nMirin is a type of Japanese cooking rice wine (it has less alcohol than sake but is sweeter). It’s available in the Asian aisle of some major supermarkets or from an Asian grocery store.	2020-10-17 03:13:32.007055	2020-12-06 18:05:13.308012	\N	f	4h15m	1	Shoyu_Ramen.jpg	image/jpeg	593946	2020-10-17 03:13:31.541121
+COPY public.myrecipes (id, title, cooking_time_in_min, "videoURL", instructions, created_at, updated_at, myrecipeingredientlink_id, is_hidden, cooking_time, user_id, avatar_file_name, avatar_content_type, avatar_file_size, avatar_updated_at, "imageURL") FROM stdin;
+7	Creamy Chicken on Linguine	35		In a large saute pan, heat oil, butter and garlic over medium heat. Add chicken and cook until juices run clear. Remove chicken from pan let cool and slice diagonally into long strips. Reserve oil in pan.\r\n\r\nMeanwhile, cook pasta according to directions on package. Drain.\r\n\r\nReheat oil in pan, add onion and saute, stirring often, until onion is soft but still white. Add bullion cube and water; bring to a boil and simmer uncovered for approximately 10 minutes. Stir in cream, milk, green onions and Parmesan cheese.\r\n\r\nPlace pasta in a bowl, layer chicken slices in a decorative pattern over pasta, pour sauce over top of chicken and around pasta. Garnish with parsley or any herbs you desire. Serve immediately.	2019-08-20 21:43:11.525731	2019-08-22 04:51:15.597267	\N	f	35m	1	creamy-chicken-on-linguine.jpeg	image/jpeg	46506	2019-08-22 04:51:15.337717	\N
+1	Creamy Rice Pudding	45		Bring 1 1/2 cups water to a boil in a saucepan; stir rice into boiling water. Reduce heat to low, cover, and simmer for 20 minutes.\r\n\r\nIn a clean saucepan, combine 1 1/2 cups cooked rice, 1 1/2 cups milk, sugar and salt. Cook over medium heat until thick and creamy, 15 to 20 minutes. Stir in remaining 1/2 cup milk, beaten egg, and raisins; cook 2 minutes more, stirring constantly. Remove from heat and stir in butter and vanilla.	2019-08-12 22:59:02.913151	2020-11-24 20:53:51.891516	\N	f	45m	1	creamy_rice_pudding.jpg	image/jpeg	86846	2019-08-22 04:22:41.113973	\N
+8	Avocado Strawberry Layered Smoothie	5		In a blender, combine all the ingredients for the strawberry smoothie and blend until smooth.\r\n\r\nPour evenly into glasses, filling each half way, and place them in the freezer.\r\n\r\nRinse out the blender. Place the remaining ingredients in the blender and blend until smooth. \r\n\r\nUse a spoon to gently transfer the avocado smoothie on top of the strawberry smoothie.	2019-08-22 22:12:08.072433	2019-08-23 00:05:41.965473	\N	f	5m	1	avocado-strawberry-layered-smoothie.jpg	image/jpeg	23908	2019-08-22 22:12:07.765571	\N
+4	Shrimp Linguine	30		Cook pasta until al dente according to package directions.\r\n\r\nWhile linguine is cooking, melt butter or margarine in a large skillet. Add garlic, and saute briefly to release flavor. Add cream; heat just to boiling, stirring frequently. Lower heat, and stir in shrimp, parsley, basil, and thyme. Continue cooking until shrimp are just heated through. Do not overcook shrimp! Remove sauce from heat.\r\n\r\nDrain the pasta, and toss lightly with the sauce. Toss again with cheese, and salt and pepper to taste. Serve immediately.	2019-08-20 21:20:25.614441	2019-08-22 04:43:49.448635	\N	f	30m	1	shrimp_linguine.webp	image/webp	45402	2019-08-22 04:43:49.082822	\N
+3	Easy Honey Mustard Mozzarella Chicken	50		Preheat oven to 375 degrees F (190 degrees C).\r\n\r\nPlace the chicken breast halves in a baking dish, and drizzle evenly with honey and mustard. Sprinkle with lemon pepper.\r\n\r\nBake chicken 25 minutes in the preheated oven. Top each breast half with 2 bacon slice halves, and sprinkle evenly with cheese. Continue baking 10 minutes, or until chicken juices run clear, bacon is crisp, and cheese is bubbly.	2019-08-20 21:04:40.941393	2019-08-22 04:45:24.00021	\N	f	50m	1	easy-honey-mustard-mozzarella-chicken.jpg	image/jpeg	925483	2019-08-22 04:45:23.126349	\N
+9	Cucumber and Charred Onion Salad	25		Prepare grill for medium-high heat. Combine chile and 2 Tbsp. vinegar in a small bowl; set aside.\r\n\r\nPlace onions on a rimmed baking sheet and drizzle with 2 Tbsp. oil; season with salt and pepper. Turn to coat. Grill onions directly on grate until lightly charred and softened, about 2 minutes per side. Transfer to a large bowl and toss with remaining 2 Tbsp. vinegar; let cool.\r\n\r\nCoarsely chop ½ cup grilled onion and return to bowl. Add chile and soaking liquid, cucumber, dried oregano, and 2 Tbsp. oil and toss to combine; season with salt and pepper. Serve drizzled with more oil.\r\n\r\n\r\n	2019-08-23 01:47:54.706134	2019-08-23 01:55:13.944137	\N	f	25m	1	cucumber-and-charred-onion-salad.jpg	image/jpeg	1144614	2019-08-23 01:47:53.656365	\N
+5	Thai Cucumber Salad	45		Toss the cucumbers with the salt in a colander, and leave in the sink to drain for 30 minutes. Rinse with cold water, then drain and pat dry with paper towels.\r\n\r\nWhisk together the sugar and vinegar in a mixing bowl until the sugar has dissolved. Add the cucumbers, jalapeno peppers, and cilantro; toss to combine. Sprinkle chopped peanuts on top before serving.	2019-08-20 21:27:06.084315	2019-08-22 04:47:05.898066	\N	f	45m	1	thai_cucumber_salad.jpg	image/jpeg	28984	2019-08-22 04:47:05.661484	\N
+15	Dapan Chicken	60		Dice chicken, potatoes, green peppers and onions.\r\n\r\nBoil water in pot. After it is boiling, put 2 slices of ginger, some cooking wine, 2 pieces of Sichuan pepper, and chicken. Take everything out after 1 minute.	2019-10-06 21:57:29.51897	2019-10-06 22:27:54.383264	\N	f	1h	1	dapan_chicken.jpg	image/jpeg	79462	2019-10-06 21:57:29.176808	\N
+6	Cucumber and Tomato Salad	15		In a large bowl, combine the tomato, cucumber, red onion, kidney beans, tofu, and basil. Just before serving, toss with balsamic vinaigrette salad dressing, and season with salt and pepper.	2019-08-20 21:34:51.342391	2019-08-28 16:38:22.467659	\N	f	15m	1	cucumber_and_tomato_salad.jpg	image/jpeg	149603	2019-08-28 16:38:22.097983	\N
+2	Cajun Corn and Bacon Maque Choux	65		Cut corn off the cobs by thinly slicing across the tops of the kernels; place in a medium bowl. Cut across the kernels again to release milk from the corn, add milk to bowl. Set aside.\r\n\r\nHeat the oil in a large skillet over medium-high heat. Add onion and green pepper, cook until onion is transparent, about 5 to 8 minutes. Combine corn, tomatoes, and milk with the onion mixture. Reduce heat to medium low, and cook 20 minutes longer, stirring frequently to prevent sticking. Do not boil. Season with salt and cayenne pepper. Lower heat, cover skillet, and cook 5 to 10 minutes longer. Stir in green onions and bacon. Remove from heat and serve.	2019-08-20 18:38:44.869257	2020-11-24 20:55:38.884698	\N	f	1h5m	1	Cajun_Corn_and_Bacon_Maque_Choux.webp	image/webp	34262	2019-08-22 04:42:22.288684	\N
+16	Baked Spicy Cajun Chicken with Creamed Corn & Green Beans	35		Preheat oven to 230°C (450°F). Line a large baking sheet with aluminum foil.\r\n\r\nCombine flour and spices in a large bowl.\r\n\r\nCoat chicken with oil. Add drumsticks one by one to the bowl with the spices, rolling and pressing to adhere on all sides. Place chicken on the baking sheet.\r\n\r\nPlace baking sheet in the oven and bake, turning once, until cooked through, 20-25 minutes.\r\n\r\nMeanwhile, heat a medium saucepan over medium heat.\r\n\r\nAdd corn to the colander and rinse under hot water for several minutes to defrost. Set aside to drain.\r\n\r\nOnce the pan is hot, add butter and swirl to coat the bottom.\r\n\r\n\r\nAdd flour and whisk until smooth. Slowly add cream, whisking to make sure no lumps form. Stir in corn, salt, and pepper. Cover pan; remove from heat and set aside.\r\n\r\nWash green beans and trim ends.\r\n\r\nHeat a large skillet over medium-high heat.\r\n\r\nOnce the skillet is hot, add butter and swirl to coat the bottom.\r\n\r\n\r\nAdd green beans to the skillet and season with salt and pepper. Cook, tossing frequently, until bright green and tender-crisp, 4-5 minutes. Remove from the heat.\r\n\r\nTo serve, divide the chicken, creamed corn, and green beans between plates. Enjoy!	2020-10-05 22:49:37.296007	2020-10-05 23:14:08.008613	\N	f	35m	1	Baked_Spicy_Cajun_Chicken_with_Creamed_Corn___Green_Beans.jpeg	image/jpeg	117335	2020-10-05 22:49:36.903385	\N
+17	Shrimp, Avocado & Grapefruit Salad	35		If using frozen shrimp, place in a medium bowl, cover with water, and set aside to thaw. If using fresh shrimp, skip this step.\r\n\r\nWash and dry the lettuce. Tear into smaller pieces.\r\n\r\nWash and quarter grapefruit. Peel and slice 6 of the quarters into wedges (save 2 for the dressing). Halve and pit avocado; thinly slice flesh while still in skin and scoop out (save a quarter of the avocado for the dressing).\r\n\r\nWash and juice the lime and remaining grapefruit wedge into a small bowl; add saved avocado and mash thoroughly. Add honey, salt, and pepper; whisk to combine and set aside.\r\n\r\nHeat a skillet over medium-high heat.\r\n\r\nPeel and mince garlic.\r\n\r\nDrain and rinse shrimp under cold water until there are no more ice chunks. Place on paper towels and pat dry. If using fresh shrimp, skip this step.\r\n\r\nCoat bottom of skillet with oil. Add garlic and cook until fragrant, 15-30 seconds. Add shrimp and cook until opaque, 2-3 minutes.\r\n\r\nTo serve, arrange lettuce on a plate and top with avocado, grapefruit, and shrimp. Drizzle with dressing and enjoy!	2020-10-05 23:07:51.800865	2020-10-05 23:14:49.852183	\N	f	35m	1	Shrimp__Avocado___Grapefruit_Salad.jpg	image/jpeg	131586	2020-10-05 23:07:51.472848	\N
+18	Fruit Medley Breakfast Smoothie	5		Combine the almond milk, banana, frozen fruit, coconut oil, chia seeds, and powdered ginger in a blender and purée until smooth. Pour into a glass and serve immediately.	2020-10-05 23:24:56.285395	2020-10-05 23:27:21.085541	\N	f	5m	1	Fruit_Medley_Breakfast_Smoothie.jpeg	image/jpeg	120910	2020-10-05 23:24:55.717474	\N
+20	Freezer Friendly Breakfast Sandwich	50		Video by Clean & Delicious: https://www.youtube.com/watch?v=mBOe542Re0A&list=PLz7PEqpfmQPyVXtk9_UO9ltVujBagU1Bc&index=4&t=220s\r\n\r\nPreheat the oven to 350ºF.  Spray an 9x11 casserole dish with cooking spray or coat with butter or coconut oil.\r\n\r\nHeat olive oil in a large non-stick sauté pan, add onion along with pinch of salt.  Sauté' until onions are translucent.  Add in peppers and garlic and cook for another two minutes.\r\n\r\nAdd in chopped spinach with a bit more salt and pepper, stir and cook until spinach has wilted down.  Shut off heat and let veggies cool a bit.\r\n\r\nIn a large bowl, whisk together the eggs and then slowly stir the cooled veggie mixture into the eggs.\r\n\r\nPour the egg and vegetable mixture into baking dish and bake for about 30 minutes, or until the center is set and the outer edges are slightly browned. Allow the eggs to cool, then slice into six pieces.\r\n\r\nBuild the sandwiches by adding one piece of the baked eggs and one slice of cheese to each English muffin.  Wrap each sandwich in plastic wrap and place into the freezer for up to 3 months.\r\n\r\n**To reheat, you have a couple of options. Remove from freezer the night before and leave in fridge overnight to defrost.  Then when ready to eat place on microwave safe plate and heat for a minute or so or until heated through. The other option is to remove from freezer an leave on counter for 20-30  minutes before removing plastic wrap and heating in microwave until warmed through.	2020-10-16 16:46:47.466439	2020-10-16 16:54:50.166618	\N	f	50m	1	Freezer_Friendly_Breakfast_Sandwich.png	image/png	4237465	2020-10-16 16:46:45.317204	\N
+21	Chili Lime Baked Shrimp Cups	45		Video by Inspired Taste: https://www.youtube.com/watch?v=tx1yTwRL5N0\r\n\r\nHeat oven to 350 degrees F.\r\n\r\nLightly brush wonton wrappers on both sides with olive oil. Lightly season one side with salt.\r\n\r\nUsing a mini muffin pan, press the wonton wrappers down into the cups, laying back the corners and pressing the bottoms down to make a defined cup. Bake until lightly browned, 8 to 10 minutes. Transfer to a rack and let cool.\r\n\r\nCOOK SHRIMP\r\nUsing a microplane, zest the lime. Set the lime aside for serving. Add the lime zest to the shrimp along with the olive oil, chili powder, salt, and pepper. Toss then arrange on a baking sheet in one layer. Bake until the shrimp are opaque throughout, 8 to 12 minutes.\r\n\r\nMAKE LIME SOUR CREAM\r\nIn a small bowl, stir the sour cream, lime juice and a pinch of salt together.\r\n\r\nTO FINISH\r\nFill the cooled wonton cups with a few leaves of arugula, a small dollop of lime sour cream, and a chili-lime shrimp. Serve with lime wedges for spritzing on top.	2020-10-16 17:06:31.737127	2020-10-16 21:48:37.063716	\N	f	45m	1	Chili_Lime_Baked_Shrimp_Cups.jpg	image/jpeg	90082	2020-10-16 17:06:30.880854	\N
+19	Zucchini Brownie	45		Video by How To Cook Smarter: https://www.youtube.com/watch?v=4TbnMyrCTIo&list=PLz7PEqpfmQPzy4yV1ZYi7Dhd2nCHnI3e4&index=4&t=64s\r\n\r\nIn a bowl, combine the dry ingredients, ground oats, cocoa powder, baking soda, ground cinnamon and salt.\r\n\r\nIn another bowl, add the applesauce, maple syrup, flex egg (mix ground flaxseed with 3 tbsp of water) and vanilla extract. Whisk well until combined.\r\n\r\nGently fold in the grated zucchini, until you get a nice and thick batter. Let it sit for 5 minutes.\r\n\r\nLine 8 by 8 inch baking pan with parchment paper. Pour the batter, smooth the top and bake at 350F (180C) degrees for 30 minutes.\r\n\r\nLet it cool completely in a baking pan, transfer to a cutting board and cut in 9 equal pieces.\r\n\r\nDrizzle with melted dark chocolate on top or serve with your favourite ice cream.\r\n\r\nEnjoy!	2020-10-16 16:02:47.08031	2020-10-16 16:55:20.497849	\N	f	45m	1	Zucchini_Brownies.png	image/png	5067460	2020-10-16 16:02:44.256484	\N
+22	Philly Steak Skewers	40		Video by The Domestic Geek: https://www.youtube.com/watch?v=vHSmOI7Z_5M\r\n\r\nToss the cubed steak with the oil, minced garlic, Worcestershire sauce and horseradish. Allow it to sit in the refrigerator for at least 30 minutes.\r\n\r\nBuild the skewers by alternating between the steak, mushrooms, cut-up green pepper and red onion. \r\n\r\nPreheat the grill to medium-high heat. Grill the skewers on all sides until golden and the beef is cooked to your liking, 3 to 4 minutes per side. Once cooked, brush the skewers with the steak sauce and cook for another minute.	2020-10-16 22:59:11.508674	2020-10-16 23:04:05.298075	\N	f	40m	1	Philly_Steak_Skewers.png	image/png	6242379	2020-10-16 22:59:09.116679	\N
+23	Shoyu Ramen	255	https://www.youtube.com/watch?v=DC101DeDMEQ	(Video by Marion's Kitchen)\r\n\r\nPreheat the oven to 200°C/390°F.\r\n\r\nCut the chicken wings through their joints into smaller pieces. Spread the wings and carrots out in a large roasting tin and cook for 45-60 minutes in the oven or until golden brown.\r\n\r\nTransfer the roasting tin to your stovetop. Turn the heat to high and when the roasting juices in the tin start to bubble, add in 2 cups of water. Use a wooden spoon to scrape up all the browned bits from the bottom of the pan. Then transfer all the chicken, carrots and the liquid into a large stock pot.\r\n\r\nPlace the stock pot over a high heat and add the kombu, shitake, 6 green onions, garlic (sliced into two halves), ginger (4 long slices) and half of the soy sauce. Top up with 10 cups of water. Bring the stock to a simmer then reduce the heat to low and simmer gently for 3 hours, skimming the surface every so often.\r\n\r\nIn the meantime, make the tare by mixing the remaining soy sauce and all the mirin in a small bowl.\r\n\r\nRemove and reserve the shitake mushrooms. Remove and discard the chicken and aromatics. Strain the broth through a fine mesh sieve. Pour the broth into a clean saucepan. Taste and season with the tare according to your tastes (I added almost all of the tare to mine, but it will depend on the saltiness of your soy sauce and how much your broth reduced).\r\n\r\nTo serve, place noodles in serving bowls. Ladle over the soup broth. Top with chashu pork (or your choice of topping). Slice the reserved shitake mushrooms (discard the stems). Add the mushroom slices to the bowl. Add half a medium-soft-boiled egg and sprinkle over the green onions.\r\n\r\n \r\n\r\n*NOTES:\r\n\r\nKombu is a firm dried seaweed that you can buy from any Asian or Japanese grocery store.\r\n\r\nMirin is a type of Japanese cooking rice wine (it has less alcohol than sake but is sweeter). It’s available in the Asian aisle of some major supermarkets or from an Asian grocery store.	2020-10-17 03:13:32.007055	2020-12-06 18:05:13.308012	\N	f	4h15m	1	Shoyu_Ramen.jpg	image/jpeg	593946	2020-10-17 03:13:31.541121	\N
+24	title-edit	80	\N	line1-edit.\r\n\r\nline2-edit.	2021-01-10 23:36:19.441676	2021-01-11 00:05:27.865814	\N	f	1h20m	5	\N	\N	\N	\N	\N
 \.
 
 
@@ -1865,6 +1849,9 @@ COPY public.schema_migrations (version) FROM stdin;
 20201022203743
 20201111061635
 20201203040743
+20210101013414
+20210106054517
+20210110231950
 \.
 
 
@@ -1936,6 +1923,8 @@ COPY public.taggings (id, myrecipe_id, tag_id, created_at, updated_at) FROM stdi
 67	23	1	2020-10-17 03:13:32.013512	2020-10-17 03:13:32.013512
 68	23	2	2020-10-17 03:13:32.016004	2020-10-17 03:13:32.016004
 69	23	3	2020-10-17 03:13:32.018138	2020-10-17 03:13:32.018138
+72	24	1	2021-01-10 23:39:41.705617	2021-01-10 23:39:41.705617
+73	24	2	2021-01-10 23:39:41.707971	2021-01-10 23:39:41.707971
 \.
 
 
@@ -1971,14 +1960,16 @@ COPY public.userdietaryrestrictionlinks (id, user_id, dietaryrestriction_id, cre
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: susannahsun
 --
 
-COPY public.users (id, first_name, last_name, email, password_digest, created_at, updated_at, avatar_file_name, avatar_content_type, avatar_file_size, avatar_updated_at, is_admin, tags, city, province, region) FROM stdin;
-2	Jasmine	The Princess	jasminetheprincess@disney.com	$2a$12$mBNW2RV.AaOvnYoCUrroFODm70F4wKzhkFSvntjrnKlg3ciyFdoAK	2019-08-27 16:36:50.479551	2019-08-27 16:36:50.479551	\N	\N	\N	\N	f	{}	\N	\N	\N
-3	Hamlet	Silence	hamlet@shakespeare.com	$2a$12$ycZAkocTd0JGFIhSn8gALepBuHzLvQK6hngwZj9.2foFVsCe.qpNq	2019-08-27 18:10:53.676507	2019-08-27 18:10:53.676507	\N	\N	\N	\N	f	{}	\N	\N	\N
-4	Ali	Ababwa	princeali@aladdin.com	$2a$12$HB5o.6LtqShauCCZiKV32OYY8DM5Vv22ll7LJv92QuAgoAomWwzG6	2019-08-27 23:53:35.937194	2019-08-27 23:53:35.937194	\N	\N	\N	\N	f	{}	\N	\N	\N
-11	Susannah	Sun	pks_susan@hotmail.com	$2a$12$pEPnmWBKZVhYsWYXpN35qOv1wucVkloQX7JrD7l0QOHuTd.TbAFgy	2020-11-13 18:12:17.174252	2020-11-13 18:22:55.151351	\N	\N	\N	\N	f	{}	Burnaby	BC	Lower Mainland
-5	Susannah	Sun	love101bebe@gmail.com	$2a$12$5snG9nSqs6aIUSjf7u6Cs.xU.3gZG1wb5Yvui20upXsnJfcy3.WP6	2020-11-13 17:46:58.865361	2020-11-16 02:10:50.829768	\N	\N	\N	\N	f	{}	Calgary	AB	Unknown
-1	Susannah	Sun	thisis.susannahsun@gmail.com	$2a$12$BSUT.hU/IOEsJkuqEJs3NeuiT4eZZmblbC01.Dqcqq/NM1tw3OQNi	2019-08-09 04:13:46.742659	2020-11-24 06:33:36.441332	\N	\N	\N	\N	t	{7,8,1,2}	burnaby	bc	lower mainland
-19	Susannah	Sun	test@test.com	$2a$12$/GoulShd.OPjODymYhryT.6IfY/0Gy4BnT.Csh/gMsxhpQ5MJzFDW	2020-12-27 23:05:55.57121	2020-12-27 23:05:55.57121	\N	\N	\N	\N	f	{}	Edmonton	AB	\N
+COPY public.users (id, first_name, last_name, email, password_digest, created_at, updated_at, avatar_file_name, avatar_content_type, avatar_file_size, avatar_updated_at, is_admin, tags, city, province, region, postal) FROM stdin;
+5	Susannah	Sun	love101bebe@gmail.com	$2a$12$5snG9nSqs6aIUSjf7u6Cs.xU.3gZG1wb5Yvui20upXsnJfcy3.WP6	2020-11-13 17:46:58.865361	2020-12-31 19:52:50.368895	\N	\N	\N	\N	f	{}	Calgary	AB	Unknown	\N
+20	Susannah	Sun	sus@sun.com	$2a$12$GsY5Q9ZC5Gv9y8gB5M/AJe96L1dUfVPdiLKC/Klos9Eb7xEX0/lfC	2021-01-08 06:00:10.374877	2021-01-08 06:00:10.374877	\N	\N	\N	\N	f	{}	\N	\N	\N	\N
+21	susannah	sun	1@2.com	$2a$12$VKgr1uQtfksXB88DsbwxSeOq2yH3m58.6RCciXNxxBFoZ4o6RU2w6	2021-01-13 05:52:46.402711	2021-01-13 05:52:46.402711	\N	\N	\N	\N	f	{}	vancouver	bc	\N	v5e3g6
+2	Jasmine	The Princess	jasminetheprincess@disney.com	$2a$12$mBNW2RV.AaOvnYoCUrroFODm70F4wKzhkFSvntjrnKlg3ciyFdoAK	2019-08-27 16:36:50.479551	2019-08-27 16:36:50.479551	\N	\N	\N	\N	f	{}	\N	\N	\N	\N
+3	Hamlet	Silence	hamlet@shakespeare.com	$2a$12$ycZAkocTd0JGFIhSn8gALepBuHzLvQK6hngwZj9.2foFVsCe.qpNq	2019-08-27 18:10:53.676507	2019-08-27 18:10:53.676507	\N	\N	\N	\N	f	{}	\N	\N	\N	\N
+4	Ali	Ababwa	princeali@aladdin.com	$2a$12$HB5o.6LtqShauCCZiKV32OYY8DM5Vv22ll7LJv92QuAgoAomWwzG6	2019-08-27 23:53:35.937194	2019-08-27 23:53:35.937194	\N	\N	\N	\N	f	{}	\N	\N	\N	\N
+11	Susannah	Sun	pks_susan@hotmail.com	$2a$12$pEPnmWBKZVhYsWYXpN35qOv1wucVkloQX7JrD7l0QOHuTd.TbAFgy	2020-11-13 18:12:17.174252	2020-11-13 18:22:55.151351	\N	\N	\N	\N	f	{}	Burnaby	BC	Lower Mainland	\N
+1	Susannah	Sun	thisis.susannahsun@gmail.com	$2a$12$BSUT.hU/IOEsJkuqEJs3NeuiT4eZZmblbC01.Dqcqq/NM1tw3OQNi	2019-08-09 04:13:46.742659	2020-11-24 06:33:36.441332	\N	\N	\N	\N	t	{7,8,1,2}	burnaby	bc	lower mainland	\N
+19	Susannah	Sun	test@test.com	$2a$12$/GoulShd.OPjODymYhryT.6IfY/0Gy4BnT.Csh/gMsxhpQ5MJzFDW	2020-12-27 23:05:55.57121	2020-12-27 23:05:55.57121	\N	\N	\N	\N	f	{}	Edmonton	AB	\N	\N
 \.
 
 
@@ -1996,8 +1987,26 @@ COPY public.usertaggings (id, user_id, tag_id, created_at, updated_at) FROM stdi
 91	19	7	2020-12-27 23:05:55.580894	2020-12-27 23:05:55.580894
 92	19	8	2020-12-27 23:05:55.58206	2020-12-27 23:05:55.58206
 93	19	9	2020-12-27 23:05:55.58326	2020-12-27 23:05:55.58326
+97	20	1	2021-01-08 06:00:10.379654	2021-01-08 06:00:10.379654
+98	20	2	2021-01-08 06:00:10.386673	2021-01-08 06:00:10.386673
+99	20	3	2021-01-08 06:00:10.388072	2021-01-08 06:00:10.388072
+100	20	4	2021-01-08 06:00:10.389379	2021-01-08 06:00:10.389379
+101	20	5	2021-01-08 06:00:10.390672	2021-01-08 06:00:10.390672
+102	20	6	2021-01-08 06:00:10.391979	2021-01-08 06:00:10.391979
+103	20	7	2021-01-08 06:00:10.393705	2021-01-08 06:00:10.393705
+104	20	8	2021-01-08 06:00:10.395363	2021-01-08 06:00:10.395363
+105	20	9	2021-01-08 06:00:10.396661	2021-01-08 06:00:10.396661
+106	21	1	2021-01-13 05:52:46.422566	2021-01-13 05:52:46.422566
+107	21	2	2021-01-13 05:52:46.434185	2021-01-13 05:52:46.434185
+108	21	3	2021-01-13 05:52:46.435943	2021-01-13 05:52:46.435943
+109	21	4	2021-01-13 05:52:46.437611	2021-01-13 05:52:46.437611
+110	21	5	2021-01-13 05:52:46.439251	2021-01-13 05:52:46.439251
+111	21	6	2021-01-13 05:52:46.440887	2021-01-13 05:52:46.440887
+112	21	7	2021-01-13 05:52:46.442593	2021-01-13 05:52:46.442593
+113	21	8	2021-01-13 05:52:46.444382	2021-01-13 05:52:46.444382
 39	11	2	2020-11-13 18:12:17.179308	2020-11-13 18:12:17.179308
 40	11	3	2020-11-13 18:12:17.180775	2020-11-13 18:12:17.180775
+114	21	9	2021-01-13 05:52:46.445668	2021-01-13 05:52:46.445668
 \.
 
 
@@ -2005,7 +2014,7 @@ COPY public.usertaggings (id, user_id, tag_id, created_at, updated_at) FROM stdi
 -- Name: completions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: susannahsun
 --
 
-SELECT pg_catalog.setval('public.completions_id_seq', 110, true);
+SELECT pg_catalog.setval('public.completions_id_seq', 112, true);
 
 
 --
@@ -2019,7 +2028,7 @@ SELECT pg_catalog.setval('public.delayed_jobs_id_seq', 2, true);
 -- Name: dietaryrestrictionlinks_id_seq; Type: SEQUENCE SET; Schema: public; Owner: susannahsun
 --
 
-SELECT pg_catalog.setval('public.dietaryrestrictionlinks_id_seq', 34, true);
+SELECT pg_catalog.setval('public.dietaryrestrictionlinks_id_seq', 38, true);
 
 
 --
@@ -2040,35 +2049,35 @@ SELECT pg_catalog.setval('public.favourites_id_seq', 24, true);
 -- Name: groceries_id_seq; Type: SEQUENCE SET; Schema: public; Owner: susannahsun
 --
 
-SELECT pg_catalog.setval('public.groceries_id_seq', 7517, true);
+SELECT pg_catalog.setval('public.groceries_id_seq', 7920, true);
 
 
 --
 -- Name: ingredients_id_seq; Type: SEQUENCE SET; Schema: public; Owner: susannahsun
 --
 
-SELECT pg_catalog.setval('public.ingredients_id_seq', 111, true);
+SELECT pg_catalog.setval('public.ingredients_id_seq', 116, true);
 
 
 --
 -- Name: leftover_usage_mealplan_links_id_seq; Type: SEQUENCE SET; Schema: public; Owner: susannahsun
 --
 
-SELECT pg_catalog.setval('public.leftover_usage_mealplan_links_id_seq', 259, true);
+SELECT pg_catalog.setval('public.leftover_usage_mealplan_links_id_seq', 281, true);
 
 
 --
 -- Name: leftover_usages_id_seq; Type: SEQUENCE SET; Schema: public; Owner: susannahsun
 --
 
-SELECT pg_catalog.setval('public.leftover_usages_id_seq', 348, true);
+SELECT pg_catalog.setval('public.leftover_usages_id_seq', 370, true);
 
 
 --
 -- Name: leftovers_id_seq; Type: SEQUENCE SET; Schema: public; Owner: susannahsun
 --
 
-SELECT pg_catalog.setval('public.leftovers_id_seq', 292, true);
+SELECT pg_catalog.setval('public.leftovers_id_seq', 312, true);
 
 
 --
@@ -2082,28 +2091,28 @@ SELECT pg_catalog.setval('public.likes_id_seq', 1, false);
 -- Name: mealplans_id_seq; Type: SEQUENCE SET; Schema: public; Owner: susannahsun
 --
 
-SELECT pg_catalog.setval('public.mealplans_id_seq', 7, true);
+SELECT pg_catalog.setval('public.mealplans_id_seq', 9, true);
 
 
 --
 -- Name: myrecipeingredientlinks_id_seq; Type: SEQUENCE SET; Schema: public; Owner: susannahsun
 --
 
-SELECT pg_catalog.setval('public.myrecipeingredientlinks_id_seq', 182, true);
+SELECT pg_catalog.setval('public.myrecipeingredientlinks_id_seq', 184, true);
 
 
 --
 -- Name: myrecipemealplanlinks_id_seq; Type: SEQUENCE SET; Schema: public; Owner: susannahsun
 --
 
-SELECT pg_catalog.setval('public.myrecipemealplanlinks_id_seq', 167, true);
+SELECT pg_catalog.setval('public.myrecipemealplanlinks_id_seq', 182, true);
 
 
 --
 -- Name: myrecipes_id_seq; Type: SEQUENCE SET; Schema: public; Owner: susannahsun
 --
 
-SELECT pg_catalog.setval('public.myrecipes_id_seq', 23, true);
+SELECT pg_catalog.setval('public.myrecipes_id_seq', 24, true);
 
 
 --
@@ -2117,7 +2126,7 @@ SELECT pg_catalog.setval('public.reviews_id_seq', 1, true);
 -- Name: taggings_id_seq; Type: SEQUENCE SET; Schema: public; Owner: susannahsun
 --
 
-SELECT pg_catalog.setval('public.taggings_id_seq', 69, true);
+SELECT pg_catalog.setval('public.taggings_id_seq', 73, true);
 
 
 --
@@ -2131,21 +2140,21 @@ SELECT pg_catalog.setval('public.tags_id_seq', 9, true);
 -- Name: userdietaryrestrictionlinks_id_seq; Type: SEQUENCE SET; Schema: public; Owner: susannahsun
 --
 
-SELECT pg_catalog.setval('public.userdietaryrestrictionlinks_id_seq', 66, true);
+SELECT pg_catalog.setval('public.userdietaryrestrictionlinks_id_seq', 67, true);
 
 
 --
 -- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: susannahsun
 --
 
-SELECT pg_catalog.setval('public.users_id_seq', 19, true);
+SELECT pg_catalog.setval('public.users_id_seq', 21, true);
 
 
 --
 -- Name: usertaggings_id_seq; Type: SEQUENCE SET; Schema: public; Owner: susannahsun
 --
 
-SELECT pg_catalog.setval('public.usertaggings_id_seq', 93, true);
+SELECT pg_catalog.setval('public.usertaggings_id_seq', 114, true);
 
 
 --
