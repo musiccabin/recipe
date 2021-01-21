@@ -6,14 +6,14 @@ module Mutations
         check_authentication!
 
         user_recipe_usages = current_user.mealplan.leftover_usages
-        if user_recipe_usages
+        if user_recipe_usages.any?
             user_recipe_usages.each do |usage|
               usage.update(mealplan: nil)
               usage.leftover_usage_mealplan_link.destroy
             end
         end
         links = current_user.mealplan.myrecipemealplanlinks
-        if links
+        if links.any?
             links.each do |link|
                 link.destroy
             end

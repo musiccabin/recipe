@@ -85,7 +85,7 @@ module Mutations
   
       # subtract_leftovers
       added_up.each do |stats|
-        byebug
+        # byebug
         ingredient = Ingredient.find_by(name: stats[:name])
         leftover = current_user.leftovers&.find_by(ingredient: ingredient)
         if leftover

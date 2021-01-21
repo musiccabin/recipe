@@ -16,6 +16,6 @@ class Grocery < ApplicationRecord
     end
 
     def accepted_category
-        self.errors.add(:category, 'allowed categories: produce, meat, dairy, frozen, nuts & seeds, other') unless ['produce', 'meat', 'dairy', 'frozen', 'nuts & seeds', 'other'].include? self.category.downcase
+        self.errors.add(:category, 'allowed categories: produce, meat, dairy, frozen, nuts & seeds, other') unless ['produce', 'meat', 'dairy', 'frozen', 'nuts & seeds', 'other'].include? self&.category&.downcase
     end
 end
