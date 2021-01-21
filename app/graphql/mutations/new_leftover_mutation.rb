@@ -11,7 +11,7 @@ module Mutations
         check_authentication!
 
         ingredient = Ingredient.find_or_initialize_by(name: attributes.ingredient_name)
-        byebug
+        # byebug
         ingredient.update(category: attributes.category) unless ingredient.id.present?
         return { errors: ingredient.errors, grocery_updated: grocery_updated } unless ingredient.id.present?
         
