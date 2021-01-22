@@ -422,13 +422,13 @@ module Types
       stats_50.default = 0
       #if mealplan already uses up a leftover ingredient, don't recommend recipes for this ingredient anymore.
       #if mealplan uses a portion of a leftover ingredient, update recommendation to search for the remaining quantity.
-      links = current_user&.mealplan&.myrecipemealplanlinks
-      if links.any?
+      mealplan_recipes = current_user&.mealplan&.myrecipes
+      if mealplan_recipes.any?
         leftovers.each do |leftover|
-          links.each do |link|
-            link.ingredients.each do |i|
-              next if i != l.ingredient
-              updated_leftover = updated_leftover(i, l.myrecipe, leftover)
+          mealplan_recipes.each do |recipe|
+            recipe.ingredients.each do |i|
+              next if i != leftover.ingredient
+              updated_leftover = updated_leftover(i, recipe, leftover)
               if updated_leftover.present?
                 leftover = updated_leftover
               else
