@@ -79,7 +79,7 @@ module Mutations
           end
           found[:quantity] += convert_quantity(ingredient_name, link.quantity, unit, appropriate_unit)
         else
-          added_up << { name: ingredient_name, quantity: convert_quantity(ingredient_name, link.quantity, unit, appropriate_unit), unit: appropriate_unit }
+          added_up << { name: ingredient_name, quantity: convert_quantity(ingredient_name, link.quantity, unit, appropriate_unit), unit: appropriate_unit, category: link.ingredient.category }
         end
       end
   
@@ -125,7 +125,7 @@ module Mutations
           stats[:quantity] = stringify_quantity(stats[:quantity])
           user_already_added.update(user_added: false)
         else
-          new_grocery = Grocery.create(name: stats[:name], quantity: stringify_quantity(stats[:quantity]), unit: stats[:unit], user: current_user, is_completed: false)
+          new_grocery = Grocery.create(name: stats[:name], quantity: stringify_quantity(stats[:quantity]), unit: stats[:unit], category: stats[:category], user: current_user, is_completed: false)
           new_grocery.destroy if new_grocery.quantity == '0'
         end
       end
@@ -413,7 +413,6 @@ module Mutations
       grocery = current_user.groceries.find_by(name: ingredient_name)
 
       # corresponding grocery item doesn't exist && leftover being removed:
-      # byebug
       if grocery.nil? && remove_leftover
         links = current_user.mealplan.myrecipemealplanlinks.where(completed: false)
         links.each do |link|
