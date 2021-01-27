@@ -1,5 +1,5 @@
 module Mutations
-    class CompleteGroceryMutation < Mutations::BaseMutation
+    class UncompleteGroceryMutation < Mutations::BaseMutation
       argument :id, ID, required: true
   
       field :status, String, null: true
@@ -10,10 +10,10 @@ module Mutations
 
         grocery = Grocery.find_by(id: id)
         check_grocery_exists!(grocery)
-        grocery.is_completed = true
+        grocery.is_completed = false
         
         if grocery.save
-            { status: 'completed grocery item!' } 
+            { status: 'uncompleted grocery item!' } 
         else
             { errors: errors }
         end

@@ -32,5 +32,6 @@ module Types
     field :create_user, mutation: Mutations::CreateUserMutation
     field :sign_out, mutation: Mutations::SignOutMutation
     field :complete_grocery, mutation: Mutations::CompleteGroceryMutation
+    field :uncomplete_grocery, mutation: Mutations::UncompleteGroceryMutation
   end
 end
