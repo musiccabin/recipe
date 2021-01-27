@@ -1,24 +1,19 @@
 module Mutations
-    class CompleteGroceriesMutation < Mutations::BaseMutation
-      argument :groceries, [Types::IngredientAttributes], required: false
-      argument :ids, [Integer], required: true
+    class CompleteGroceryMutation < Mutations::BaseMutation
+      argument :id, ID, required: true
   
       field :status, String, null: true
-      field :errors, [Types::ValidationErrorsType], null: false
+      field :errors, Types::ValidationErrorsType, null: true
   
-      def resolve(ids:, groceries: nil)
-        errors = []
+      def resolve(id:, groceries: nil)
         check_authentication!
 
-        ids.each do |id|
-            grocery = Grocery.find_by(id: id)
-            check_grocery_exists!(grocery)
-            grocery.is_completed = true
-            errors << grocery.errors unless grocery.save
-        end
+        grocery = Grocery.find_by(id: id)
+        check_grocery_exists!(grocery)
+        grocery.is_completed = true
         
-        if errors.empty?
-            { status: 'completed grocery items!', errors: errors } 
+        if grocery.save
+            { status: 'completed grocery item!' } 
         else
             { errors: errors }
         end
