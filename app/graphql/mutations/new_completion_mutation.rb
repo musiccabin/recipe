@@ -11,18 +11,19 @@ module Mutations
   
         recipe = Myrecipe.find_by(id: recipe_id)
         check_recipe_exists!(recipe)
-  
+
+        current_user.mealplan.myrecipemealplanlinks.find_by(myrecipe: recipe).update(completed: true)
         completion_exists = current_user.completions&.find_by(myrecipe: recipe)
-        if completion_exists
-          current_user.mealplan.myrecipemealplanlinks.find_by(myrecipe: recipe).update(completed: true)
+        if completion_exists        
           return { status: 'recipe has been completed before.' }
-        end
-        completion = Completion.new(myrecipe: recipe, user: current_user)
-        if completion.save
-          RecipeSchema.subscriptions.trigger("completionAdded", {}, completion)
-          { completion: completion }
         else
-          { errors: completion.errors }
+          completion = Completion.new(myrecipe: recipe, user: current_user)
+          if completion.save
+            RecipeSchema.subscriptions.trigger("completionAdded", {}, completion)
+            { completion: completion }
+          else
+            { errors: completion.errors }
+          end
         end
       end
     end

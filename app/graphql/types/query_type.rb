@@ -100,7 +100,7 @@ module Types
       recipe = recipe_info(id: id)
       mealplan.leftover_usages.where(myrecipe: recipe)
     end
-
+  
     field :ingredient_category, String, null: true,
     description: "Returns the category of an ingredient" do
       argument :name, String, required: true
@@ -115,6 +115,16 @@ module Types
     def leftovers
       authenticate_user!
       current_user.leftovers
+    end
+
+    field :completed_in_mealplan, [Types::MyrecipeType], null: true,
+    description: "Returns recipes that are completed in user's current mealplan"
+    def completed_in_mealplan
+      completed = []
+      mealplan&.myrecipemealplanlinks.each do |link|
+        completed << link.myrecipe if link.completed
+      end
+      completed
     end
 
     field :completed_recipes, [Types::MyrecipeType], null: true,
