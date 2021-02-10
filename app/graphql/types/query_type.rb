@@ -371,9 +371,9 @@ module Types
       result_not_in_mealplan = []
       #return recipes that aren't added to user's mealplan
       if current_user.mealplan
-        result_not_in_mealplan += Myrecipe.all.select{|recipe| current_user.mealplan.myrecipes.exclude?(recipe)}
+        result_not_in_mealplan += Myrecipe.all.where(is_hidden: false).select{|recipe| current_user.mealplan.myrecipes.exclude?(recipe)}
       else
-        result_not_in_mealplan = Myrecipe.all
+        result_not_in_mealplan = Myrecipe.all.where(is_hidden: false)
       end
       #filter by user's dietary restrictions
       result_rstrn = []
