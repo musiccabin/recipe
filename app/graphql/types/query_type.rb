@@ -1370,7 +1370,8 @@ module Types
         else
           city_usage = []
           city_usage << usage
-          all_usages << { city: usage.user.city.downcase, geo_usage: city_usage }
+          user = usage.user
+          all_usages << { city: user.city.downcase, province: user.province.downcase, geo_usage: city_usage }
         end
       end
       all_usages.each do |city_hash|
