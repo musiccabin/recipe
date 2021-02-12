@@ -161,6 +161,25 @@ module Types
       current_user.groceries
     end
 
+    field :all_provs, [Types::ProvType], null: true,
+    description: "Returns all users' provinces and cities in them"
+    def all_provs
+      provs = []
+      User.all.each do |user|
+        found_prov = provs.detect {|stat| stat[:prov] == user.province}
+        if found_prov
+          found_prov[:cities] << user.city
+        else
+          cities = [user.city]
+          provs << {prov: user.province, cities: cities}
+        end
+      end
+      provs.each do |prov|
+        prov[:cities].uniq!
+      end
+      provs
+    end
+
     field :dashboard_ind_stats_last_week, Types::IndDashboardStatsType, null: false,
     description: "Returns top-10 leftover ingredients used in the last week by user"
     def dashboard_ind_stats_last_week
