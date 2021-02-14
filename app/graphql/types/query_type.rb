@@ -170,7 +170,7 @@ module Types
         if found_prov
           found_prov[:cities] << user.city
         else
-          cities = [user.city]
+          cities = ['All Cities', user.city]
           provs << {prov: user.province, cities: cities}
         end
       end
