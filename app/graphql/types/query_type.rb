@@ -101,13 +101,12 @@ module Types
       mealplan.leftover_usages.where(myrecipe: recipe)
     end
   
-    field :ingredient_category, String, null: true,
-    description: "Returns the category of an ingredient" do
+    field :ingredient_info, Types::IngredientType, null: true,
+    description: "Returns the id, name, and category of an ingredient" do
       argument :name, String, required: true
     end
-    def ingredient_category(name:)
-      ingredient = Ingredient.find_by(name: name)
-      ingredient ? ingredient.category : '' 
+    def ingredient_info(name:)
+      ingredient = Ingredient.find_by(name: name.downcase)
     end    
     
     field :leftovers, [Types::LeftoverType], null: true,
