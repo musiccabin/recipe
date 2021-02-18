@@ -433,18 +433,16 @@ module Mutations
         grocery_updated = true
         unit_grocery = grocery.unit
         appropriate_unit = nil
+        quantity_to_buy = floatify(grocery.quantity)
+        quantity_leftover = floatify(leftover.quantity)
         if unit_grocery != leftover.unit
           appropriate_unit = appropriate_unit(ingredient_name, unit_grocery)
           if unit_grocery != appropriate_unit
             quantity_to_buy = convert_quantity(ingredient_name, floatify(grocery.quantity), unit_grocery, appropriate_unit)
-          else
-            quantity_to_buy = floatify(grocery.quantity)
           end
           unit_leftover = leftover.unit
           if unit_leftover != appropriate_unit
             quantity_leftover = convert_quantity(ingredient_name, floatify(leftover.quantity), unit_leftover, appropriate_unit)
-          else
-            quantity_leftover = floatify(leftover.quantity)
           end         
         end
         if unit_grocery != old_unit
