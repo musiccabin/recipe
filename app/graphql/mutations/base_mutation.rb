@@ -37,6 +37,13 @@ module Mutations
       end
     end
 
+    def check_leftover_usage_exists!(leftover_usage)
+      if leftover_usage.nil?
+        raise GraphQL::ExecutionError,
+              "Usage item not found."
+      end
+    end
+
     def check_grocery_exists!(grocery)
       if grocery.nil?
         raise GraphQL::ExecutionError,

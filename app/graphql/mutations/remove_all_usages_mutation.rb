@@ -1,5 +1,5 @@
 module Mutations
-    class RemoveUsagesMutation < Mutations::BaseMutation
+    class RemoveAllUsagesMutation < Mutations::BaseMutation
       argument :recipe_id, ID, required: true
 
       field :status, String, null: false
