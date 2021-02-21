@@ -417,9 +417,9 @@ module Types
       end
       if current_user.leftovers.any?
         sorted_results = []
-        sorted_results += use_up_leftovers(current_user.leftovers, result_rstrn)
+        sorted_results += use_up_leftovers(current_user.leftovers, result_rstrn_tags)
         #push all the rest (non-sorted) recipes from recipe bank
-        result_rstrn.each do |result|
+        result_rstrn_tags.each do |result|
           sorted_results << result unless sorted_results.include?(result)
         end
       else
