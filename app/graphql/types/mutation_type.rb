@@ -18,6 +18,7 @@ module Types
     field :new_grocery, mutation: Mutations::NewGroceryMutation
     field :update_grocery, mutation: Mutations::UpdateGroceryMutation
     field :remove_grocery, mutation: Mutations::RemoveGroceryMutation
+    field :new_usage, mutation: Mutations::NewUsageMutation
     field :update_usage, mutation: Mutations::UpdateUsageMutation
     field :remove_usage, mutation: Mutations::RemoveUsageMutation
     field :used_recipe_amounts, mutation: Mutations::UsedRecipeAmountsMutation
