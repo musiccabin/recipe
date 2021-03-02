@@ -458,7 +458,7 @@ module Mutations
         if remove_leftover
           grocery.quantity = stringify_quantity(quantity_to_buy + quantity_leftover)
         elsif old_quantity && old_unit
-          grocery.quantity = stringify_quantity(quantity_to_buy + old_quantity - quantity_leftover)
+          grocery.quantity = stringify_quantity(quantity_to_buy + floatify(old_quantity) - quantity_leftover)
         else
           grocery.quantity = stringify_quantity(quantity_to_buy - quantity_leftover)
         end 

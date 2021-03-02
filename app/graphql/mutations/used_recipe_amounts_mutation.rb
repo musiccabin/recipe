@@ -35,7 +35,6 @@ module Mutations
           end
           { errors: errors, status: 'leftovers updated according to amounts used in recipe!', warning_ingredients: warning_ingredients }
         end
-        # byebug
       end
     end
 end
