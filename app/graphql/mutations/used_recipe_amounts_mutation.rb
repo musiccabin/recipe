@@ -21,13 +21,14 @@ module Mutations
         if leftover_usage_links.any?
           leftover_usage_links.each do |l|
             # byebug
-            recipe_leftover_usages << l.leftover_usage if l.leftover_usage.myrecipe == recipe
+            recipe_leftover_usages << l.leftover_usage if (l.leftover_usage.myrecipe == recipe && l.quantity != 'to taste')
           end
         end
         errors = []
         warning_ingredients = []
         if recipe_leftover_usages.empty?
           links.each do |link|
+            next if link.quantity == 'to taste'
             results = add_leftover_usage(recipe, link.ingredient, link.quantity, link.unit, nil, nil, [], warning_ingredients)
             # byebug
             errors += results[:errors]
