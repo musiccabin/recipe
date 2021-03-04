@@ -197,7 +197,7 @@ module Mutations
             when num >= (0.125)
               output += "#{float.floor.to_s} 1/4"
             else
-              output += ''
+              output += float.floor.to_s
             end
           end
         end

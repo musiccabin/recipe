@@ -725,7 +725,7 @@ module Types
             when num >= (0.125)
               output += "#{float.floor.to_s} 1/4"
             else
-              output += ''
+              output += float.floor.to_s
             end
           end
         end
@@ -1283,6 +1283,8 @@ module Types
           converted = lb_oz(floatify(stat[:quantity]), stat[:unit])
           stat[:unit] = converted[:unit]
           stat[:quantity] = stringify_quantity(converted[:quantity])
+        else
+          stat[:quantity] = stringify_quantity(stat[:quantity])
         end
       end
     end
@@ -1309,23 +1311,23 @@ module Types
         unit = appropriate_unit(name, unit_usage)
         if stats
           if stats[:unit] != unit
-            stats[:unit] = unit     
-            stats[:quantity] = stringify_quantity(convert_quantity(name, stats[:quantity], stats[:unit], unit))
+            stats[:unit] = unit    
+            stats[:quantity] = convert_quantity(name, stats[:quantity], stats[:unit], unit)
           end   
           if stats[:unit] != unit_usage
-            stats[:quantity] = stringify_quantity(floatify(stats[:quantity]) + convert_quantity(stats[:name], quantity_usage, unit_usage, stats[:unit]))
+            stats[:quantity] = floatify(stats[:quantity]) + convert_quantity(stats[:name], quantity_usage, unit_usage, stats[:unit])
           else
-            stats[:quantity] = stringify_quantity(floatify(stats[:quantity]) + floatify(quantity_usage))
+            stats[:quantity] = floatify(stats[:quantity]) + floatify(quantity_usage)
           end          
           stats[:count] += 1
         else
-          quantity = stringify_quantity(convert_quantity(name, quantity_usage, unit_usage, unit))
+          quantity = convert_quantity(name, quantity_usage, unit_usage, unit)
           all_stats << { ingredient: ingredient, quantity: quantity, unit: unit, count: 1 }
         end
         # byebug
         count[category.to_sym] += 1
       end
-      all_stats.each do |stats|
+      optimize_unit(all_stats).each do |stats|
         case stats[:ingredient].category
         when 'frozen'
           organized_stats[:frozen] << stats
@@ -1350,20 +1352,21 @@ module Types
       # byebug
       num_of_stats = category_stats.count
       if num_of_stats <= 10
-        optimize_unit(category_stats)
+        category_stats
       else
         tenth_item_usage_count = category_stats[9][:count]
         if tenth_item_usage_count > category_stats[10][:count]
-          optimize_unit(category_stats.first(10))
+          category_stats.first(10)
         else
           how_many = 10
           category_stats[10..num_of_stats-1].each do |stats|
             if stats.count == tenth_item_usage_count
              how_many += 1
             else
-              return optimize_unit(category_stats.first(how_many))
+              break
             end
           end
+          category_stats.first(how_many)
         end
       end
     end
